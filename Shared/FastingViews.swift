@@ -1,5 +1,7 @@
 import SwiftUI
 
+// MARK: - Formatting
+
 func formatHMS(_ t: TimeInterval) -> String {
     let total = max(0, Int(t))
     return String(format: "%02d:%02d:%02d", total / 3600, (total % 3600) / 60, total % 60)
@@ -12,7 +14,103 @@ func formatHM(_ t: TimeInterval) -> String {
     return h > 0 ? "\(h)h\(String(format: "%02d", m))" : "\(m) min"
 }
 
-/// Pastel circular progress ring, reused by the app screen and the widget.
+// MARK: - Decorative background
+
+/// Soft pastel gradient with blurred colour blobs and sparkles, tinted by phase.
+struct FastingBackground: View {
+    let phase: FastingPhase
+
+    private let sparkles: [(x: CGFloat, y: CGFloat, size: CGFloat, op: Double)] = [
+        (-130, -190, 9, 0.85), (140, -130, 7, 0.7), (125, 250, 8, 0.6),
+        (-150, 120, 6, 0.55), (60, -250, 11, 0.5), (-70, 330, 7, 0.5), (165, 60, 6, 0.5)
+    ]
+
+    var body: some View {
+        ZStack {
+            LinearGradient(colors: Palette.bg(phase), startPoint: .top, endPoint: .bottom)
+
+            Circle().fill(blobA).frame(width: 360, height: 360).blur(radius: 70)
+                .offset(x: -150, y: 360)
+            Circle().fill(blobB).frame(width: 320, height: 320).blur(radius: 80)
+                .offset(x: 160, y: 410)
+            Capsule().fill(.white.opacity(0.30)).frame(width: 540, height: 130).blur(radius: 45)
+                .rotationEffect(.degrees(-18)).offset(x: -30, y: 300)
+
+            ForEach(sparkles.indices, id: \.self) { i in
+                Image(systemName: "sparkle")
+                    .font(.system(size: sparkles[i].size))
+                    .foregroundStyle(.white.opacity(sparkles[i].op))
+                    .offset(x: sparkles[i].x, y: sparkles[i].y)
+            }
+        }
+        // Pin to the proposed (screen) size so the off-canvas blobs don't widen the layout.
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .clipped()
+        .ignoresSafeArea()
+    }
+
+    private var blobA: Color { phase == .fasting ? Palette.fastingB.opacity(0.55) : Palette.eatingA.opacity(0.5) }
+    private var blobB: Color { phase == .fasting ? Palette.fastingA.opacity(0.55) : Palette.peach.opacity(0.40) }
+}
+
+// MARK: - Ring
+
+/// Tick marks evenly spaced around a circle.
+struct Ticks: Shape {
+    var count: Int
+    var lengthRatio: CGFloat = 0.045
+
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        let center = CGPoint(x: rect.midX, y: rect.midY)
+        let radius = min(rect.width, rect.height) / 2
+        for i in 0..<count {
+            let angle = CGFloat(i) / CGFloat(count) * 2 * .pi
+            let outer = CGPoint(x: center.x + cos(angle) * radius, y: center.y + sin(angle) * radius)
+            let inner = CGPoint(x: center.x + cos(angle) * (radius - radius * lengthRatio),
+                                y: center.y + sin(angle) * (radius - radius * lengthRatio))
+            path.move(to: inner)
+            path.addLine(to: outer)
+        }
+        return path
+    }
+}
+
+/// The hero progress ring: glowing multi-stop gradient arc over a track, with tick marks.
+struct GlowRing: View {
+    var progress: Double
+    var colors: [Color]
+    var glow: Color
+    var lineWidth: CGFloat = 24
+
+    var body: some View {
+        let p = max(0.0001, min(progress, 1))
+        let gradient = AngularGradient(gradient: Gradient(colors: colors), center: .center)
+        ZStack {
+            Ticks(count: 60)
+                .stroke(Palette.sub.opacity(0.22), lineWidth: 1)
+                .padding(lineWidth + 8)
+
+            Circle()
+                .stroke(Palette.track, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
+
+            Circle()
+                .trim(from: 0, to: p)
+                .stroke(gradient, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
+                .rotationEffect(.degrees(-90))
+                .blur(radius: 13)
+                .opacity(0.9)
+
+            Circle()
+                .trim(from: 0, to: p)
+                .stroke(gradient, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
+                .rotationEffect(.degrees(-90))
+                .shadow(color: glow.opacity(0.55), radius: 6)
+        }
+    }
+}
+
+/// Simpler ring (no heavy glow) for the widgets and Live Activity.
 struct RingView: View {
     var progress: Double
     var colors: [Color]
@@ -21,12 +119,11 @@ struct RingView: View {
     var body: some View {
         ZStack {
             Circle()
-                .stroke(Palette.ringTrack, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
+                .stroke(Palette.track, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
             Circle()
                 .trim(from: 0, to: max(0.001, min(progress, 1)))
                 .stroke(
-                    AngularGradient(gradient: Gradient(colors: colors + [colors.first ?? .white]),
-                                    center: .center),
+                    AngularGradient(gradient: Gradient(colors: colors + [colors.first ?? .white]), center: .center),
                     style: StrokeStyle(lineWidth: lineWidth, lineCap: .round)
                 )
                 .rotationEffect(.degrees(-90))
@@ -34,23 +131,83 @@ struct RingView: View {
     }
 }
 
-/// Small pill showing the current metabolic stage.
+// MARK: - Reusable glass components
+
+/// Phase emblem shown in the centre of the ring (moon for fasting, leaf for eating).
+struct PhaseBadge: View {
+    let phase: FastingPhase
+    var body: some View {
+        let symbol = phase == .fasting ? "moon.stars.fill" : "leaf.fill"
+        let tint = Palette.accent(phase)
+        ZStack {
+            Circle().fill(tint.opacity(0.16)).frame(width: 46, height: 46)
+            Image(systemName: symbol).font(.system(size: 18, weight: .medium)).foregroundStyle(tint)
+        }
+    }
+}
+
+/// Thin divider with a centred sparkle.
+struct SparkleDivider: View {
+    var tint: Color
+    var body: some View {
+        HStack(spacing: 8) {
+            line
+            Image(systemName: "sparkle").font(.caption2).foregroundStyle(tint)
+            line
+        }
+        .frame(width: 116)
+    }
+    private var line: some View { Rectangle().fill(Palette.sub.opacity(0.30)).frame(height: 1) }
+}
+
+/// A frosted-glass stat card with an icon badge, label and value.
+struct StatCard: View {
+    let icon: String
+    let tint: Color
+    let label: String
+    let value: String
+
+    var body: some View {
+        VStack(spacing: 7) {
+            ZStack {
+                Circle().fill(.white.opacity(0.7)).frame(width: 38, height: 38)
+                Image(systemName: icon).font(.system(size: 15, weight: .semibold)).foregroundStyle(tint)
+            }
+            Text(label.uppercased()).font(.caption2).foregroundStyle(Palette.sub)
+            Text(value).font(.system(.headline, design: .rounded)).foregroundStyle(Palette.ink)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 15)
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(.white.opacity(0.5), lineWidth: 1))
+        .shadow(color: .black.opacity(0.05), radius: 8, y: 4)
+    }
+}
+
+/// Pill showing the current metabolic stage.
 struct StageChip: View {
     let stage: FastingStage
     var compact: Bool = false
 
     var body: some View {
-        HStack(spacing: 6) {
+        HStack(spacing: 7) {
             Text(stage.emoji)
             Text(stage.name)
-                .font(compact ? .caption2 : .subheadline)
+                .font(compact ? .caption2 : .system(.subheadline, design: .rounded))
                 .fontWeight(.semibold)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
         }
         .foregroundStyle(Palette.ink)
-        .padding(.horizontal, compact ? 8 : 14)
-        .padding(.vertical, compact ? 4 : 8)
-        .background(.white.opacity(0.6), in: Capsule())
+        .padding(.horizontal, compact ? 8 : 16)
+        .padding(.vertical, compact ? 4 : 9)
+        .background {
+            if compact {
+                Capsule().fill(.white.opacity(0.6))
+            } else {
+                Capsule().fill(.ultraThinMaterial)
+                    .overlay(Capsule().stroke(.white.opacity(0.5), lineWidth: 1))
+            }
+        }
     }
 }

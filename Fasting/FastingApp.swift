@@ -5,7 +5,6 @@ import WidgetKit
 struct FastingApp: App {
     init() {
         _ = SharedStore.load() // ensure a default schedule exists on first launch
-        // -skipNotifPrompt is only used for clean automated screenshots.
         if !CommandLine.arguments.contains("-skipNotifPrompt") {
             NotificationManager.shared.requestAuthorizationAndSchedule()
         }
@@ -40,24 +39,20 @@ struct ContentView: View {
     private var mainView: some View {
         TimelineView(.periodic(from: Date(), by: 1)) { context in
             let now = overrideNow ?? context.date
-            let state = schedule.state(at: now)
+            let s = schedule.state(at: now)
 
-            ZStack {
-                LinearGradient(colors: Palette.bgColors(for: state.phase),
-                               startPoint: .top, endPoint: .bottom)
-                    .ignoresSafeArea()
-
-                VStack(spacing: 22) {
-                    header
-                    ring(for: state)
-                    stages(for: state)
-                    stats(for: state)
-                    liveButton(state)
-                    Spacer(minLength: 0)
-                }
-                .padding(.horizontal, 22)
-                .padding(.top, 8)
+            VStack(spacing: 18) {
+                header
+                heroRing(s)
+                stageSection(s)
+                statsRow(s)
+                liveButton
+                Spacer(minLength: 0)
             }
+            .padding(.horizontal, 22)
+            .padding(.top, 8)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(FastingBackground(phase: s.phase))
         }
         .onAppear {
             live.refresh()
@@ -75,88 +70,97 @@ struct ContentView: View {
         }
     }
 
+    // MARK: Header
+
     private var header: some View {
         HStack(alignment: .top) {
-            VStack(alignment: .leading, spacing: 3) {
+            VStack(alignment: .leading, spacing: 2) {
                 Text("Jeûne")
-                    .font(.system(.largeTitle, design: .rounded).bold())
+                    .font(.system(size: 40, weight: .heavy, design: .rounded))
                     .foregroundStyle(Palette.ink)
                 Text("\(schedule.startLabel) → \(schedule.endLabel) · \(schedule.fastingHoursText)")
-                    .font(.subheadline)
-                    .foregroundStyle(Palette.subtle)
+                    .font(.system(.subheadline, design: .rounded))
+                    .foregroundStyle(Palette.sub)
             }
             Spacer()
             Button { showSettings = true } label: {
                 Image(systemName: "slider.horizontal.3")
-                    .font(.title2)
+                    .font(.title3)
                     .foregroundStyle(Palette.ink)
-                    .frame(width: 46, height: 46)
-                    .background(.white.opacity(0.55), in: Circle())
+                    .frame(width: 48, height: 48)
+                    .background(.ultraThinMaterial, in: Circle())
+                    .overlay(Circle().stroke(.white.opacity(0.5), lineWidth: 1))
             }
         }
     }
 
-    private func ring(for s: FastingState) -> some View {
+    // MARK: Ring
+
+    private func heroRing(_ s: FastingState) -> some View {
         ZStack {
-            RingView(progress: s.progress, colors: Palette.ringColors(for: s.phase), lineWidth: 22)
-            VStack(spacing: 6) {
+            Circle()
+                .fill(.white.opacity(0.5))
+                .frame(width: 224, height: 224)
+                .overlay(Circle().stroke(.white.opacity(0.6), lineWidth: 1))
+                .shadow(color: .black.opacity(0.05), radius: 12)
+
+            GlowRing(progress: s.progress, colors: Palette.ring(s.phase), glow: Palette.glow(s.phase), lineWidth: 24)
+
+            VStack(spacing: 7) {
+                PhaseBadge(phase: s.phase)
                 Text(s.isFasting ? "JEÛNE EN COURS" : "FENÊTRE ALIMENTAIRE")
-                    .font(.caption2).fontWeight(.bold)
-                    .tracking(1)
-                    .foregroundStyle(Palette.subtle)
+                    .font(.caption2.weight(.bold))
+                    .tracking(1.5)
+                    .foregroundStyle(Palette.sub)
                 Text(formatHMS(s.elapsed))
-                    .font(.system(size: 42, weight: .bold, design: .rounded))
+                    .font(.system(size: 40, weight: .heavy, design: .rounded))
                     .monospacedDigit()
                     .foregroundStyle(Palette.ink)
+                SparkleDivider(tint: Palette.accent(s.phase))
                 Text("\(Int((s.progress * 100).rounded())) %")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(Palette.subtle)
+                    .font(.system(.title3, design: .rounded).weight(.semibold))
+                    .foregroundStyle(Palette.accent(s.phase))
             }
-            .padding(36)
+            .padding(.horizontal, 30)
         }
-        .frame(width: 270, height: 270)
-        .padding(.vertical, 2)
+        .frame(width: 298, height: 298)
+        .padding(.vertical, 4)
     }
 
-    private func stages(for s: FastingState) -> some View {
+    // MARK: Stage
+
+    private func stageSection(_ s: FastingState) -> some View {
         VStack(spacing: 8) {
             StageChip(stage: FastingStage.current(forHours: s.elapsedHours))
             if s.isFasting, let next = FastingStage.next(forHours: s.elapsedHours) {
                 Text("Prochaine étape \(next.emoji) \(next.name) dans \(formatHM((next.threshold - s.elapsedHours) * 3600))")
                     .font(.caption)
-                    .foregroundStyle(Palette.subtle)
+                    .foregroundStyle(Palette.sub)
                     .multilineTextAlignment(.center)
             } else {
                 Text(FastingStage.current(forHours: s.elapsedHours).detail)
                     .font(.caption)
-                    .foregroundStyle(Palette.subtle)
+                    .foregroundStyle(Palette.sub)
             }
         }
     }
 
-    private func stats(for s: FastingState) -> some View {
+    // MARK: Stats
+
+    private func statsRow(_ s: FastingState) -> some View {
         HStack(spacing: 12) {
-            stat("Début", schedule.startLabel)
-            stat(s.isFasting ? "Restant" : "Prochain jeûne", formatHM(s.remaining))
-            stat("Fin", schedule.endLabel)
+            StatCard(icon: "clock", tint: Palette.fastAccent, label: "Début", value: schedule.startLabel)
+            StatCard(icon: s.isFasting ? "hourglass" : "calendar",
+                     tint: Palette.accent(s.phase),
+                     label: s.isFasting ? "Restant" : "Prochain jeûne",
+                     value: formatHM(s.remaining))
+            StatCard(icon: "sunrise.fill", tint: Palette.peach, label: "Fin", value: schedule.endLabel)
         }
     }
 
-    private func stat(_ label: String, _ value: String) -> some View {
-        VStack(spacing: 4) {
-            Text(label.uppercased())
-                .font(.caption2)
-                .foregroundStyle(Palette.subtle)
-            Text(value)
-                .font(.headline)
-                .foregroundStyle(Palette.ink)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 14)
-        .background(.white.opacity(0.45), in: RoundedRectangle(cornerRadius: 18))
-    }
+    // MARK: Live Activity button
 
-    private func liveButton(_ s: FastingState) -> some View {
+    private var liveButton: some View {
         Button {
             if live.isActive {
                 live.stop()
@@ -166,17 +170,19 @@ struct ContentView: View {
         } label: {
             Label(live.isActive ? "Arrêter le suivi en direct" : "Suivre dans la Dynamic Island",
                   systemImage: live.isActive ? "stop.circle.fill" : "bolt.badge.clock.fill")
-                .font(.subheadline.weight(.semibold))
+                .font(.system(.subheadline, design: .rounded).weight(.semibold))
                 .foregroundStyle(Palette.ink)
-                .padding(.vertical, 13)
+                .padding(.vertical, 14)
                 .frame(maxWidth: .infinity)
-                .background(.white.opacity(0.55), in: Capsule())
+                .background(.ultraThinMaterial, in: Capsule())
+                .overlay(Capsule().stroke(.white.opacity(0.5), lineWidth: 1))
         }
+        .padding(.top, 2)
     }
 }
 
-/// In-app preview of the home-screen widgets and the Live Activity, rendered from
-/// the exact shared content. Shown via the -widgetGallery launch argument.
+/// In-app preview of the widgets and the Live Activity, rendered from the exact
+/// shared content. Shown via the -widgetGallery launch argument.
 struct WidgetGalleryView: View {
     private var demoState: FastingState {
         let now = Date()
@@ -195,19 +201,15 @@ struct WidgetGalleryView: View {
 
     var body: some View {
         let s = demoState
-        ScrollView {
+        ScrollView(showsIndicators: false) {
             VStack(spacing: 24) {
                 Text("Aperçu widgets & Dynamic Island")
-                    .font(.headline)
+                    .font(.system(.headline, design: .rounded))
                     .foregroundStyle(Palette.ink)
 
                 sectionTitle("Widgets écran d'accueil")
-                card(width: 158, height: 158) {
-                    FastingWidgetContent(family: .systemSmall, state: s)
-                }
-                card(width: 338, height: 158) {
-                    FastingWidgetContent(family: .systemMedium, state: s)
-                }
+                card(width: 158, height: 158) { FastingWidgetContent(family: .systemSmall, state: s) }
+                card(width: 338, height: 158) { FastingWidgetContent(family: .systemMedium, state: s) }
 
                 sectionTitle("Dynamic Island (compact)")
                 islandCompact
@@ -221,17 +223,14 @@ struct WidgetGalleryView: View {
             .padding(.vertical, 28)
             .frame(maxWidth: .infinity)
         }
-        .background(LinearGradient(colors: [Color(white: 0.94), Color(white: 0.85)],
-                                   startPoint: .top, endPoint: .bottom).ignoresSafeArea())
+        .background(FastingBackground(phase: .fasting))
     }
 
     private var islandCompact: some View {
         HStack {
             Text(liveData.stage.emoji)
             Spacer()
-            liveRemaining(liveData)
-                .font(.caption.weight(.bold))
-                .foregroundStyle(.white)
+            liveRemaining(liveData).font(.caption.weight(.bold)).foregroundStyle(.white)
         }
         .padding(.horizontal, 22)
         .frame(width: 240, height: 44)
@@ -242,16 +241,13 @@ struct WidgetGalleryView: View {
         Text(t.uppercased())
             .font(.caption2.weight(.bold))
             .tracking(1)
-            .foregroundStyle(Palette.subtle)
+            .foregroundStyle(Palette.sub)
     }
 
     private func card<V: View>(width: CGFloat, height: CGFloat, @ViewBuilder _ content: () -> V) -> some View {
         content()
             .frame(width: width, height: height)
-            .background(
-                LinearGradient(colors: Palette.bgColors(for: .fasting),
-                               startPoint: .top, endPoint: .bottom)
-            )
+            .background(LinearGradient(colors: Palette.bgColors(for: .fasting), startPoint: .top, endPoint: .bottom))
             .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
             .shadow(color: .black.opacity(0.15), radius: 12, y: 6)
     }
