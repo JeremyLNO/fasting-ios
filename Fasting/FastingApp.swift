@@ -210,6 +210,7 @@ struct WidgetGalleryView: View {
                 sectionTitle("Widgets écran d'accueil")
                 card(width: 158, height: 158) { FastingWidgetContent(family: .systemSmall, state: s) }
                 card(width: 338, height: 158) { FastingWidgetContent(family: .systemMedium, state: s) }
+                card(width: 338, height: 354) { FastingWidgetContent(family: .systemLarge, state: s) }
 
                 sectionTitle("Dynamic Island (compact)")
                 islandCompact

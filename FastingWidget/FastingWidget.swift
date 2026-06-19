@@ -57,6 +57,6 @@ struct FastingWidget: Widget {
         }
         .configurationDisplayName("Fasting")
         .description("Suis l'avancement de ton jeûne depuis l'écran d'accueil.")
-        .supportedFamilies([.systemSmall, .systemMedium, .accessoryCircular])
+        .supportedFamilies([.systemSmall, .systemMedium, .systemLarge, .accessoryCircular])
     }
 }

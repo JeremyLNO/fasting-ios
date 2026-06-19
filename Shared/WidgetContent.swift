@@ -11,6 +11,7 @@ struct FastingWidgetContent: View {
         switch family {
         case .accessoryCircular: accessory
         case .systemMedium:      medium
+        case .systemLarge:       large
         default:                 small
         }
     }
@@ -66,6 +67,49 @@ struct FastingWidgetContent: View {
             Spacer(minLength: 0)
         }
         .padding(14)
+    }
+
+    private var large: some View {
+        VStack(spacing: 14) {
+            HStack(spacing: 8) {
+                Image(systemName: state.isFasting ? "moon.stars.fill" : "leaf.fill")
+                    .font(.subheadline)
+                    .foregroundStyle(Palette.accent(state.phase))
+                Text(state.isFasting ? "Jeûne en cours" : "Fenêtre alimentaire")
+                    .font(.system(.headline, design: .rounded))
+                    .foregroundStyle(Palette.ink)
+                Spacer()
+                Text("\(Int((state.progress * 100).rounded()))%")
+                    .font(.system(.headline, design: .rounded).weight(.bold))
+                    .foregroundStyle(Palette.accent(state.phase))
+            }
+
+            ZStack {
+                RingView(progress: state.progress, colors: Palette.ringColors(for: state.phase), lineWidth: 16)
+                VStack(spacing: 2) {
+                    Text(FastingStage.current(forHours: state.elapsedHours).emoji)
+                        .font(.title2)
+                    live
+                        .font(.system(size: 32, weight: .bold, design: .rounded))
+                        .foregroundStyle(Palette.ink)
+                }
+            }
+            .frame(maxHeight: .infinity)
+
+            StageChip(stage: FastingStage.current(forHours: state.elapsedHours))
+
+            HStack(spacing: 6) {
+                Image(systemName: "flag.checkered")
+                    .font(.caption2).foregroundStyle(Palette.sub)
+                Text(state.isFasting ? "Fin du jeûne" : "Prochain jeûne")
+                    .font(.caption).foregroundStyle(Palette.sub)
+                Spacer()
+                Text(state.windowEnd, format: .dateTime.hour().minute())
+                    .font(.system(.subheadline, design: .rounded).weight(.semibold))
+                    .foregroundStyle(Palette.ink)
+            }
+        }
+        .padding(16)
     }
 
     private var accessory: some View {
