@@ -23,6 +23,12 @@
 		BD0000000000000000000005 /* FastingViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000004 /* FastingViews.swift */; };
 		BA000000000000000000000A /* WidgetContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000006 /* WidgetContent.swift */; };
 		BD0000000000000000000006 /* WidgetContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000006 /* WidgetContent.swift */; };
+		BA000000000000000000000B /* FastingActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000007 /* FastingActivityAttributes.swift */; };
+		BD0000000000000000000007 /* FastingActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000007 /* FastingActivityAttributes.swift */; };
+		BA000000000000000000000C /* LiveActivityViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000008 /* LiveActivityViews.swift */; };
+		BD0000000000000000000008 /* LiveActivityViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000008 /* LiveActivityViews.swift */; };
+		BA000000000000000000000D /* LiveActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC0000000000000000000007 /* LiveActivityManager.swift */; };
+		BD0000000000000000000009 /* FastingLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD0000000000000000000005 /* FastingLiveActivity.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -57,6 +63,10 @@
 		AB0000000000000000000003 /* SharedStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedStore.swift; sourceTree = "<group>"; };
 		AB0000000000000000000004 /* FastingViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FastingViews.swift; sourceTree = "<group>"; };
 		AB0000000000000000000006 /* WidgetContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetContent.swift; sourceTree = "<group>"; };
+		AB0000000000000000000007 /* FastingActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FastingActivityAttributes.swift; sourceTree = "<group>"; };
+		AB0000000000000000000008 /* LiveActivityViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityViews.swift; sourceTree = "<group>"; };
+		AC0000000000000000000007 /* LiveActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityManager.swift; sourceTree = "<group>"; };
+		AD0000000000000000000005 /* FastingLiveActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FastingLiveActivity.swift; sourceTree = "<group>"; };
 		AC0000000000000000000001 /* FastingApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FastingApp.swift; sourceTree = "<group>"; };
 		AC0000000000000000000002 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		AC0000000000000000000003 /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
@@ -112,6 +122,8 @@
 				AB0000000000000000000003 /* SharedStore.swift */,
 				AB0000000000000000000004 /* FastingViews.swift */,
 				AB0000000000000000000006 /* WidgetContent.swift */,
+				AB0000000000000000000007 /* FastingActivityAttributes.swift */,
+				AB0000000000000000000008 /* LiveActivityViews.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -124,6 +136,7 @@
 				AC0000000000000000000003 /* NotificationManager.swift */,
 				AC0000000000000000000004 /* Assets.xcassets */,
 				AC0000000000000000000005 /* Fasting.entitlements */,
+				AC0000000000000000000007 /* LiveActivityManager.swift */,
 			);
 			path = Fasting;
 			sourceTree = "<group>";
@@ -134,6 +147,7 @@
 				AD0000000000000000000001 /* FastingWidget.swift */,
 				AD0000000000000000000003 /* Info.plist */,
 				AD0000000000000000000002 /* FastingWidget.entitlements */,
+				AD0000000000000000000005 /* FastingLiveActivity.swift */,
 			);
 			path = FastingWidget;
 			sourceTree = "<group>";
@@ -237,6 +251,9 @@
 				BA0000000000000000000006 /* SharedStore.swift in Sources */,
 				BA0000000000000000000007 /* FastingViews.swift in Sources */,
 				BA000000000000000000000A /* WidgetContent.swift in Sources */,
+				BA000000000000000000000B /* FastingActivityAttributes.swift in Sources */,
+				BA000000000000000000000C /* LiveActivityViews.swift in Sources */,
+				BA000000000000000000000D /* LiveActivityManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -250,6 +267,9 @@
 				BD0000000000000000000004 /* SharedStore.swift in Sources */,
 				BD0000000000000000000005 /* FastingViews.swift in Sources */,
 				BD0000000000000000000006 /* WidgetContent.swift in Sources */,
+				BD0000000000000000000007 /* FastingActivityAttributes.swift in Sources */,
+				BD0000000000000000000008 /* LiveActivityViews.swift in Sources */,
+				BD0000000000000000000009 /* FastingLiveActivity.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -353,6 +373,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Jeûne";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -382,6 +403,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Jeûne";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

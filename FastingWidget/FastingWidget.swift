@@ -46,6 +46,7 @@ struct FastingWidgetEntryView: View {
 struct FastingWidgetBundle: WidgetBundle {
     var body: some Widget {
         FastingWidget()
+        FastingLiveActivity()
     }
 }
 

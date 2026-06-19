@@ -3,16 +3,21 @@
 App iOS native (SwiftUI + WidgetKit) pour suivre l'état de son jeûne intermittent.
 
 ## Captures
-| Jeûne en cours | Fenêtre alimentaire | Widgets écran d'accueil |
-|:---:|:---:|:---:|
-| ![Jeûne en cours](screenshots/01-jeune-en-cours.png) | ![Fenêtre alimentaire](screenshots/02-fenetre-alimentaire.png) | ![Widgets](screenshots/03-widgets-accueil.png) |
+| Jeûne en cours | Fenêtre alimentaire |
+|:---:|:---:|
+| ![Jeûne en cours](screenshots/01-jeune-en-cours.png) | ![Fenêtre alimentaire](screenshots/02-fenetre-alimentaire.png) |
+
+| Widgets & Live Activity | Dynamic Island (en situation) |
+|:---:|:---:|
+| ![Widgets et Live Activity](screenshots/03-widgets-accueil.png) | ![Dynamic Island](screenshots/04-dynamic-island.png) |
 
 ## Fonctionnalités
 - **Configuration** : uniquement l'heure de **début** et de **fin** du jeûne (réglages, deux sélecteurs d'heure).
 - **Écran principal** : anneau de progression pastel, **temps écoulé** en direct, **état d'avancement** métabolique (Digestion → Glycémie → Glycogène → Combustion des graisses → Cétose → Autophagie), et la phase en cours (jeûne / fenêtre alimentaire).
 - **Notifications locales** quotidiennes au **début** et à la **fin** du jeûne.
 - **Widgets écran d'accueil** (petit + moyen) + widget rond pour l'écran verrouillé, alimentés via un **App Group** partagé.
-- Thème **pastel** (lavande / pêche / menthe) partagé entre l'app et le widget.
+- **Live Activity / Dynamic Island** : suivi en direct du jeûne dans la Dynamic Island et sur l'écran verrouillé (chrono et progression qui avancent tout seuls, sans push). Bouton *Suivre / Arrêter le suivi en direct* dans l'app.
+- Thème **pastel** (lavande / pêche / menthe) partagé entre l'app, les widgets et la Live Activity.
 
 ## Structure
 ```
