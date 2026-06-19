@@ -58,12 +58,24 @@ Avec un **compte Apple Developer (99 $/an)** :
 4. On branche alors un job `archive` signé (signature cloud via `-allowProvisioningUpdates`) →
    upload TestFlight. (Dis-le-moi quand le compte est prêt, je l'ajoute.)
 
-## Déployer sur son iPhone (compte Apple gratuit)
-1. Brancher l'iPhone, le sélectionner comme destination.
-2. Dans **Signing & Capabilities** des deux targets : choisir son équipe (Personal Team),
-   et vérifier la capability **App Groups** = `group.company.lno.fasting`.
-3. ▶︎ pour installer. Sur l'iPhone : Réglages → Général → VPN et gestion → faire confiance au profil.
-4. Ajouter le widget : appui long sur l'écran d'accueil → **+** → chercher « Jeûne ».
+## Installer sur son iPhone
+
+### Apple ID gratuit (test rapide) — config actuelle
+L'**App Group est désactivé** (entitlements vides) car réservé aux comptes payants. Donc :
+l'app, les **notifications** et la **Dynamic Island** fonctionnent, mais le **widget affiche
+l'horaire par défaut** (20:00→12:00, pas tes réglages), et l'app **expire après 7 jours**.
+
+1. Brancher l'iPhone (USB), déverrouiller, « Se fier à cet ordinateur ».
+2. `Signing & Capabilities` des **deux** targets → cocher **Automatically manage signing** →
+   choisir ton **Team** (Personal Team / ton Apple ID).
+3. Sélectionner l'iPhone comme destination → **⌘R**.
+4. iPhone → Réglages → Général → **VPN et gestion d'appareils** → faire **confiance** au profil.
+5. Widget : appui long sur l'écran d'accueil → **+** → « **Fasting** ».
+
+### Compte Apple Developer payant (complet)
+Pour le partage app↔widget complet : remettre la clé `com.apple.security.application-groups`
+= `group.company.lno.fasting` dans les **deux** entitlements (`Fasting/Fasting.entitlements`
+et `FastingWidget/FastingWidget.entitlements`), puis install directe ou **TestFlight** via la CI.
 
 ## Arguments de lancement (dev uniquement)
 - `-skipNotifPrompt` : ne pas demander l'autorisation notifications (captures propres).
