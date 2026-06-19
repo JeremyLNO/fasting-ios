@@ -31,6 +31,8 @@
 		BD0000000000000000000009 /* FastingLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD0000000000000000000005 /* FastingLiveActivity.swift */; };
 		BA000000000000000000000E /* Localization.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000009 /* Localization.swift */; };
 		BD000000000000000000000A /* Localization.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000009 /* Localization.swift */; };
+		BA000000000000000000000F /* Store.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC0000000000000000000008 /* Store.swift */; };
+		BA0000000000000000000010 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC0000000000000000000009 /* PaywallView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -69,6 +71,9 @@
 		AB0000000000000000000008 /* LiveActivityViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityViews.swift; sourceTree = "<group>"; };
 		AB0000000000000000000009 /* Localization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Localization.swift; sourceTree = "<group>"; };
 		AC0000000000000000000007 /* LiveActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityManager.swift; sourceTree = "<group>"; };
+		AC0000000000000000000008 /* Store.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Store.swift; sourceTree = "<group>"; };
+		AC0000000000000000000009 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
+		AC000000000000000000000A /* Fasting.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = Fasting.storekit; sourceTree = "<group>"; };
 		AD0000000000000000000005 /* FastingLiveActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FastingLiveActivity.swift; sourceTree = "<group>"; };
 		AC0000000000000000000001 /* FastingApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FastingApp.swift; sourceTree = "<group>"; };
 		AC0000000000000000000002 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
@@ -141,6 +146,9 @@
 				AC0000000000000000000004 /* Assets.xcassets */,
 				AC0000000000000000000005 /* Fasting.entitlements */,
 				AC0000000000000000000007 /* LiveActivityManager.swift */,
+				AC0000000000000000000008 /* Store.swift */,
+				AC0000000000000000000009 /* PaywallView.swift */,
+				AC000000000000000000000A /* Fasting.storekit */,
 			);
 			path = Fasting;
 			sourceTree = "<group>";
@@ -259,6 +267,8 @@
 				BA000000000000000000000C /* LiveActivityViews.swift in Sources */,
 				BA000000000000000000000D /* LiveActivityManager.swift in Sources */,
 				BA000000000000000000000E /* Localization.swift in Sources */,
+				BA000000000000000000000F /* Store.swift in Sources */,
+				BA0000000000000000000010 /* PaywallView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -7,6 +7,7 @@ struct FastingApp: App {
         if let i = CommandLine.arguments.firstIndex(of: "-demoLang"), i + 1 < CommandLine.arguments.count {
             UserDefaults.standard.set(CommandLine.arguments[i + 1], forKey: AppLanguage.storageKey)
         }
+        Trial.ensureInstallDate()
         _ = SharedStore.load() // ensure a default schedule exists on first launch
         if !CommandLine.arguments.contains("-skipNotifPrompt") {
             NotificationManager.shared.requestAuthorizationAndSchedule()
@@ -14,7 +15,23 @@ struct FastingApp: App {
     }
 
     var body: some Scene {
-        WindowGroup { ContentView() }
+        WindowGroup { RootView() }
+    }
+}
+
+/// Gates the app behind the 7-day free trial / Fasting Pro subscription.
+struct RootView: View {
+    @StateObject private var store = StoreManager()
+    @AppStorage(AppLanguage.storageKey) private var languageRaw = "en"
+    private var lang: AppLanguage { AppLanguage(rawValue: languageRaw) ?? .en }
+
+    var body: some View {
+        let forced = CommandLine.arguments.contains("-showPaywall")
+        if !forced && (store.isSubscribed || Trial.isActive) {
+            ContentView()
+        } else {
+            PaywallView(store: store, lang: lang)
+        }
     }
 }
 

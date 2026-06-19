@@ -17,6 +17,8 @@ App iOS native (SwiftUI + WidgetKit) pour suivre l'état de son jeûne intermitt
 - **Notifications locales** quotidiennes au **début** et à la **fin** du jeûne.
 - **Widgets écran d'accueil** (petit + moyen) + widget rond pour l'écran verrouillé, alimentés via un **App Group** partagé.
 - **Live Activity / Dynamic Island** : suivi en direct du jeûne dans la Dynamic Island et sur l'écran verrouillé (chrono et progression qui avancent tout seuls, sans push). Bouton *Suivre / Arrêter le suivi en direct* dans l'app.
+- **Multilingue** : anglais par défaut, bascule 🇬🇧 / 🇫🇷 / 🇩🇪 / 🇪🇸 dans les réglages.
+- **Essai gratuit 7 jours** (dès l'installation) puis abonnement **9,99 $/an** (StoreKit 2).
 - Thème **pastel** (lavande / pêche / menthe) partagé entre l'app, les widgets et la Live Activity.
 
 ## Structure
@@ -77,7 +79,19 @@ Pour le partage app↔widget complet : remettre la clé `com.apple.security.appl
 = `group.company.lno.fasting` dans les **deux** entitlements (`Fasting/Fasting.entitlements`
 et `FastingWidget/FastingWidget.entitlements`), puis install directe ou **TestFlight** via la CI.
 
+## Essai gratuit & abonnement (StoreKit)
+- **Essai 7 jours** compté depuis la 1ʳᵉ ouverture (`Trial`, stocké en local). Pendant l'essai
+  l'app est pleinement utilisable ; après 7 jours, un **paywall bloque** l'accès jusqu'à l'abonnement.
+- Abonnement annuel **9,99 $/an**, produit `com.lno.fasting.pro.yearly` (StoreKit 2, `Store.swift`).
+- **Tester l'achat sans App Store Connect** : Xcode → *Edit Scheme → Run → Options →
+  StoreKit Configuration* → choisir **`Fasting/Fasting.storekit`**. L'achat se simule alors en local.
+- **Pour vendre pour de vrai** : compte **Apple Developer payant** + créer dans App Store Connect
+  un abonnement auto-renouvelable avec l'ID `com.lno.fasting.pro.yearly`.
+
 ## Arguments de lancement (dev uniquement)
 - `-skipNotifPrompt` : ne pas demander l'autorisation notifications (captures propres).
 - `-demoNow <timestamp>` : fige l'heure « maintenant » (démo).
+- `-demoLang <en|fr|de|es>` : force la langue.
+- `-openSettings` : ouvre les réglages au lancement.
 - `-widgetGallery` : affiche l'aperçu in-app des widgets.
+- `-showPaywall` : force l'écran d'abonnement. `-forceExpired` : simule l'essai terminé.

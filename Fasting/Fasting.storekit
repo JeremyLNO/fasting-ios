@@ -1,0 +1,45 @@
+{
+  "identifier" : "A1B2C3D4",
+  "nonRenewingSubscriptions" : [],
+  "products" : [],
+  "settings" : {
+    "_failTransactionsEnabled" : false,
+    "_locale" : "en_US",
+    "_storefront" : "USA",
+    "_storeKitErrors" : []
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "20FB1C2E",
+      "localizations" : [],
+      "name" : "Fasting Pro",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [],
+          "codeOffers" : [],
+          "displayPrice" : "9.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "6F3A1B22",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Unlimited fasting tracking, widgets and metabolic stages.",
+              "displayName" : "Fasting Pro (Yearly)",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "com.lno.fasting.pro.yearly",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Fasting Pro Yearly",
+          "subscriptionGroupID" : "20FB1C2E",
+          "type" : "RecurringSubscription"
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}
