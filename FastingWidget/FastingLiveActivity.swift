@@ -48,10 +48,8 @@ struct FastingLiveActivity: Widget {
             } compactLeading: {
                 Text(d.stage.emoji)
             } compactTrailing: {
-                liveRemaining(d)
-                    .font(.caption2.weight(.semibold))
-                    .foregroundStyle(Palette.ink)
-                    .frame(maxWidth: 52)
+                liveBar(d)
+                    .frame(width: 46)
             } minimal: {
                 Text(d.stage.emoji)
             }
