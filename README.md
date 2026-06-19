@@ -1,4 +1,4 @@
-# Jeûne — app de fasting iOS
+# Fasting — app de jeûne iOS
 
 App iOS native (SwiftUI + WidgetKit) pour suivre l'état de son jeûne intermittent.
 

@@ -1,6 +1,6 @@
 # AGENTS.md — règles de collaboration (Claude Code ⇄ Xcode local)
 
-Ce fichier fige comment on travaille à deux sur **Jeûne** (app iOS native). Il sert aussi
+Ce fichier fige comment on travaille à deux sur **Fasting** (app iOS native). Il sert aussi
 de référence aux sessions Claude Code : à lire avant toute modification.
 
 ## Le projet
