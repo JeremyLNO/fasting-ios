@@ -1,0 +1,49 @@
+name: iOS Build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ios-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build app + widget (iOS Simulator, unsigned)
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Environment
+        run: |
+          xcodebuild -version
+          echo "iOS runtimes disponibles :"
+          xcrun simctl list runtimes | grep -i ios || true
+
+      - name: Build (clean)
+        run: |
+          xcodebuild \
+            -project Fasting.xcodeproj \
+            -scheme Fasting \
+            -configuration Debug \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            clean build
+
+      - name: Package .app
+        run: |
+          cd build/Build/Products/Debug-iphonesimulator
+          zip -ryq Fasting-sim.zip Fasting.app
+          ls -la
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Fasting-sim-app
+          path: build/Build/Products/Debug-iphonesimulator/Fasting-sim.zip
+          if-no-files-found: error

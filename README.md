@@ -38,6 +38,21 @@ Choisir le scheme **Fasting**, un simulateur ou son iPhone, puis ▶︎.
 > sur un iPhone physique (nécessite aussi d'installer le support de plateforme iOS dans
 > Components). Le code Swift, lui, compile déjà sans erreur.
 
+## CI / Build cloud (GitHub Actions)
+[![iOS Build](https://github.com/JeremyLNO/fasting-ios/actions/workflows/ios.yml/badge.svg)](https://github.com/JeremyLNO/fasting-ios/actions/workflows/ios.yml)
+
+À chaque push sur `main`, un runner macOS compile l'app **et** le widget (avec l'icône et les
+assets — le cloud dispose du runtime simulateur qui manque en local) et publie le `.app` en
+artefact téléchargeable : onglet **Actions** → dernier run → section *Artifacts*.
+
+### Plus tard : distribution TestFlight
+Avec un **compte Apple Developer (99 $/an)** :
+1. Créer l'app dans App Store Connect (bundle `company.lno.fasting`).
+2. Générer une **clé API App Store Connect** (Issuer ID, Key ID, fichier `.p8`).
+3. Les ajouter en **secrets** du repo : `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_P8`.
+4. On branche alors un job `archive` signé (signature cloud via `-allowProvisioningUpdates`) →
+   upload TestFlight. (Dis-le-moi quand le compte est prêt, je l'ajoute.)
+
 ## Déployer sur son iPhone (compte Apple gratuit)
 1. Brancher l'iPhone, le sélectionner comme destination.
 2. Dans **Signing & Capabilities** des deux targets : choisir son équipe (Personal Team),
