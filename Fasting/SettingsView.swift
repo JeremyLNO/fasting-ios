@@ -3,6 +3,8 @@ import SwiftUI
 struct SettingsView: View {
     @Binding var schedule: FastingSchedule
     @Environment(\.dismiss) private var dismiss
+    @AppStorage(AppLanguage.storageKey) private var languageRaw = "en"
+    private var lang: AppLanguage { AppLanguage(rawValue: languageRaw) ?? .en }
 
     @State private var start = Date()
     @State private var end = Date()
@@ -10,35 +12,38 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                LinearGradient(colors: [Palette.bgTop, Palette.bgBottom],
+                LinearGradient(colors: [Palette.bgFastTop, Palette.bgFastBot],
                                startPoint: .top, endPoint: .bottom)
                     .ignoresSafeArea()
 
-                VStack(spacing: 18) {
-                    timeCard("Début du jeûne", "🌙", $start)
-                    timeCard("Fin du jeûne", "☀️", $end)
-                    summary
-                    Spacer()
-                    Button(action: save) {
-                        Text("Enregistrer")
-                            .font(.headline)
-                            .foregroundStyle(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 16)
-                            .background(
-                                LinearGradient(colors: [Palette.fastingA, Palette.fastingB],
-                                               startPoint: .leading, endPoint: .trailing),
-                                in: RoundedRectangle(cornerRadius: 18)
-                            )
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 16) {
+                        timeCard(L.t("set_fast_start", lang), "🌙", $start)
+                        timeCard(L.t("set_fast_end", lang), "☀️", $end)
+                        summary
+                        languageCard
+                        Button(action: save) {
+                            Text(L.t("set_save", lang))
+                                .font(.system(.headline, design: .rounded))
+                                .foregroundStyle(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 16)
+                                .background(
+                                    LinearGradient(colors: [Palette.fastingA, Palette.fastingB],
+                                                   startPoint: .leading, endPoint: .trailing),
+                                    in: RoundedRectangle(cornerRadius: 18)
+                                )
+                        }
+                        .padding(.top, 4)
                     }
+                    .padding(22)
                 }
-                .padding(22)
             }
-            .navigationTitle("Réglages")
+            .navigationTitle(L.t("set_title", lang))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Fermer") { dismiss() }
+                    Button(L.t("set_close", lang)) { dismiss() }
                         .foregroundStyle(Palette.ink)
                 }
             }
@@ -49,7 +54,7 @@ struct SettingsView: View {
     private func timeCard(_ title: String, _ emoji: String, _ value: Binding<Date>) -> some View {
         HStack {
             Text(emoji).font(.title2)
-            Text(title).font(.headline).foregroundStyle(Palette.ink)
+            Text(title).font(.system(.headline, design: .rounded)).foregroundStyle(Palette.ink)
             Spacer()
             DatePicker("", selection: value, displayedComponents: .hourAndMinute)
                 .labelsHidden()
@@ -62,9 +67,40 @@ struct SettingsView: View {
         let temp = scheduleFromPickers()
         let eating = 24 * 60 - temp.fastingMinutes
         let eatingText = eating % 60 == 0 ? "\(eating / 60)h" : "\(eating / 60)h\(String(format: "%02d", eating % 60))"
-        return Text("\(temp.fastingHoursText) de jeûne · \(eatingText) pour manger")
+        return Text("\(temp.fastingHoursText) \(L.t("set_word_fasting", lang)) · \(eatingText) \(L.t("set_word_eating", lang))")
             .font(.subheadline)
-            .foregroundStyle(Palette.subtle)
+            .foregroundStyle(Palette.sub)
+    }
+
+    private var languageCard: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(L.t("set_language", lang).uppercased())
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(Palette.sub)
+                .padding(.bottom, 4)
+
+            ForEach(AppLanguage.allCases) { l in
+                Button {
+                    languageRaw = l.rawValue
+                    NotificationManager.shared.reschedule(for: schedule)
+                } label: {
+                    HStack(spacing: 12) {
+                        Text(l.flag).font(.title3)
+                        Text(l.name)
+                            .font(.system(.body, design: .rounded))
+                            .foregroundStyle(Palette.ink)
+                        Spacer()
+                        Image(systemName: l == lang ? "checkmark.circle.fill" : "circle")
+                            .foregroundStyle(l == lang ? Palette.fastAccent : Palette.sub.opacity(0.35))
+                    }
+                    .padding(.vertical, 8)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(18)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(.white.opacity(0.6), in: RoundedRectangle(cornerRadius: 18))
     }
 
     private func scheduleFromPickers() -> FastingSchedule {

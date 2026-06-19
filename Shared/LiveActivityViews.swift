@@ -10,7 +10,7 @@ struct LiveActivityData {
     let startLabel: String
     let endLabel: String
 
-    var phaseTitle: String { isFasting ? "Jeûne en cours" : "Fenêtre alimentaire" }
+    var phaseTitle: String { isFasting ? L.t("phase_fasting") : L.t("phase_eating") }
     var ringColors: [Color] { Palette.ringColors(for: isFasting ? .fasting : .eating) }
     var stage: FastingStage {
         FastingStage.current(forHours: max(0, Date().timeIntervalSince(windowStart)) / 3600)
@@ -58,7 +58,7 @@ struct LiveLockView: View {
             Spacer(minLength: 6)
 
             VStack(spacing: 2) {
-                Text("FIN").font(.caption2).foregroundStyle(Palette.subtle)
+                Text(L.t("la_end").uppercased()).font(.caption2).foregroundStyle(Palette.subtle)
                 Text(data.endLabel).font(.headline).foregroundStyle(Palette.ink)
             }
         }

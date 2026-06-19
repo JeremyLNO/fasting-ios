@@ -15,17 +15,18 @@ final class NotificationManager {
     }
 
     func reschedule(for schedule: FastingSchedule) {
+        let lang = AppLanguage.current
         center.removePendingNotificationRequests(withIdentifiers: ["fast.start", "fast.end"])
 
         add(id: "fast.start", hour: schedule.startHour, minute: schedule.startMinute,
-            title: "Jeûne démarré 🌙",
-            body: "Ton jeûne de \(schedule.fastingHoursText) commence maintenant. Courage !")
+            title: L.t("notif_start_title", lang),
+            body: String(format: L.t("notif_start_body", lang), schedule.fastingHoursText))
 
         add(id: "fast.end", hour: schedule.endHour, minute: schedule.endMinute,
-            title: "Jeûne terminé ✅",
-            body: "Bravo ! Tu peux ouvrir ta fenêtre alimentaire.")
+            title: L.t("notif_end_title", lang),
+            body: L.t("notif_end_body", lang))
 
-        print("[Notifications] Programmées : début \(schedule.startLabel), fin \(schedule.endLabel)")
+        print("[Notifications] scheduled: start \(schedule.startLabel), end \(schedule.endLabel)")
     }
 
     private func add(id: String, hour: Int, minute: Int, title: String, body: String) {

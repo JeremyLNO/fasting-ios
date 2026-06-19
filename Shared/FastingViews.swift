@@ -186,13 +186,14 @@ struct StatCard: View {
 
 /// Pill showing the current metabolic stage.
 struct StageChip: View {
-    let stage: FastingStage
+    let emoji: String
+    let name: String
     var compact: Bool = false
 
     var body: some View {
         HStack(spacing: 7) {
-            Text(stage.emoji)
-            Text(stage.name)
+            Text(emoji)
+            Text(name)
                 .font(compact ? .caption2 : .system(.subheadline, design: .rounded))
                 .fontWeight(.semibold)
                 .lineLimit(1)

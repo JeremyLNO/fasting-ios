@@ -29,6 +29,8 @@
 		BD0000000000000000000008 /* LiveActivityViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000008 /* LiveActivityViews.swift */; };
 		BA000000000000000000000D /* LiveActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC0000000000000000000007 /* LiveActivityManager.swift */; };
 		BD0000000000000000000009 /* FastingLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD0000000000000000000005 /* FastingLiveActivity.swift */; };
+		BA000000000000000000000E /* Localization.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000009 /* Localization.swift */; };
+		BD000000000000000000000A /* Localization.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000009 /* Localization.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -65,6 +67,7 @@
 		AB0000000000000000000006 /* WidgetContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetContent.swift; sourceTree = "<group>"; };
 		AB0000000000000000000007 /* FastingActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FastingActivityAttributes.swift; sourceTree = "<group>"; };
 		AB0000000000000000000008 /* LiveActivityViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityViews.swift; sourceTree = "<group>"; };
+		AB0000000000000000000009 /* Localization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Localization.swift; sourceTree = "<group>"; };
 		AC0000000000000000000007 /* LiveActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityManager.swift; sourceTree = "<group>"; };
 		AD0000000000000000000005 /* FastingLiveActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FastingLiveActivity.swift; sourceTree = "<group>"; };
 		AC0000000000000000000001 /* FastingApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FastingApp.swift; sourceTree = "<group>"; };
@@ -124,6 +127,7 @@
 				AB0000000000000000000006 /* WidgetContent.swift */,
 				AB0000000000000000000007 /* FastingActivityAttributes.swift */,
 				AB0000000000000000000008 /* LiveActivityViews.swift */,
+				AB0000000000000000000009 /* Localization.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -254,6 +258,7 @@
 				BA000000000000000000000B /* FastingActivityAttributes.swift in Sources */,
 				BA000000000000000000000C /* LiveActivityViews.swift in Sources */,
 				BA000000000000000000000D /* LiveActivityManager.swift in Sources */,
+				BA000000000000000000000E /* Localization.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -270,6 +275,7 @@
 				BD0000000000000000000007 /* FastingActivityAttributes.swift in Sources */,
 				BD0000000000000000000008 /* LiveActivityViews.swift in Sources */,
 				BD0000000000000000000009 /* FastingLiveActivity.swift in Sources */,
+				BD000000000000000000000A /* Localization.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

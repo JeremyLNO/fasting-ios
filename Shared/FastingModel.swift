@@ -8,7 +8,7 @@ struct FastingSchedule: Codable, Equatable {
     var endHour: Int
     var endMinute: Int
 
-    static let `default` = FastingSchedule(startHour: 20, startMinute: 0, endHour: 12, endMinute: 0)
+    static let `default` = FastingSchedule(startHour: 22, startMinute: 0, endHour: 18, endMinute: 0)
 
     var startLabel: String { String(format: "%02d:%02d", startHour, startMinute) }
     var endLabel: String { String(format: "%02d:%02d", endHour, endMinute) }
@@ -83,18 +83,20 @@ extension FastingSchedule {
 struct FastingStage: Identifiable {
     let id = UUID()
     let threshold: Double   // elapsed fasting hours at which this stage begins
-    let name: String
+    let key: String
     let emoji: String
-    let detail: String
+
+    func name(_ lang: AppLanguage = .current) -> String { L.t("stage_\(key)", lang) }
+    func detail(_ lang: AppLanguage = .current) -> String { L.t("stage_\(key)_detail", lang) }
 
     static let all: [FastingStage] = [
-        .init(threshold: 0,  name: "Digestion",                emoji: "🍽️", detail: "Le corps digère le dernier repas"),
-        .init(threshold: 4,  name: "Glycémie en baisse",       emoji: "📉", detail: "La glycémie redescend"),
-        .init(threshold: 8,  name: "Réserves de glycogène",    emoji: "🔋", detail: "Le corps puise dans le glycogène"),
-        .init(threshold: 12, name: "Combustion des graisses",  emoji: "🔥", detail: "Passage en mode lipolyse"),
-        .init(threshold: 16, name: "Cétose",                   emoji: "🥑", detail: "Production de corps cétoniques"),
-        .init(threshold: 18, name: "Autophagie",               emoji: "✨", detail: "Nettoyage cellulaire enclenché"),
-        .init(threshold: 24, name: "Jeûne prolongé",           emoji: "🌟", detail: "Bénéfices renforcés")
+        .init(threshold: 0,  key: "digestion", emoji: "🍽️"),
+        .init(threshold: 4,  key: "glycemia",  emoji: "📉"),
+        .init(threshold: 8,  key: "glycogen",  emoji: "🔋"),
+        .init(threshold: 12, key: "fatburn",   emoji: "🔥"),
+        .init(threshold: 16, key: "ketosis",   emoji: "🥑"),
+        .init(threshold: 18, key: "autophagy", emoji: "✨"),
+        .init(threshold: 24, key: "extended",  emoji: "🌟")
     ]
 
     static func current(forHours hours: Double) -> FastingStage {

@@ -26,7 +26,7 @@ struct FastingLiveActivity: Widget {
             return DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
                     Label {
-                        Text(d.isFasting ? "Jeûne" : "Repas")
+                        Text(d.isFasting ? L.t("phase_fasting") : L.t("phase_eating"))
                             .font(.caption).foregroundStyle(Palette.ink)
                     } icon: {
                         Text(d.stage.emoji)
@@ -40,7 +40,7 @@ struct FastingLiveActivity: Widget {
                 DynamicIslandExpandedRegion(.bottom) {
                     VStack(spacing: 4) {
                         liveBar(d)
-                        Text("\(d.stage.emoji) \(d.stage.name) · fin à \(d.endLabel)")
+                        Text("\(d.stage.emoji) \(d.stage.name()) · \(L.t("la_ends_at")) \(d.endLabel)")
                             .font(.caption2)
                             .foregroundStyle(Palette.subtle)
                     }

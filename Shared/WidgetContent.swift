@@ -37,9 +37,11 @@ struct FastingWidgetContent: View {
                 live
                     .font(.system(.callout, design: .rounded).weight(.bold))
                     .foregroundStyle(Palette.ink)
-                Text(state.isFasting ? "jeûne" : "repas")
+                Text(state.isFasting ? L.t("phase_fasting") : L.t("phase_eating"))
                     .font(.caption2)
                     .foregroundStyle(Palette.subtle)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
             }
         }
         .padding(6)
@@ -56,13 +58,14 @@ struct FastingWidgetContent: View {
             .frame(width: 92, height: 92)
 
             VStack(alignment: .leading, spacing: 6) {
-                Text(state.isFasting ? "Jeûne en cours" : "Fenêtre alimentaire")
+                Text(state.isFasting ? L.t("phase_fasting") : L.t("phase_eating"))
                     .font(.headline)
                     .foregroundStyle(Palette.ink)
                 live
                     .font(.system(.title2, design: .rounded).weight(.bold))
                     .foregroundStyle(Palette.ink)
-                StageChip(stage: FastingStage.current(forHours: state.elapsedHours), compact: true)
+                StageChip(emoji: FastingStage.current(forHours: state.elapsedHours).emoji,
+                          name: FastingStage.current(forHours: state.elapsedHours).name(), compact: true)
             }
             Spacer(minLength: 0)
         }
@@ -75,7 +78,7 @@ struct FastingWidgetContent: View {
                 Image(systemName: state.isFasting ? "moon.stars.fill" : "leaf.fill")
                     .font(.subheadline)
                     .foregroundStyle(Palette.accent(state.phase))
-                Text(state.isFasting ? "Jeûne en cours" : "Fenêtre alimentaire")
+                Text(state.isFasting ? L.t("phase_fasting") : L.t("phase_eating"))
                     .font(.system(.headline, design: .rounded))
                     .foregroundStyle(Palette.ink)
                 Spacer()
@@ -96,12 +99,13 @@ struct FastingWidgetContent: View {
             }
             .frame(maxHeight: .infinity)
 
-            StageChip(stage: FastingStage.current(forHours: state.elapsedHours))
+            StageChip(emoji: FastingStage.current(forHours: state.elapsedHours).emoji,
+                      name: FastingStage.current(forHours: state.elapsedHours).name())
 
             HStack(spacing: 6) {
                 Image(systemName: "flag.checkered")
                     .font(.caption2).foregroundStyle(Palette.sub)
-                Text(state.isFasting ? "Fin du jeûne" : "Prochain jeûne")
+                Text(state.isFasting ? L.t("stat_end") : L.t("stat_next_fast"))
                     .font(.caption).foregroundStyle(Palette.sub)
                 Spacer()
                 Text(state.windowEnd, format: .dateTime.hour().minute())

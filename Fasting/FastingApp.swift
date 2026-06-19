@@ -4,6 +4,9 @@ import WidgetKit
 @main
 struct FastingApp: App {
     init() {
+        if let i = CommandLine.arguments.firstIndex(of: "-demoLang"), i + 1 < CommandLine.arguments.count {
+            UserDefaults.standard.set(CommandLine.arguments[i + 1], forKey: AppLanguage.storageKey)
+        }
         _ = SharedStore.load() // ensure a default schedule exists on first launch
         if !CommandLine.arguments.contains("-skipNotifPrompt") {
             NotificationManager.shared.requestAuthorizationAndSchedule()
@@ -19,6 +22,8 @@ struct ContentView: View {
     @State private var schedule = SharedStore.load()
     @State private var showSettings = false
     @StateObject private var live = LiveActivityManager()
+    @AppStorage(AppLanguage.storageKey) private var languageRaw = "en"
+    private var lang: AppLanguage { AppLanguage(rawValue: languageRaw) ?? .en }
 
     /// Optional fixed "now" for demo screenshots: -demoNow <unix-timestamp>.
     private var overrideNow: Date? {
@@ -56,6 +61,7 @@ struct ContentView: View {
         }
         .onAppear {
             live.refresh()
+            if CommandLine.arguments.contains("-openSettings") { showSettings = true }
             if CommandLine.arguments.contains("-startLiveActivity") {
                 let now = Date()
                 let demo = FastingState(phase: .fasting, progress: 0.56,
@@ -108,7 +114,7 @@ struct ContentView: View {
 
             VStack(spacing: 7) {
                 PhaseBadge(phase: s.phase)
-                Text(s.isFasting ? "JEÛNE EN COURS" : "FENÊTRE ALIMENTAIRE")
+                Text((s.isFasting ? L.t("phase_fasting", lang) : L.t("phase_eating", lang)).uppercased())
                     .font(.caption2.weight(.bold))
                     .tracking(1.5)
                     .foregroundStyle(Palette.sub)
@@ -131,14 +137,15 @@ struct ContentView: View {
 
     private func stageSection(_ s: FastingState) -> some View {
         VStack(spacing: 8) {
-            StageChip(stage: FastingStage.current(forHours: s.elapsedHours))
+            let current = FastingStage.current(forHours: s.elapsedHours)
+            StageChip(emoji: current.emoji, name: current.name(lang))
             if s.isFasting, let next = FastingStage.next(forHours: s.elapsedHours) {
-                Text("Prochaine étape \(next.emoji) \(next.name) dans \(formatHM((next.threshold - s.elapsedHours) * 3600))")
+                Text("\(L.t("next_stage", lang)) \(next.emoji) \(next.name(lang)) \(L.t("word_in", lang)) \(formatHM((next.threshold - s.elapsedHours) * 3600))")
                     .font(.caption)
                     .foregroundStyle(Palette.sub)
                     .multilineTextAlignment(.center)
             } else {
-                Text(FastingStage.current(forHours: s.elapsedHours).detail)
+                Text(current.detail(lang))
                     .font(.caption)
                     .foregroundStyle(Palette.sub)
             }
@@ -149,12 +156,12 @@ struct ContentView: View {
 
     private func statsRow(_ s: FastingState) -> some View {
         HStack(spacing: 12) {
-            StatCard(icon: "clock", tint: Palette.fastAccent, label: "Début", value: schedule.startLabel)
+            StatCard(icon: "clock", tint: Palette.fastAccent, label: L.t("stat_start", lang), value: schedule.startLabel)
             StatCard(icon: s.isFasting ? "hourglass" : "calendar",
                      tint: Palette.accent(s.phase),
-                     label: s.isFasting ? "Restant" : "Prochain jeûne",
+                     label: s.isFasting ? L.t("stat_remaining", lang) : L.t("stat_next_fast", lang),
                      value: formatHM(s.remaining))
-            StatCard(icon: "sunrise.fill", tint: Palette.peach, label: "Fin", value: schedule.endLabel)
+            StatCard(icon: "sunrise.fill", tint: Palette.peach, label: L.t("stat_end", lang), value: schedule.endLabel)
         }
     }
 
@@ -168,7 +175,7 @@ struct ContentView: View {
                 live.start(schedule: schedule, state: schedule.state(at: Date()))
             }
         } label: {
-            Label(live.isActive ? "Arrêter le suivi en direct" : "Suivre dans la Dynamic Island",
+            Label(live.isActive ? L.t("btn_stop", lang) : L.t("btn_track", lang),
                   systemImage: live.isActive ? "stop.circle.fill" : "bolt.badge.clock.fill")
                 .font(.system(.subheadline, design: .rounded).weight(.semibold))
                 .foregroundStyle(Palette.ink)
