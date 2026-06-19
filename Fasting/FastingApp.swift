@@ -28,7 +28,7 @@ struct RootView: View {
     var body: some View {
         let forced = CommandLine.arguments.contains("-showPaywall")
         if !forced && (store.isSubscribed || Trial.isActive) {
-            ContentView()
+            ContentView(store: store)
         } else {
             PaywallView(store: store, lang: lang)
         }
@@ -36,6 +36,7 @@ struct RootView: View {
 }
 
 struct ContentView: View {
+    let store: StoreManager
     @State private var schedule = SharedStore.load()
     @State private var showSettings = false
     @StateObject private var live = LiveActivityManager()
@@ -89,7 +90,7 @@ struct ContentView: View {
             }
         }
         .sheet(isPresented: $showSettings) {
-            SettingsView(schedule: $schedule)
+            SettingsView(schedule: $schedule, store: store)
         }
     }
 
@@ -193,7 +194,7 @@ struct ContentView: View {
             }
         } label: {
             Label(live.isActive ? L.t("btn_stop", lang) : L.t("btn_track", lang),
-                  systemImage: live.isActive ? "stop.circle.fill" : "bolt.badge.clock.fill")
+                  systemImage: live.isActive ? "stop.circle.fill" : "bolt.fill")
                 .font(.system(.subheadline, design: .rounded).weight(.semibold))
                 .foregroundStyle(Palette.ink)
                 .padding(.vertical, 14)

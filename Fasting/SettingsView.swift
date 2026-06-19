@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SettingsView: View {
     @Binding var schedule: FastingSchedule
+    @ObservedObject var store: StoreManager
     @Environment(\.dismiss) private var dismiss
     @AppStorage(AppLanguage.storageKey) private var languageRaw = "en"
     private var lang: AppLanguage { AppLanguage(rawValue: languageRaw) ?? .en }
@@ -22,6 +23,7 @@ struct SettingsView: View {
                         timeCard(L.t("set_fast_end", lang), "☀️", $end)
                         summary
                         languageCard
+                        subscriptionCard
                         Button(action: save) {
                             Text(L.t("set_save", lang))
                                 .font(.system(.headline, design: .rounded))
@@ -85,7 +87,7 @@ struct SettingsView: View {
                     NotificationManager.shared.reschedule(for: schedule)
                 } label: {
                     HStack(spacing: 12) {
-                        Text(l.flag).font(.title3)
+                        FlagView(lang: l)
                         Text(l.name)
                             .font(.system(.body, design: .rounded))
                             .foregroundStyle(Palette.ink)
@@ -101,6 +103,67 @@ struct SettingsView: View {
         .padding(18)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(.white.opacity(0.6), in: RoundedRectangle(cornerRadius: 18))
+    }
+
+    private var subscriptionCard: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text(L.t("set_plan", lang).uppercased())
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(Palette.sub)
+
+            HStack(spacing: 12) {
+                Image(systemName: store.isSubscribed ? "crown.fill" : "gift.fill")
+                    .font(.title3)
+                    .foregroundStyle(store.isSubscribed ? Palette.peach : Palette.fastAccent)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(planTitle)
+                        .font(.system(.body, design: .rounded).weight(.semibold))
+                        .foregroundStyle(Palette.ink)
+                    Text(planSubtitle)
+                        .font(.caption)
+                        .foregroundStyle(Palette.sub)
+                }
+                Spacer()
+                if store.isSubscribed {
+                    Image(systemName: "checkmark.seal.fill").foregroundStyle(Palette.eatAccent)
+                }
+            }
+
+            if !store.isSubscribed {
+                Button { Task { await store.purchase() } } label: {
+                    Text("\(L.t("pay_subscribe", lang)) · \(String(format: L.t("pay_per_year", lang), store.priceText))")
+                        .font(.system(.subheadline, design: .rounded).weight(.bold))
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 13)
+                        .background(
+                            LinearGradient(colors: [Palette.fastingA, Palette.fastingB],
+                                           startPoint: .leading, endPoint: .trailing),
+                            in: RoundedRectangle(cornerRadius: 14)
+                        )
+                }
+                .disabled(store.purchasing)
+
+                Button(L.t("pay_restore", lang)) { Task { await store.restore() } }
+                    .font(.footnote)
+                    .foregroundStyle(Palette.sub)
+                    .frame(maxWidth: .infinity)
+            }
+        }
+        .padding(18)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(.white.opacity(0.6), in: RoundedRectangle(cornerRadius: 18))
+    }
+
+    private var planTitle: String {
+        store.isSubscribed ? L.t("pay_title", lang) : L.t("plan_free", lang)
+    }
+
+    private var planSubtitle: String {
+        if store.isSubscribed { return L.t("plan_active", lang) }
+        let days = Trial.daysRemaining
+        if days <= 0 { return L.t("pay_trial_ended", lang) }
+        return days <= 1 ? L.t("pay_one_day_left", lang) : String(format: L.t("pay_days_left", lang), days)
     }
 
     private func scheduleFromPickers() -> FastingSchedule {

@@ -184,6 +184,66 @@ struct StatCard: View {
     }
 }
 
+/// Small drawn flag — robust everywhere (regional-indicator flag emoji don't always
+/// render, e.g. on the iOS Simulator).
+struct FlagView: View {
+    let lang: AppLanguage
+    private let w: CGFloat = 28
+    private let h: CGFloat = 20
+
+    private let blue = Color(red: 0.0, green: 0.13, blue: 0.55)
+    private let red = Color(red: 0.79, green: 0.07, blue: 0.18)
+    private let gold = Color(red: 1.0, green: 0.79, blue: 0.0)
+
+    var body: some View {
+        content
+            .frame(width: w, height: h)
+            .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 4, style: .continuous).stroke(.black.opacity(0.12), lineWidth: 0.5))
+    }
+
+    @ViewBuilder private var content: some View {
+        switch lang {
+        case .fr:
+            HStack(spacing: 0) { blue; Color.white; red }
+        case .de:
+            VStack(spacing: 0) { Color.black; red; gold }
+        case .es:
+            VStack(spacing: 0) {
+                red.frame(height: h * 0.25)
+                gold.frame(height: h * 0.50)
+                red.frame(height: h * 0.25)
+            }
+        case .en:
+            unionJack
+        }
+    }
+
+    private var unionJack: some View {
+        GeometryReader { geo in
+            let ww = geo.size.width
+            let hh = geo.size.height
+            ZStack {
+                blue
+                diagonals.stroke(Color.white, lineWidth: hh * 0.30)
+                diagonals.stroke(red, lineWidth: hh * 0.14)
+                Rectangle().fill(Color.white).frame(width: ww * 0.34)
+                Rectangle().fill(Color.white).frame(height: hh * 0.34)
+                Rectangle().fill(red).frame(width: ww * 0.20)
+                Rectangle().fill(red).frame(height: hh * 0.20)
+            }
+            .compositingGroup()
+        }
+    }
+
+    private var diagonals: Path {
+        Path { p in
+            p.move(to: .zero); p.addLine(to: CGPoint(x: w, y: h))
+            p.move(to: CGPoint(x: w, y: 0)); p.addLine(to: CGPoint(x: 0, y: h))
+        }
+    }
+}
+
 /// Pill showing the current metabolic stage.
 struct StageChip: View {
     let emoji: String

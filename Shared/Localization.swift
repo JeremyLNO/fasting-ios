@@ -107,6 +107,11 @@ enum L {
         "pay_continue":      [.en: "Continue free trial", .fr: "Continuer l'essai gratuit", .de: "Kostenlose Testphase fortsetzen", .es: "Continuar prueba gratuita"],
         "pay_days_left":     [.en: "%d days left in your free trial", .fr: "%d jours restants dans ton essai gratuit", .de: "Noch %d Tage in deiner Testphase", .es: "%d días restantes de prueba gratuita"],
         "pay_one_day_left":  [.en: "Last day of your free trial", .fr: "Dernier jour de ton essai gratuit", .de: "Letzter Tag deiner Testphase", .es: "Último día de tu prueba gratuita"],
-        "pay_terms":         [.en: "Auto-renewable. Cancel anytime in the App Store.", .fr: "Renouvellement automatique. Annulable à tout moment dans l'App Store.", .de: "Automatische Verlängerung. Jederzeit im App Store kündbar.", .es: "Renovación automática. Cancela cuando quieras en la App Store."]
+        "pay_terms":         [.en: "Auto-renewable. Cancel anytime in the App Store.", .fr: "Renouvellement automatique. Annulable à tout moment dans l'App Store.", .de: "Automatische Verlängerung. Jederzeit im App Store kündbar.", .es: "Renovación automática. Cancela cuando quieras en la App Store."],
+
+        // Subscription status (Settings)
+        "set_plan":    [.en: "Subscription", .fr: "Abonnement", .de: "Abo", .es: "Suscripción"],
+        "plan_active": [.en: "Pro subscription active", .fr: "Abonnement Pro actif", .de: "Pro-Abo aktiv", .es: "Suscripción Pro activa"],
+        "plan_free":   [.en: "Free trial", .fr: "Essai gratuit", .de: "Testphase", .es: "Prueba gratuita"]
     ]
 }
