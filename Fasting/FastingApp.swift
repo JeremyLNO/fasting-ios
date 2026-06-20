@@ -215,15 +215,19 @@ struct ContentView: View {
     }
 
     private var waterTracker: some View {
-        VStack(spacing: 12) {
+        let done = glasses >= SharedStore.waterGoal
+        return VStack(spacing: 12) {
             HStack(spacing: 6) {
-                Image(systemName: "drop.fill").font(.subheadline).foregroundStyle(Palette.water)
-                Text(L.t("water_title", lang))
+                Image(systemName: done ? "checkmark.seal.fill" : "drop.fill")
+                    .font(.subheadline)
+                    .foregroundStyle(done ? Palette.eatAccent : Palette.water)
+                Text(done ? L.t("water_done", lang) : L.t("water_title", lang))
                     .font(.system(.subheadline, design: .rounded).weight(.semibold))
-                    .foregroundStyle(Palette.ink)
+                    .foregroundStyle(done ? Palette.eatAccent : Palette.ink)
                 Spacer()
-                Text("\(glasses * 200) ml / 1 L")
-                    .font(.caption).foregroundStyle(Palette.sub)
+                Text(done ? "1 L ✓" : "\(glasses * 200) ml / 1 L")
+                    .font(.caption.weight(done ? .bold : .regular))
+                    .foregroundStyle(done ? Palette.eatAccent : Palette.sub)
             }
             HStack(spacing: 12) {
                 ForEach(0..<5, id: \.self) { i in
@@ -235,7 +239,8 @@ struct ContentView: View {
         .padding(16)
         .frame(maxWidth: .infinity)
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(.white.opacity(0.5), lineWidth: 1))
+        .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous)
+            .stroke(done ? Palette.eatAccent.opacity(0.55) : .white.opacity(0.5), lineWidth: done ? 1.5 : 1))
     }
 
     private func tapGlass(_ i: Int) {

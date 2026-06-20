@@ -105,11 +105,12 @@ struct FastingWidgetContent: View {
                       compact: true)
 
             HStack(spacing: 7) {
-                Image(systemName: "drop.fill").font(.caption).foregroundStyle(Palette.water)
+                Image(systemName: water >= 5 ? "checkmark.seal.fill" : "drop.fill")
+                    .font(.caption).foregroundStyle(water >= 5 ? Palette.eatAccent : Palette.water)
                 WaterGlassesRow(count: water, size: 17, spacing: 6)
                 Spacer()
-                Text("\(water * 200) ml")
-                    .font(.caption).foregroundStyle(Palette.sub)
+                Text(water >= 5 ? "1 L ✓" : "\(water * 200) ml")
+                    .font(.caption).foregroundStyle(water >= 5 ? Palette.eatAccent : Palette.sub)
             }
         }
         .padding(14)

@@ -90,17 +90,19 @@ struct WaterProvider: TimelineProvider {
 struct WaterWidgetEntryView: View {
     let entry: WaterEntry
     var body: some View {
-        VStack(spacing: 8) {
+        let done = entry.glasses >= 5
+        return VStack(spacing: 8) {
             HStack(spacing: 5) {
-                Image(systemName: "drop.fill").foregroundStyle(Palette.water)
-                Text(L.t("water_title"))
+                Image(systemName: done ? "checkmark.seal.fill" : "drop.fill")
+                    .foregroundStyle(done ? Palette.eatAccent : Palette.water)
+                Text(done ? L.t("water_done") : L.t("water_title"))
                     .font(.system(.subheadline, design: .rounded).weight(.semibold))
-                    .foregroundStyle(Palette.ink)
+                    .foregroundStyle(done ? Palette.eatAccent : Palette.ink)
             }
             WaterGlassesRow(count: entry.glasses, size: 20, spacing: 5)
-            Text("\(entry.glasses * 200) ml / 1 L")
-                .font(.caption2)
-                .foregroundStyle(Palette.subtle)
+            Text(done ? "1 L ✓" : "\(entry.glasses * 200) ml / 1 L")
+                .font(.caption2.weight(done ? .bold : .regular))
+                .foregroundStyle(done ? Palette.eatAccent : Palette.subtle)
         }
         .containerBackground(for: .widget) {
             LinearGradient(colors: [Color(red: 0.90, green: 0.96, blue: 1.0), Color(red: 0.83, green: 0.92, blue: 1.0)],
