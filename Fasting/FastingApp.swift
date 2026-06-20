@@ -8,6 +8,10 @@ struct FastingApp: App {
             UserDefaults.standard.set(CommandLine.arguments[i + 1], forKey: AppLanguage.storageKey)
         }
         Trial.ensureInstallDate()
+        if let i = CommandLine.arguments.firstIndex(of: "-demoWater"), i + 1 < CommandLine.arguments.count,
+           let n = Int(CommandLine.arguments[i + 1]) {
+            SharedStore.setWaterGlasses(n)
+        }
         _ = SharedStore.load() // ensure a default schedule exists on first launch
         if !CommandLine.arguments.contains("-skipNotifPrompt") {
             NotificationManager.shared.requestAuthorizationAndSchedule()
@@ -39,6 +43,7 @@ struct ContentView: View {
     let store: StoreManager
     @State private var schedule = SharedStore.load()
     @State private var showSettings = false
+    @State private var glasses = SharedStore.waterGlasses()
     @StateObject private var live = LiveActivityManager()
     @AppStorage(AppLanguage.storageKey) private var languageRaw = "en"
     private var lang: AppLanguage { AppLanguage(rawValue: languageRaw) ?? .en }
@@ -64,21 +69,25 @@ struct ContentView: View {
             let now = overrideNow ?? context.date
             let s = schedule.state(at: now)
 
-            VStack(spacing: 18) {
-                header
-                heroRing(s)
-                stageSection(s)
-                statsRow(s)
-                liveButton
-                Spacer(minLength: 0)
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 16) {
+                    header
+                    heroRing(s)
+                    stageSection(s)
+                    statsRow(s)
+                    waterTracker
+                    liveButton
+                }
+                .padding(.horizontal, 22)
+                .padding(.top, 8)
+                .padding(.bottom, 24)
             }
-            .padding(.horizontal, 22)
-            .padding(.top, 8)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(FastingBackground(phase: s.phase))
         }
         .onAppear {
             live.refresh()
+            glasses = SharedStore.waterGlasses()
             if CommandLine.arguments.contains("-openSettings") { showSettings = true }
             if CommandLine.arguments.contains("-startLiveActivity") {
                 let now = Date()
@@ -204,6 +213,36 @@ struct ContentView: View {
         }
         .padding(.top, 2)
     }
+
+    private var waterTracker: some View {
+        VStack(spacing: 12) {
+            HStack(spacing: 6) {
+                Image(systemName: "drop.fill").font(.subheadline).foregroundStyle(Palette.water)
+                Text(L.t("water_title", lang))
+                    .font(.system(.subheadline, design: .rounded).weight(.semibold))
+                    .foregroundStyle(Palette.ink)
+                Spacer()
+                Text("\(glasses * 200) ml / 1 L")
+                    .font(.caption).foregroundStyle(Palette.sub)
+            }
+            HStack(spacing: 12) {
+                ForEach(0..<5, id: \.self) { i in
+                    Button { tapGlass(i) } label: { GlassIcon(filled: i < glasses, size: 34) }
+                        .buttonStyle(.plain)
+                }
+            }
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity)
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(.white.opacity(0.5), lineWidth: 1))
+    }
+
+    private func tapGlass(_ i: Int) {
+        let newValue = (glasses == i + 1) ? i : i + 1
+        glasses = newValue
+        SharedStore.setWaterGlasses(newValue)
+    }
 }
 
 /// In-app preview of the widgets and the Live Activity, rendered from the exact
@@ -235,7 +274,10 @@ struct WidgetGalleryView: View {
                 sectionTitle("Widgets écran d'accueil")
                 card(width: 158, height: 158) { FastingWidgetContent(family: .systemSmall, state: s) }
                 card(width: 338, height: 158) { FastingWidgetContent(family: .systemMedium, state: s) }
-                card(width: 338, height: 354) { FastingWidgetContent(family: .systemLarge, state: s) }
+                card(width: 338, height: 354) { FastingWidgetContent(family: .systemLarge, state: s, water: 3) }
+
+                sectionTitle("Widget eau")
+                waterWidgetCard
 
                 sectionTitle("Dynamic Island (compact)")
                 islandCompact
@@ -250,6 +292,24 @@ struct WidgetGalleryView: View {
             .frame(maxWidth: .infinity)
         }
         .background(FastingBackground(phase: .fasting))
+    }
+
+    private var waterWidgetCard: some View {
+        VStack(spacing: 8) {
+            HStack(spacing: 5) {
+                Image(systemName: "drop.fill").foregroundStyle(Palette.water)
+                Text(L.t("water_title"))
+                    .font(.system(.subheadline, design: .rounded).weight(.semibold))
+                    .foregroundStyle(Palette.ink)
+            }
+            WaterGlassesRow(count: 3, size: 20, spacing: 5)
+            Text("600 ml / 1 L").font(.caption2).foregroundStyle(Palette.subtle)
+        }
+        .frame(width: 158, height: 158)
+        .background(LinearGradient(colors: [Color(red: 0.90, green: 0.96, blue: 1.0), Color(red: 0.83, green: 0.92, blue: 1.0)],
+                                   startPoint: .top, endPoint: .bottom))
+        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .shadow(color: .black.opacity(0.15), radius: 12, y: 6)
     }
 
     private var islandCompact: some View {

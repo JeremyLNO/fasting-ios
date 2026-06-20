@@ -33,6 +33,8 @@ enum Palette {
     static let fastAccent = Color(red: 0.49, green: 0.43, blue: 0.86)
     static let eatAccent  = Color(red: 0.30, green: 0.66, blue: 0.43)
     static let peach      = Color(red: 1.00, green: 0.64, blue: 0.34)
+    static let water      = Color(red: 0.36, green: 0.69, blue: 0.96)
+    static let waterLight = Color(red: 0.64, green: 0.85, blue: 1.00)
 
     static func bg(_ p: FastingPhase) -> [Color] { p == .fasting ? [bgFastTop, bgFastBot] : [bgEatTop, bgEatBot] }
     static func ring(_ p: FastingPhase) -> [Color] { p == .fasting ? fastRing : eatRing }

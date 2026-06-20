@@ -133,6 +133,56 @@ struct RingView: View {
 
 // MARK: - Reusable glass components
 
+// MARK: - Water
+
+/// Tapered drinking-glass shape.
+struct WaterGlassShape: Shape {
+    func path(in rect: CGRect) -> Path {
+        var p = Path()
+        let w = rect.width, h = rect.height
+        p.move(to: CGPoint(x: w * 0.16, y: h * 0.04))
+        p.addLine(to: CGPoint(x: w * 0.84, y: h * 0.04))
+        p.addLine(to: CGPoint(x: w * 0.70, y: h * 0.96))
+        p.addLine(to: CGPoint(x: w * 0.30, y: h * 0.96))
+        p.closeSubpath()
+        return p
+    }
+}
+
+/// A single glass — empty outline or filled with water.
+struct GlassIcon: View {
+    var filled: Bool
+    var size: CGFloat = 32
+
+    var body: some View {
+        ZStack {
+            WaterGlassShape()
+                .fill(filled
+                      ? LinearGradient(colors: [Palette.waterLight, Palette.water], startPoint: .top, endPoint: .bottom)
+                      : LinearGradient(colors: [.white.opacity(0.45), .white.opacity(0.45)], startPoint: .top, endPoint: .bottom))
+            WaterGlassShape()
+                .stroke(filled ? Palette.water : Palette.sub.opacity(0.45), lineWidth: 1.5)
+        }
+        .frame(width: size, height: size * 1.18)
+    }
+}
+
+/// A non-interactive row of glasses (used in the widgets).
+struct WaterGlassesRow: View {
+    var count: Int
+    var total: Int = 5
+    var size: CGFloat = 32
+    var spacing: CGFloat = 12
+
+    var body: some View {
+        HStack(spacing: spacing) {
+            ForEach(0..<total, id: \.self) { i in
+                GlassIcon(filled: i < count, size: size)
+            }
+        }
+    }
+}
+
 /// Phase emblem shown in the centre of the ring (moon for fasting, leaf for eating).
 struct PhaseBadge: View {
     let phase: FastingPhase

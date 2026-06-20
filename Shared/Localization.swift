@@ -112,6 +112,7 @@ enum L {
         // Subscription status (Settings)
         "set_plan":    [.en: "Subscription", .fr: "Abonnement", .de: "Abo", .es: "Suscripción"],
         "plan_active": [.en: "Pro subscription active", .fr: "Abonnement Pro actif", .de: "Pro-Abo aktiv", .es: "Suscripción Pro activa"],
-        "plan_free":   [.en: "Free trial", .fr: "Essai gratuit", .de: "Testphase", .es: "Prueba gratuita"]
+        "plan_free":   [.en: "Free trial", .fr: "Essai gratuit", .de: "Testphase", .es: "Prueba gratuita"],
+        "water_title": [.en: "Water", .fr: "Eau", .de: "Wasser", .es: "Agua"]
     ]
 }

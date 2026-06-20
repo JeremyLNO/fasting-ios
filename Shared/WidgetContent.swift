@@ -6,6 +6,7 @@ import WidgetKit
 struct FastingWidgetContent: View {
     let family: WidgetFamily
     let state: FastingState
+    var water: Int = 0
 
     var body: some View {
         switch family {
@@ -73,47 +74,45 @@ struct FastingWidgetContent: View {
     }
 
     private var large: some View {
-        VStack(spacing: 14) {
+        VStack(spacing: 10) {
             HStack(spacing: 8) {
                 Image(systemName: state.isFasting ? "moon.stars.fill" : "leaf.fill")
                     .font(.subheadline)
                     .foregroundStyle(Palette.accent(state.phase))
                 Text(state.isFasting ? L.t("phase_fasting") : L.t("phase_eating"))
-                    .font(.system(.headline, design: .rounded))
+                    .font(.system(.subheadline, design: .rounded).weight(.semibold))
                     .foregroundStyle(Palette.ink)
                 Spacer()
                 Text("\(Int((state.progress * 100).rounded()))%")
-                    .font(.system(.headline, design: .rounded).weight(.bold))
+                    .font(.system(.subheadline, design: .rounded).weight(.bold))
                     .foregroundStyle(Palette.accent(state.phase))
             }
 
             ZStack {
-                RingView(progress: state.progress, colors: Palette.ringColors(for: state.phase), lineWidth: 16)
-                VStack(spacing: 2) {
+                RingView(progress: state.progress, colors: Palette.ringColors(for: state.phase), lineWidth: 14)
+                VStack(spacing: 1) {
                     Text(FastingStage.current(forHours: state.elapsedHours).emoji)
-                        .font(.title2)
+                        .font(.title3)
                     live
-                        .font(.system(size: 32, weight: .bold, design: .rounded))
+                        .font(.system(size: 28, weight: .bold, design: .rounded))
                         .foregroundStyle(Palette.ink)
                 }
             }
             .frame(maxHeight: .infinity)
 
             StageChip(emoji: FastingStage.current(forHours: state.elapsedHours).emoji,
-                      name: FastingStage.current(forHours: state.elapsedHours).name())
+                      name: FastingStage.current(forHours: state.elapsedHours).name(),
+                      compact: true)
 
-            HStack(spacing: 6) {
-                Image(systemName: "flag.checkered")
-                    .font(.caption2).foregroundStyle(Palette.sub)
-                Text(state.isFasting ? L.t("stat_end") : L.t("stat_next_fast"))
-                    .font(.caption).foregroundStyle(Palette.sub)
+            HStack(spacing: 7) {
+                Image(systemName: "drop.fill").font(.caption).foregroundStyle(Palette.water)
+                WaterGlassesRow(count: water, size: 17, spacing: 6)
                 Spacer()
-                Text(state.windowEnd, format: .dateTime.hour().minute())
-                    .font(.system(.subheadline, design: .rounded).weight(.semibold))
-                    .foregroundStyle(Palette.ink)
+                Text("\(water * 200) ml")
+                    .font(.caption).foregroundStyle(Palette.sub)
             }
         }
-        .padding(16)
+        .padding(14)
     }
 
     private var accessory: some View {
