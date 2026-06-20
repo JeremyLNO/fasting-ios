@@ -62,22 +62,21 @@ Avec un **compte Apple Developer (99 $/an)** :
 
 ## Installer sur son iPhone
 
-### Apple ID gratuit (test rapide) — config actuelle
-L'**App Group est désactivé** (entitlements vides) car réservé aux comptes payants. Donc :
-l'app, les **notifications** et la **Dynamic Island** fonctionnent, mais le **widget affiche
-l'horaire par défaut** (20:00→12:00, pas tes réglages), et l'app **expire après 7 jours**.
+**Config actuelle : App Group ACTIVÉ** (`group.company.lno.fasting` sur les 2 targets) → les
+**widgets (eau + jeûne) reflètent l'app** en temps réel. ⚠️ L'App Group **nécessite une équipe
+Apple PAYANTE** ; un compte gratuit sera refusé par Xcode.
 
 1. Brancher l'iPhone (USB), déverrouiller, « Se fier à cet ordinateur ».
-2. `Signing & Capabilities` des **deux** targets → cocher **Automatically manage signing** →
-   choisir ton **Team** (Personal Team / ton Apple ID).
+2. `Signing & Capabilities` des **deux** targets → **Automatically manage signing** →
+   **Team** = une équipe **payante** (ex. celle de l'entreprise).
 3. Sélectionner l'iPhone comme destination → **⌘R**.
-4. iPhone → Réglages → Général → **VPN et gestion d'appareils** → faire **confiance** au profil.
-5. Widget : appui long sur l'écran d'accueil → **+** → « **Fasting** ».
+4. iPhone → Réglages → Général → **VPN et gestion d'appareils** → **Se fier** au profil.
+5. Widget : appui long sur l'écran d'accueil → **+** → « **Fasting** » ou « **Eau / Water** ».
 
-### Compte Apple Developer payant (complet)
-Pour le partage app↔widget complet : remettre la clé `com.apple.security.application-groups`
-= `group.company.lno.fasting` dans les **deux** entitlements (`Fasting/Fasting.entitlements`
-et `FastingWidget/FastingWidget.entitlements`), puis install directe ou **TestFlight** via la CI.
+### Pour signer en GRATUIT (sans partage widget)
+Vide les 2 entitlements (`Fasting/Fasting.entitlements` et `FastingWidget/FastingWidget.entitlements`)
+en `<dict/>`. Les widgets afficheront alors un placeholder (pas de partage app↔widget), mais l'app
+fonctionne et se signe avec un Personal Team gratuit.
 
 ## Essai gratuit & abonnement (StoreKit)
 - **Essai 7 jours** compté depuis la 1ʳᵉ ouverture (`Trial`, stocké en local). Pendant l'essai
