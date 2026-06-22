@@ -114,6 +114,7 @@ enum L {
         "plan_active": [.en: "Pro subscription active", .fr: "Abonnement Pro actif", .de: "Pro-Abo aktiv", .es: "Suscripción Pro activa"],
         "plan_free":   [.en: "Free trial", .fr: "Essai gratuit", .de: "Testphase", .es: "Prueba gratuita"],
         "water_title": [.en: "Water", .fr: "Eau", .de: "Wasser", .es: "Agua"],
-        "water_done":  [.en: "Goal reached!", .fr: "Objectif atteint !", .de: "Ziel erreicht!", .es: "¡Objetivo logrado!"]
+        "water_done":  [.en: "Goal reached!", .fr: "Objectif atteint !", .de: "Ziel erreicht!", .es: "¡Objetivo logrado!"],
+        "support":     [.en: "Support & ideas", .fr: "Support et idées", .de: "Support & Ideen", .es: "Soporte e ideas"]
     ]
 }

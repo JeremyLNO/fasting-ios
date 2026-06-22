@@ -37,6 +37,16 @@ struct SettingsView: View {
                                 )
                         }
                         .padding(.top, 4)
+
+                        Link(destination: URL(string: "https://crazybeelabs.com/support/")!) {
+                            HStack(spacing: 6) {
+                                Image(systemName: "lifepreserver")
+                                Text(L.t("support", lang))
+                            }
+                            .font(.system(.subheadline, design: .rounded).weight(.medium))
+                            .foregroundStyle(Palette.fastAccent)
+                        }
+                        .padding(.top, 8)
                     }
                     .padding(22)
                 }
