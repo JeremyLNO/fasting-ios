@@ -47,6 +47,17 @@ struct SettingsView: View {
                             .foregroundStyle(Palette.fastAccent)
                         }
                         .padding(.top, 8)
+
+                        Link(destination: URL(string: "https://crazybeelabs.com/")!) {
+                            Image("CrazyBeeLabs")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(height: 48)
+                                .opacity(0.95)
+                                .padding(.top, 10)
+                                .padding(.bottom, 4)
+                        }
+                        .buttonStyle(.plain)
                     }
                     .padding(22)
                 }
