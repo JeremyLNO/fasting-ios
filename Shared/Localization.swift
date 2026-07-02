@@ -115,6 +115,39 @@ enum L {
         "plan_free":   [.en: "Free trial", .fr: "Essai gratuit", .de: "Testphase", .es: "Prueba gratuita"],
         "water_title": [.en: "Water", .fr: "Eau", .de: "Wasser", .es: "Agua"],
         "water_done":  [.en: "Goal reached!", .fr: "Objectif atteint !", .de: "Ziel erreicht!", .es: "¡Objetivo logrado!"],
-        "support":     [.en: "Support & ideas", .fr: "Support et idées", .de: "Support & Ideen", .es: "Soporte e ideas"]
+        "support":     [.en: "Support & ideas", .fr: "Support et idées", .de: "Support & Ideen", .es: "Soporte e ideas"],
+
+        // History
+        "history_title":  [.en: "History", .fr: "Historique", .de: "Verlauf", .es: "Historial"],
+        "history_streak": [.en: "Current streak", .fr: "Série actuelle", .de: "Aktuelle Serie", .es: "Racha actual"],
+        "history_best":   [.en: "Best streak", .fr: "Meilleure série", .de: "Beste Serie", .es: "Mejor racha"],
+        "history_total":  [.en: "Fasts completed", .fr: "Jeûnes complétés", .de: "Abgeschlossene Fastenperioden", .es: "Ayunos completados"],
+        "history_avg":    [.en: "Average duration", .fr: "Durée moyenne", .de: "Durchschnittliche Dauer", .es: "Duración media"],
+        "history_last":   [.en: "Last 4 weeks", .fr: "4 dernières semaines", .de: "Letzte 4 Wochen", .es: "Últimas 4 semanas"],
+        "history_days":   [.en: "days", .fr: "jours", .de: "Tage", .es: "días"],
+        "history_empty":  [.en: "Your streak starts with your first completed fast.", .fr: "Ta série commence avec ton premier jeûne complété.", .de: "Deine Serie beginnt mit deinem ersten abgeschlossenen Fasten.", .es: "Tu racha empieza con tu primer ayuno completado."],
+
+        // Presets
+        "set_presets": [.en: "Quick presets", .fr: "Préréglages rapides", .de: "Schnellauswahl", .es: "Preajustes rápidos"],
+
+        // Water goal & reminders
+        "water_goal_label":      [.en: "Daily goal", .fr: "Objectif quotidien", .de: "Tagesziel", .es: "Objetivo diario"],
+        "water_goal_glasses":    [.en: "%d glasses", .fr: "%d verres", .de: "%d Gläser", .es: "%d vasos"],
+        "water_reminders_label": [.en: "Water reminders", .fr: "Rappels pour boire", .de: "Trinkerinnerungen", .es: "Recordatorios de agua"],
+        "water_reminder_title":  [.en: "Time to hydrate 💧", .fr: "C'est l'heure de boire 💧", .de: "Zeit zu trinken 💧", .es: "Hora de hidratarse 💧"],
+        "water_reminder_body":   [.en: "Don't forget to drink some water.", .fr: "N'oublie pas de boire de l'eau.", .de: "Vergiss nicht, Wasser zu trinken.", .es: "No olvides beber agua."],
+
+        // Onboarding
+        "onb_welcome_title":    [.en: "Welcome to Fasting", .fr: "Bienvenue sur Fasting", .de: "Willkommen bei Fasting", .es: "Bienvenido a Fasting"],
+        "onb_welcome_subtitle": [.en: "A simple way to track your intermittent fasting, right from your home screen.", .fr: "Un moyen simple de suivre ton jeûne intermittent, depuis ton écran d'accueil.", .de: "Eine einfache Art, dein intermittierendes Fasten zu verfolgen — direkt vom Homescreen.", .es: "Una forma sencilla de seguir tu ayuno intermitente, desde tu pantalla de inicio."],
+        "onb_language_title":   [.en: "Choose your language", .fr: "Choisis ta langue", .de: "Wähle deine Sprache", .es: "Elige tu idioma"],
+        "onb_schedule_title":   [.en: "Pick your fasting schedule", .fr: "Choisis ton programme de jeûne", .de: "Wähle deinen Fastenplan", .es: "Elige tu horario de ayuno"],
+        "onb_schedule_subtitle":[.en: "You can fine-tune the exact times anytime in Settings.", .fr: "Tu pourras affiner les horaires exacts à tout moment dans les réglages.", .de: "Du kannst die genauen Zeiten jederzeit in den Einstellungen anpassen.", .es: "Puedes ajustar las horas exactas cuando quieras en Ajustes."],
+        "onb_notif_title":      [.en: "Stay on track", .fr: "Reste sur la bonne voie", .de: "Bleib dran", .es: "Mantente en el camino"],
+        "onb_notif_subtitle":   [.en: "We'll send you a notification when your fast starts and ends.", .fr: "Tu recevras une notification au début et à la fin de ton jeûne.", .de: "Wir benachrichtigen dich, wenn dein Fasten beginnt und endet.", .es: "Te avisaremos cuando tu ayuno empiece y termine."],
+        "onb_trial_title":      [.en: "7 days free, then $9.99/year", .fr: "7 jours gratuits, puis 9,99 $/an", .de: "7 Tage kostenlos, dann 9,99 $/Jahr", .es: "7 días gratis, luego $9.99/año"],
+        "onb_trial_subtitle":   [.en: "Cancel anytime. No commitment.", .fr: "Annulable à tout moment. Sans engagement.", .de: "Jederzeit kündbar. Unverbindlich.", .es: "Cancela cuando quieras. Sin compromiso."],
+        "onb_continue":         [.en: "Continue", .fr: "Continuer", .de: "Weiter", .es: "Continuar"],
+        "onb_get_started":      [.en: "Get started", .fr: "C'est parti", .de: "Los geht's", .es: "Empezar"]
     ]
 }

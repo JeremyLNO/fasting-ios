@@ -29,6 +29,22 @@ final class NotificationManager {
         print("[Notifications] scheduled: start \(schedule.startLabel), end \(schedule.endLabel)")
     }
 
+    func rescheduleWater(enabled: Bool, goal: Int) {
+        let ids = (0..<8).map { "water.reminder.\($0)" }
+        center.removePendingNotificationRequests(withIdentifiers: ids)
+        guard enabled else { return }
+
+        let lang = AppLanguage.current
+        let count = min(max(goal, 3), 8)
+        let startHour = 9, endHour = 21
+        let span = endHour - startHour
+        for i in 0..<count {
+            let hour = startHour + Int((Double(span) * Double(i) / Double(max(count - 1, 1))).rounded())
+            add(id: "water.reminder.\(i)", hour: min(hour, 22), minute: 0,
+                title: L.t("water_reminder_title", lang), body: L.t("water_reminder_body", lang))
+        }
+    }
+
     private func add(id: String, hour: Int, minute: Int, title: String, body: String) {
         let content = UNMutableNotificationContent()
         content.title = title

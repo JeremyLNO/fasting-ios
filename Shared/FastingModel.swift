@@ -77,6 +77,41 @@ extension FastingSchedule {
         return FastingState(phase: .eating, progress: min(max(p, 0), 1),
                             windowStart: prevEnd, windowEnd: nextStart, now: now)
     }
+
+    /// Fully-elapsed fasting windows (one per calendar day), most recent first, going back
+    /// until `limitDate`. Used to build history/streaks from the recurring daily schedule.
+    func pastFastingWindows(before now: Date, limitDate: Date, calendar: Calendar = .current,
+                             maxCount: Int = 90) -> [(start: Date, end: Date)] {
+        let durationSeconds = Double(fastingMinutes) * 60
+        var results: [(start: Date, end: Date)] = []
+        var dayOffset = 1 // start a day ahead in case today's window hasn't started yet
+        var safety = 0
+        while results.count < maxCount, safety < 500 {
+            safety += 1
+            guard let base = calendar.date(byAdding: .day, value: dayOffset, to: now),
+                  let start = calendar.date(bySettingHour: startHour, minute: startMinute, second: 0, of: base)
+            else { break }
+            if start < limitDate { break }
+            let end = start.addingTimeInterval(durationSeconds)
+            if end <= now { results.append((start, end)) }
+            dayOffset -= 1
+        }
+        return results
+    }
+}
+
+/// Common fasting protocols, expressed as the fasting-window duration in hours.
+struct FastingPreset: Identifiable {
+    let id = UUID()
+    let label: String
+    let fastingHours: Int
+
+    static let all: [FastingPreset] = [
+        .init(label: "16:8", fastingHours: 16),
+        .init(label: "18:6", fastingHours: 18),
+        .init(label: "20:4", fastingHours: 20),
+        .init(label: "OMAD", fastingHours: 23)
+    ]
 }
 
 /// Metabolic milestones reached as the fast progresses — the "état d'avancement".

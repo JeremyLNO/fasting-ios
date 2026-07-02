@@ -7,6 +7,11 @@ struct FastingApp: App {
         if let i = CommandLine.arguments.firstIndex(of: "-demoLang"), i + 1 < CommandLine.arguments.count {
             UserDefaults.standard.set(CommandLine.arguments[i + 1], forKey: AppLanguage.storageKey)
         }
+        if let i = CommandLine.arguments.firstIndex(of: "-demoInstallDaysAgo"), i + 1 < CommandLine.arguments.count,
+           let days = Int(CommandLine.arguments[i + 1]) {
+            let past = Calendar.current.date(byAdding: .day, value: -days, to: Date()) ?? Date()
+            UserDefaults.standard.set(past, forKey: Trial.installKey)
+        }
         Trial.ensureInstallDate()
         if let i = CommandLine.arguments.firstIndex(of: "-demoWater"), i + 1 < CommandLine.arguments.count,
            let n = Int(CommandLine.arguments[i + 1]) {
@@ -23,15 +28,25 @@ struct FastingApp: App {
     }
 }
 
-/// Gates the app behind the 7-day free trial / Fasting Pro subscription.
+/// Gates the app behind first-launch onboarding, then the 7-day free trial / Pro subscription.
 struct RootView: View {
     @StateObject private var store = StoreManager()
     @AppStorage(AppLanguage.storageKey) private var languageRaw = "en"
+    @AppStorage("onboarding.completed") private var onboardingDone = false
+    @State private var schedule = SharedStore.load()
     private var lang: AppLanguage { AppLanguage(rawValue: languageRaw) ?? .en }
 
     var body: some View {
         let forced = CommandLine.arguments.contains("-showPaywall")
-        if !forced && (store.isSubscribed || Trial.isActive) {
+        let skipOnboarding = CommandLine.arguments.contains("-skipOnboarding")
+
+        if !onboardingDone && !skipOnboarding {
+            OnboardingView(schedule: $schedule) {
+                SharedStore.save(schedule)
+                NotificationManager.shared.requestAuthorizationAndSchedule()
+                onboardingDone = true
+            }
+        } else if !forced && (store.isSubscribed || Trial.isActive) {
             ContentView(store: store)
         } else {
             PaywallView(store: store, lang: lang)
@@ -43,6 +58,7 @@ struct ContentView: View {
     let store: StoreManager
     @State private var schedule = SharedStore.load()
     @State private var showSettings = false
+    @State private var showHistory = false
     @State private var glasses = SharedStore.waterGlasses()
     @StateObject private var live = LiveActivityManager()
     @AppStorage(AppLanguage.storageKey) private var languageRaw = "en"
@@ -88,7 +104,9 @@ struct ContentView: View {
         .onAppear {
             live.refresh()
             glasses = SharedStore.waterGlasses()
+            HistoryStore.syncIfNeeded(schedule: schedule, installDate: Trial.installDate)
             if CommandLine.arguments.contains("-openSettings") { showSettings = true }
+            if CommandLine.arguments.contains("-openHistory") { showHistory = true }
             if CommandLine.arguments.contains("-startLiveActivity") {
                 let now = Date()
                 let demo = FastingState(phase: .fasting, progress: 0.56,
@@ -100,6 +118,9 @@ struct ContentView: View {
         }
         .sheet(isPresented: $showSettings) {
             SettingsView(schedule: $schedule, store: store)
+        }
+        .sheet(isPresented: $showHistory) {
+            HistoryView()
         }
     }
 
@@ -116,15 +137,20 @@ struct ContentView: View {
                     .foregroundStyle(Palette.sub)
             }
             Spacer()
-            Button { showSettings = true } label: {
-                Image(systemName: "slider.horizontal.3")
-                    .font(.title3)
-                    .foregroundStyle(Palette.ink)
-                    .frame(width: 48, height: 48)
-                    .background(.ultraThinMaterial, in: Circle())
-                    .overlay(Circle().stroke(.white.opacity(0.5), lineWidth: 1))
+            HStack(spacing: 10) {
+                Button { showHistory = true } label: { headerIcon("chart.bar.fill") }
+                Button { showSettings = true } label: { headerIcon("slider.horizontal.3") }
             }
         }
+    }
+
+    private func headerIcon(_ systemName: String) -> some View {
+        Image(systemName: systemName)
+            .font(.title3)
+            .foregroundStyle(Palette.ink)
+            .frame(width: 48, height: 48)
+            .background(.ultraThinMaterial, in: Circle())
+            .overlay(Circle().stroke(.white.opacity(0.5), lineWidth: 1))
     }
 
     // MARK: Ring
@@ -215,7 +241,8 @@ struct ContentView: View {
     }
 
     private var waterTracker: some View {
-        let done = glasses >= SharedStore.waterGoal
+        let goal = SharedStore.waterGoal
+        let done = glasses >= goal
         return VStack(spacing: 12) {
             HStack(spacing: 6) {
                 Image(systemName: done ? "checkmark.seal.fill" : "drop.fill")
@@ -225,13 +252,13 @@ struct ContentView: View {
                     .font(.system(.subheadline, design: .rounded).weight(.semibold))
                     .foregroundStyle(done ? Palette.eatAccent : Palette.ink)
                 Spacer()
-                Text(done ? "1 L ✓" : "\(glasses * 200) ml / 1 L")
+                Text(done ? "\(goal * 200) ml ✓" : "\(glasses * 200) / \(goal * 200) ml")
                     .font(.caption.weight(done ? .bold : .regular))
                     .foregroundStyle(done ? Palette.eatAccent : Palette.sub)
             }
-            HStack(spacing: 12) {
-                ForEach(0..<5, id: \.self) { i in
-                    Button { tapGlass(i) } label: { GlassIcon(filled: i < glasses, size: 34) }
+            HStack(spacing: 10) {
+                ForEach(0..<SharedStore.waterGoal, id: \.self) { i in
+                    Button { tapGlass(i) } label: { GlassIcon(filled: i < glasses, size: SharedStore.waterGoal > 5 ? 26 : 34) }
                         .buttonStyle(.plain)
                 }
             }

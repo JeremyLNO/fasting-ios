@@ -23,6 +23,9 @@
 		BA000000000000000000000E /* Localization.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000009 /* Localization.swift */; };
 		BA000000000000000000000F /* Store.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC0000000000000000000008 /* Store.swift */; };
 		BA0000000000000000000010 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC0000000000000000000009 /* PaywallView.swift */; };
+		BA0000000000000000000011 /* HistoryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000000000000000000000A /* HistoryStore.swift */; };
+		BA0000000000000000000012 /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC000000000000000000000B /* HistoryView.swift */; };
+		BA0000000000000000000013 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC000000000000000000000C /* OnboardingView.swift */; };
 		BD0000000000000000000001 /* FastingWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD0000000000000000000001 /* FastingWidget.swift */; };
 		BD0000000000000000000002 /* FastingModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000001 /* FastingModel.swift */; };
 		BD0000000000000000000003 /* Palette.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000002 /* Palette.swift */; };
@@ -33,6 +36,8 @@
 		BD0000000000000000000008 /* LiveActivityViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000008 /* LiveActivityViews.swift */; };
 		BD0000000000000000000009 /* FastingLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD0000000000000000000005 /* FastingLiveActivity.swift */; };
 		BD000000000000000000000A /* Localization.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000009 /* Localization.swift */; };
+		BD000000000000000000000B /* HistoryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000000000000000000000A /* HistoryStore.swift */; };
+		BD000000000000000000000C /* WaterIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD0000000000000000000006 /* WaterIntents.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -68,6 +73,7 @@
 		AB0000000000000000000007 /* FastingActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FastingActivityAttributes.swift; sourceTree = "<group>"; };
 		AB0000000000000000000008 /* LiveActivityViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityViews.swift; sourceTree = "<group>"; };
 		AB0000000000000000000009 /* Localization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Localization.swift; sourceTree = "<group>"; };
+		AB000000000000000000000A /* HistoryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryStore.swift; sourceTree = "<group>"; };
 		AC0000000000000000000001 /* FastingApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FastingApp.swift; sourceTree = "<group>"; };
 		AC0000000000000000000002 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		AC0000000000000000000003 /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
@@ -77,10 +83,13 @@
 		AC0000000000000000000008 /* Store.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Store.swift; sourceTree = "<group>"; };
 		AC0000000000000000000009 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
 		AC000000000000000000000A /* Fasting.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = Fasting.storekit; sourceTree = "<group>"; };
+		AC000000000000000000000B /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
+		AC000000000000000000000C /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		AD0000000000000000000001 /* FastingWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FastingWidget.swift; sourceTree = "<group>"; };
 		AD0000000000000000000002 /* FastingWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = FastingWidget.entitlements; sourceTree = "<group>"; };
 		AD0000000000000000000003 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AD0000000000000000000005 /* FastingLiveActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FastingLiveActivity.swift; sourceTree = "<group>"; };
+		AD0000000000000000000006 /* WaterIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaterIntents.swift; sourceTree = "<group>"; };
 		CC0000000000000000000001 /* Fasting.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Fasting.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CC0000000000000000000002 /* FastingWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = FastingWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -133,6 +142,7 @@
 				AB0000000000000000000007 /* FastingActivityAttributes.swift */,
 				AB0000000000000000000008 /* LiveActivityViews.swift */,
 				AB0000000000000000000009 /* Localization.swift */,
+				AB000000000000000000000A /* HistoryStore.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -149,6 +159,8 @@
 				AC0000000000000000000008 /* Store.swift */,
 				AC0000000000000000000009 /* PaywallView.swift */,
 				AC000000000000000000000A /* Fasting.storekit */,
+				AC000000000000000000000B /* HistoryView.swift */,
+				AC000000000000000000000C /* OnboardingView.swift */,
 			);
 			path = Fasting;
 			sourceTree = "<group>";
@@ -160,6 +172,7 @@
 				AD0000000000000000000003 /* Info.plist */,
 				AD0000000000000000000002 /* FastingWidget.entitlements */,
 				AD0000000000000000000005 /* FastingLiveActivity.swift */,
+				AD0000000000000000000006 /* WaterIntents.swift */,
 			);
 			path = FastingWidget;
 			sourceTree = "<group>";
@@ -269,6 +282,9 @@
 				BA000000000000000000000E /* Localization.swift in Sources */,
 				BA000000000000000000000F /* Store.swift in Sources */,
 				BA0000000000000000000010 /* PaywallView.swift in Sources */,
+				BA0000000000000000000011 /* HistoryStore.swift in Sources */,
+				BA0000000000000000000012 /* HistoryView.swift in Sources */,
+				BA0000000000000000000013 /* OnboardingView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -286,6 +302,8 @@
 				BD0000000000000000000008 /* LiveActivityViews.swift in Sources */,
 				BD0000000000000000000009 /* FastingLiveActivity.swift in Sources */,
 				BD000000000000000000000A /* Localization.swift in Sources */,
+				BD000000000000000000000B /* HistoryStore.swift in Sources */,
+				BD000000000000000000000C /* WaterIntents.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

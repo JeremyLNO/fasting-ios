@@ -1,30 +1,35 @@
 import WidgetKit
 import SwiftUI
+import AppIntents
 
 struct FastingEntry: TimelineEntry {
     let date: Date
     let schedule: FastingSchedule
     let water: Int
+    let waterGoal: Int
 }
 
 struct FastingProvider: TimelineProvider {
     func placeholder(in context: Context) -> FastingEntry {
-        FastingEntry(date: Date(), schedule: .default, water: 2)
+        FastingEntry(date: Date(), schedule: .default, water: 2, waterGoal: SharedStore.defaultWaterGoal)
     }
 
     func getSnapshot(in context: Context, completion: @escaping (FastingEntry) -> Void) {
-        completion(FastingEntry(date: Date(), schedule: SharedStore.load(), water: SharedStore.waterGlasses()))
+        completion(FastingEntry(date: Date(), schedule: SharedStore.load(), water: SharedStore.waterGlasses(),
+                                waterGoal: SharedStore.waterGoal))
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<FastingEntry>) -> Void) {
         let schedule = SharedStore.load()
         let water = SharedStore.waterGlasses()
+        let waterGoal = SharedStore.waterGoal
         let now = Date()
         // Pre-compute entries every 2 minutes for the next 4 hours so the ring advances
         // smoothly without spending extra refresh budget, then ask for a reload.
         var entries: [FastingEntry] = []
         for minute in stride(from: 0, through: 240, by: 2) {
-            entries.append(FastingEntry(date: now.addingTimeInterval(Double(minute) * 60), schedule: schedule, water: water))
+            entries.append(FastingEntry(date: now.addingTimeInterval(Double(minute) * 60), schedule: schedule,
+                                        water: water, waterGoal: waterGoal))
         }
         completion(Timeline(entries: entries, policy: .after(now.addingTimeInterval(240 * 60))))
     }
@@ -36,7 +41,7 @@ struct FastingWidgetEntryView: View {
 
     var body: some View {
         let s = entry.schedule.state(at: entry.date)
-        FastingWidgetContent(family: family, state: s, water: entry.water)
+        FastingWidgetContent(family: family, state: s, water: entry.water, waterGoal: entry.waterGoal)
             .containerBackground(for: .widget) {
                 LinearGradient(colors: Palette.bgColors(for: s.phase),
                                startPoint: .top, endPoint: .bottom)
@@ -69,17 +74,20 @@ struct FastingWidget: Widget {
 struct WaterEntry: TimelineEntry {
     let date: Date
     let glasses: Int
+    let goal: Int
 }
 
 struct WaterProvider: TimelineProvider {
-    func placeholder(in context: Context) -> WaterEntry { WaterEntry(date: Date(), glasses: 2) }
+    func placeholder(in context: Context) -> WaterEntry {
+        WaterEntry(date: Date(), glasses: 2, goal: SharedStore.defaultWaterGoal)
+    }
 
     func getSnapshot(in context: Context, completion: @escaping (WaterEntry) -> Void) {
-        completion(WaterEntry(date: Date(), glasses: SharedStore.waterGlasses()))
+        completion(WaterEntry(date: Date(), glasses: SharedStore.waterGlasses(), goal: SharedStore.waterGoal))
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<WaterEntry>) -> Void) {
-        let entry = WaterEntry(date: Date(), glasses: SharedStore.waterGlasses())
+        let entry = WaterEntry(date: Date(), glasses: SharedStore.waterGlasses(), goal: SharedStore.waterGoal)
         // Reload just after midnight so the daily count resets.
         let reload = Calendar.current.nextDate(after: Date(), matching: DateComponents(hour: 0, minute: 1),
                                                matchingPolicy: .nextTime) ?? Date().addingTimeInterval(3600)
@@ -89,8 +97,12 @@ struct WaterProvider: TimelineProvider {
 
 struct WaterWidgetEntryView: View {
     let entry: WaterEntry
+
+    private var glassSize: CGFloat { entry.goal <= 5 ? 20 : 15 }
+    private var glassSpacing: CGFloat { entry.goal <= 5 ? 5 : 3 }
+
     var body: some View {
-        let done = entry.glasses >= 5
+        let done = entry.glasses >= entry.goal
         return VStack(spacing: 8) {
             HStack(spacing: 5) {
                 Image(systemName: done ? "checkmark.seal.fill" : "drop.fill")
@@ -99,8 +111,15 @@ struct WaterWidgetEntryView: View {
                     .font(.system(.subheadline, design: .rounded).weight(.semibold))
                     .foregroundStyle(done ? Palette.eatAccent : Palette.ink)
             }
-            WaterGlassesRow(count: entry.glasses, size: 20, spacing: 5)
-            Text(done ? "1 L ✓" : "\(entry.glasses * 200) ml / 1 L")
+            HStack(spacing: glassSpacing) {
+                ForEach(0..<entry.goal, id: \.self) { i in
+                    Button(intent: SetWaterGlassesIntent(count: i + 1)) {
+                        GlassIcon(filled: i < entry.glasses, size: glassSize)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            Text(done ? "\(entry.goal * 200) ml ✓" : "\(entry.glasses * 200) / \(entry.goal * 200) ml")
                 .font(.caption2.weight(done ? .bold : .regular))
                 .foregroundStyle(done ? Palette.eatAccent : Palette.subtle)
         }
@@ -117,7 +136,7 @@ struct WaterWidget: Widget {
             WaterWidgetEntryView(entry: entry)
         }
         .configurationDisplayName(L.t("water_title"))
-        .description("Track your daily water (1 L = 5 glasses).")
+        .description("Track your daily water goal — tap a glass to log it.")
         .supportedFamilies([.systemSmall])
     }
 }

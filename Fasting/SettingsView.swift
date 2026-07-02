@@ -9,6 +9,8 @@ struct SettingsView: View {
 
     @State private var start = Date()
     @State private var end = Date()
+    @State private var waterGoal = SharedStore.waterGoal
+    @AppStorage("water.reminders.enabled") private var waterRemindersEnabled = false
 
     var body: some View {
         NavigationStack {
@@ -19,9 +21,11 @@ struct SettingsView: View {
 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 16) {
+                        presetsCard
                         timeCard(L.t("set_fast_start", lang), "🌙", $start)
                         timeCard(L.t("set_fast_end", lang), "☀️", $end)
                         summary
+                        waterSettingsCard
                         languageCard
                         subscriptionCard
                         Button(action: save) {
@@ -72,6 +76,69 @@ struct SettingsView: View {
             }
         }
         .onAppear(perform: load)
+    }
+
+    private var presetsCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(L.t("set_presets", lang).uppercased())
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(Palette.sub)
+            HStack(spacing: 8) {
+                ForEach(FastingPreset.all) { preset in
+                    Button {
+                        end = Calendar.current.date(byAdding: .hour, value: preset.fastingHours, to: start) ?? end
+                    } label: {
+                        Text(preset.label)
+                            .font(.system(.subheadline, design: .rounded).weight(.semibold))
+                            .foregroundStyle(Palette.ink)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 10)
+                            .background(.white.opacity(0.7), in: RoundedRectangle(cornerRadius: 12))
+                    }
+                }
+            }
+        }
+        .padding(18)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(.white.opacity(0.6), in: RoundedRectangle(cornerRadius: 18))
+    }
+
+    private var waterSettingsCard: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text(L.t("water_title", lang).uppercased())
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(Palette.sub)
+
+            Stepper(value: $waterGoal, in: 3...8) {
+                HStack(spacing: 6) {
+                    Image(systemName: "drop.fill").foregroundStyle(Palette.water)
+                    Text(L.t("water_goal_label", lang)).foregroundStyle(Palette.ink)
+                    Spacer()
+                    Text(String(format: L.t("water_goal_glasses", lang), waterGoal))
+                        .foregroundStyle(Palette.sub)
+                }
+            }
+            .onChange(of: waterGoal) { _, newValue in
+                SharedStore.setWaterGoal(newValue)
+                if waterRemindersEnabled {
+                    NotificationManager.shared.rescheduleWater(enabled: true, goal: newValue)
+                }
+            }
+
+            Toggle(isOn: $waterRemindersEnabled) {
+                HStack(spacing: 6) {
+                    Image(systemName: "bell.fill").foregroundStyle(Palette.water)
+                    Text(L.t("water_reminders_label", lang)).foregroundStyle(Palette.ink)
+                }
+            }
+            .tint(Palette.water)
+            .onChange(of: waterRemindersEnabled) { _, enabled in
+                NotificationManager.shared.rescheduleWater(enabled: enabled, goal: waterGoal)
+            }
+        }
+        .padding(18)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(.white.opacity(0.6), in: RoundedRectangle(cornerRadius: 18))
     }
 
     private func timeCard(_ title: String, _ emoji: String, _ value: Binding<Date>) -> some View {

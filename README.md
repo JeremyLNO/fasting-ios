@@ -11,13 +11,20 @@ App iOS native (SwiftUI + WidgetKit) pour suivre l'état de son jeûne intermitt
 |:---:|:---:|
 | ![Widgets et Live Activity](screenshots/03-widgets-accueil.png) | ![Dynamic Island](screenshots/04-dynamic-island.png) |
 
+| Onboarding | Historique |
+|:---:|:---:|
+| ![Onboarding](screenshots/08-onboarding-welcome.png) | ![Historique](screenshots/11-history.png) |
+
 ## Fonctionnalités
-- **Configuration** : uniquement l'heure de **début** et de **fin** du jeûne (réglages, deux sélecteurs d'heure).
+- **Configuration** : heure de **début**/**fin** du jeûne, ou **préréglages rapides** (16:8, 18:6, 20:4, OMAD).
 - **Écran principal** : anneau de progression pastel, **temps écoulé** en direct, **état d'avancement** métabolique (Digestion → Glycémie → Glycogène → Combustion des graisses → Cétose → Autophagie), et la phase en cours (jeûne / fenêtre alimentaire).
-- **Notifications locales** quotidiennes au **début** et à la **fin** du jeûne.
-- **Widgets écran d'accueil** (petit + moyen) + widget rond pour l'écran verrouillé, alimentés via un **App Group** partagé.
+- **Historique & séries** : série en cours / meilleure série, jeûnes complétés, durée moyenne, calendrier des 4 dernières semaines — calculés à partir du planning (pas de check-in requis).
+- **Tracker d'eau** : objectif quotidien réglable (3 à 8 verres), 5 verres cliquables qui se remplissent, état « objectif atteint », **rappels de boire** (notifications espacées dans la journée).
+- **Notifications locales** quotidiennes au **début** et à la **fin** du jeûne (+ rappels d'hydratation optionnels).
+- **Widgets écran d'accueil** (petit/moyen/grand pour le jeûne + petit widget eau **interactif**, tap direct sur un verre via App Intents iOS 17) + widget rond pour l'écran verrouillé, alimentés via un **App Group** partagé.
 - **Live Activity / Dynamic Island** : suivi en direct du jeûne dans la Dynamic Island et sur l'écran verrouillé (chrono et progression qui avancent tout seuls, sans push). Bouton *Suivre / Arrêter le suivi en direct* dans l'app.
-- **Multilingue** : anglais par défaut, bascule 🇬🇧 / 🇫🇷 / 🇩🇪 / 🇪🇸 dans les réglages.
+- **Onboarding** au premier lancement : bienvenue + choix de la langue, choix du programme de jeûne, notifications + présentation de l'essai gratuit.
+- **Multilingue** : anglais par défaut, bascule 🇬🇧 / 🇫🇷 / 🇩🇪 / 🇪🇸 dans les réglages (et dès l'onboarding).
 - **Essai gratuit 7 jours** (dès l'installation) puis abonnement **9,99 $/an** (StoreKit 2).
 - Thème **pastel** (lavande / pêche / menthe) partagé entre l'app, les widgets et la Live Activity.
 
@@ -31,19 +38,14 @@ Fasting.xcodeproj/  projet Xcode (2 targets : Fasting + FastingWidget)
 - Bundle id app : `company.lno.fasting` — widget : `company.lno.fasting.FastingWidget`
 - App Group : `group.company.lno.fasting`
 - Cible iOS minimum : 17.0
-- Jeûne par défaut : **20:00 → 12:00** (16:8), modifiable dans l'app.
+- Jeûne par défaut : **22:00 → 18:00** (20h de jeûne), modifiable dans l'app ou via les préréglages.
 
 ## Ouvrir / lancer
 ```bash
 open ~/fasting-app/Fasting.xcodeproj
 ```
-Choisir le scheme **Fasting**, un simulateur ou son iPhone, puis ▶︎.
-
-> ⚠️ **Runtime simulateur.** Ce Mac a Xcode 26.5 mais pas le runtime simulateur iOS 26.5
-> (seuls 18.6 / 26.3 / 26.4 sont installés). Pour compiler avec l'icône/les assets,
-> installer le runtime correspondant via **Xcode → Settings → Components**, *ou* lancer
-> sur un iPhone physique (nécessite aussi d'installer le support de plateforme iOS dans
-> Components). Le code Swift, lui, compile déjà sans erreur.
+Choisir le scheme **Fasting**, un simulateur ou son iPhone, puis ▶︎. Les runtimes simulateur
+iOS 18.6 / 26.3 / 26.4 / 26.5 sont installés sur cette machine.
 
 ## CI / Build cloud (GitHub Actions)
 [![iOS Build](https://github.com/JeremyLNO/fasting-ios/actions/workflows/ios.yml/badge.svg)](https://github.com/JeremyLNO/fasting-ios/actions/workflows/ios.yml)
@@ -87,10 +89,26 @@ fonctionne et se signe avec un Personal Team gratuit.
 - **Pour vendre pour de vrai** : compte **Apple Developer payant** + créer dans App Store Connect
   un abonnement auto-renouvelable avec l'ID `com.lno.fasting.pro.yearly`.
 
+## Historique & séries
+`Shared/HistoryStore.swift` reconstruit l'historique **à partir du planning** (pas de check-in
+utilisateur) : chaque fenêtre de jeûne entièrement écoulée depuis l'installation est enregistrée
+comme complétée. Série actuelle / meilleure série / total / durée moyenne + calendrier des 4
+dernières semaines dans l'écran **Historique** (icône graphique, à côté de l'engrenage).
+
+## Tracker d'eau
+Objectif réglable (3 à 8 verres, `SharedStore.waterGoal`) dans Réglages, avec rappels optionnels
+espacés dans la journée (`NotificationManager.rescheduleWater`). Le petit widget « Eau » est
+**interactif** (iOS 17 App Intents, `FastingWidget/WaterIntents.swift`) : taper un verre directement
+sur l'écran d'accueil met à jour l'app instantanément (App Group).
+
 ## Arguments de lancement (dev uniquement)
 - `-skipNotifPrompt` : ne pas demander l'autorisation notifications (captures propres).
+- `-skipOnboarding` : saute l'assistant de premier lancement.
+- `-onboardingStep <0|1|2>` : ouvre l'onboarding directement sur une page donnée.
 - `-demoNow <timestamp>` : fige l'heure « maintenant » (démo).
 - `-demoLang <en|fr|de|es>` : force la langue.
-- `-openSettings` : ouvre les réglages au lancement.
+- `-demoWater <n>` : fixe le nombre de verres du jour.
+- `-demoInstallDaysAgo <n>` : simule une date d'installation passée (pour peupler l'historique/série).
+- `-openSettings` : ouvre les réglages au lancement. `-openHistory` : ouvre l'historique.
 - `-widgetGallery` : affiche l'aperçu in-app des widgets.
 - `-showPaywall` : force l'écran d'abonnement. `-forceExpired` : simule l'essai terminé.

@@ -26,11 +26,22 @@ enum SharedStore {
         WidgetCenter.shared.reloadAllTimelines()
     }
 
-    // MARK: Water (1 L = 5 glasses, resets each day)
+    // MARK: Water (default 1 L = 5 glasses, resets each day; goal is adjustable)
 
-    static let waterGoal = 5
+    static let defaultWaterGoal = 5
+    private static let waterGoalKey = "water.goal.v1"
     private static let waterCountKey = "water.count.v1"
     private static let waterDateKey = "water.date.v1"
+
+    static var waterGoal: Int {
+        let v = defaults.integer(forKey: waterGoalKey)
+        return v > 0 ? v : defaultWaterGoal
+    }
+
+    static func setWaterGoal(_ goal: Int) {
+        defaults.set(min(max(goal, 3), 8), forKey: waterGoalKey)
+        WidgetCenter.shared.reloadAllTimelines()
+    }
 
     static func waterGlasses(asOf now: Date = Date()) -> Int {
         guard let saved = defaults.object(forKey: waterDateKey) as? Date,

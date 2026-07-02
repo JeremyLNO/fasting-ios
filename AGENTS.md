@@ -4,7 +4,8 @@ Ce fichier fige comment on travaille à deux sur **Fasting** (app iOS native). I
 de référence aux sessions Claude Code : à lire avant toute modification.
 
 ## Le projet
-- App de jeûne intermittent **SwiftUI + WidgetKit + ActivityKit**, UI en français.
+- App de jeûne intermittent **SwiftUI + WidgetKit + ActivityKit + AppIntents**, nom « Fasting ».
+- UI **multilingue** (anglais par défaut, FR/DE/ES) via `Shared/Localization.swift` (`L.t(key, lang)`) — pas de chaînes en dur dans les vues.
 - Dossier local : `~/fasting-app/` · Repo : `github.com/JeremyLNO/fasting-ios`.
 - Le dossier local **est** le projet ouvert dans Xcode — pas de copie séparée.
 
@@ -22,21 +23,28 @@ de référence aux sessions Claude Code : à lire avant toute modification.
 
 ## Compiler & lancer
 - Ouvrir `Fasting.xcodeproj`, scheme **Fasting**, **⌘R**.
-- Nécessite un **runtime simulateur** (Xcode → Settings → **Components** → iOS) **ou** un
-  iPhone branché (+ support plateforme iOS). ⚠️ Ce Mac n'a pas le runtime simulateur assorti
-  au SDK → en ligne de commande `actool` échoue sur le catalogue d'assets ; via Xcode GUI avec
-  un runtime présent, c'est OK.
+- Runtimes simulateur **iOS 18.6 / 26.3 / 26.4 / 26.5** installés sur cette machine (Xcode → Settings
+  → Components pour en ajouter d'autres). `DEVELOPMENT_TEAM` est configuré (équipe payante, nécessaire
+  pour l'App Group — voir README) ; signature auto activée sur les 2 targets.
 - **Bac à sable de build de Claude** : compile une copie *allégée* dans `/tmp/fasting-verify`
-  (sans `Assets.xcassets`) uniquement pour vérifier la compilation + lancer dans `simctl`.
+  (sans `Assets.xcassets`, `CODE_SIGNING_ALLOWED=NO`) pour vérifier la compilation + lancer dans
+  `simctl` (device UDID à relister si le fichier `/tmp/fasting_udid.txt` a été purgé entre sessions).
   **Ne jamais éditer `/tmp`** — c'est jetable. Le vrai projet (avec icône/assets) est `~/fasting-app`.
 
 ## Architecture
 - **Targets** : `Fasting` (app, bundle `company.lno.fasting`) + `FastingWidget`
-  (extension, `company.lno.fasting.FastingWidget`). App Group `group.company.lno.fasting`.
-- **`Shared/`** compilé dans **les deux** targets : modèle, store App Group, palette, vues,
-  contenu widget, Live Activity (attributs + vues).
-- **`Fasting/`** = app uniquement · **`FastingWidget/`** = widget uniquement.
+  (extension, `company.lno.fasting.FastingWidget`). App Group `group.company.lno.fasting` **activé**
+  (nécessite une équipe payante — sinon vider les 2 `.entitlements` en `<dict/>`, cf. README).
+- **`Shared/`** compilé dans **les deux** targets : modèle (+ presets + fenêtres passées), store
+  App Group (schedule + eau), historique (`HistoryStore`), palette, vues, contenu widget, Live
+  Activity (attributs + vues), localisation.
+- **`Fasting/`** = app uniquement (Settings, Onboarding, History, Store/Paywall, notifs).
+  **`FastingWidget/`** = widget uniquement (widgets, Live Activity, `WaterIntents` AppIntents).
 - Déploiement **iOS 17+**, Swift 5 mode.
+- ⚠️ **Piège récurrent** : toute vue plein-écran doit appliquer `FastingBackground` via
+  `.background(FastingBackground(phase:))` sur le contenu, **jamais** en calque frère dans un
+  `ZStack` — les formes décoratives (hors-cadre) élargissent alors le layout et coupent le
+  contenu à gauche (bug rencontré 2 fois : écran principal, puis onboarding).
 
 ## Conventions
 - `project.pbxproj` est **écrit à la main** avec un schéma d'UUID lisible :
@@ -49,12 +57,18 @@ de référence aux sessions Claude Code : à lire avant toute modification.
 - **Design system** dans `Shared/Palette.swift` + `Shared/FastingViews.swift`
   (`GlowRing`, `StatCard`, `FastingBackground`, `StageChip`, `SparkleDivider`, `PhaseBadge`).
   Style pastel / verre dépoli, teinté par phase (violet = jeûne, vert = repas).
-- **Arguments de lancement (Debug, captures/preview)** :
-  `-skipNotifPrompt`, `-demoNow <timestamp unix>`, `-startLiveActivity`, `-widgetGallery`.
+- **Arguments de lancement (Debug, captures/preview)** : `-skipNotifPrompt`, `-skipOnboarding`,
+  `-onboardingStep <0-2>`, `-demoNow <timestamp unix>`, `-demoLang <en|fr|de|es>`,
+  `-demoWater <n>`, `-demoInstallDaysAgo <n>`, `-openSettings`, `-openHistory`,
+  `-startLiveActivity`, `-widgetGallery`, `-showPaywall`, `-forceExpired`.
 
 ## Vérification (côté Claude)
-- `xcrun simctl` sur un simulateur existant ; `-demoNow` pour un état déterministe ;
-  passer l'app en arrière-plan (lancer `com.apple.Preferences`) pour révéler la Dynamic Island.
+- `xcrun simctl` sur un simulateur existant ; `-demoNow`/`-demoInstallDaysAgo` pour un état
+  déterministe (historique/série inclus) ; passer l'app en arrière-plan (lancer
+  `com.apple.Preferences`) pour révéler la Dynamic Island.
+- **Widgets interactifs (AppIntents)** : le tap réel sur un widget d'écran d'accueil ne peut pas
+  être simulé via `simctl` (pas d'automation UI) — seule la compilation de la cible widget et le
+  rendu visuel (via l'aperçu in-app `-widgetGallery`, composants partagés) sont vérifiables ici.
 
 ## Git
 - Commit après chaque lot ; message terminé par `Co-Authored-By: Claude Opus 4.8 …`.

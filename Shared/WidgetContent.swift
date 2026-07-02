@@ -7,6 +7,7 @@ struct FastingWidgetContent: View {
     let family: WidgetFamily
     let state: FastingState
     var water: Int = 0
+    var waterGoal: Int = SharedStore.defaultWaterGoal
 
     var body: some View {
         switch family {
@@ -105,12 +106,12 @@ struct FastingWidgetContent: View {
                       compact: true)
 
             HStack(spacing: 7) {
-                Image(systemName: water >= 5 ? "checkmark.seal.fill" : "drop.fill")
-                    .font(.caption).foregroundStyle(water >= 5 ? Palette.eatAccent : Palette.water)
-                WaterGlassesRow(count: water, size: 17, spacing: 6)
+                Image(systemName: water >= waterGoal ? "checkmark.seal.fill" : "drop.fill")
+                    .font(.caption).foregroundStyle(water >= waterGoal ? Palette.eatAccent : Palette.water)
+                WaterGlassesRow(count: water, total: waterGoal, size: 17, spacing: 6)
                 Spacer()
-                Text(water >= 5 ? "1 L ✓" : "\(water * 200) ml")
-                    .font(.caption).foregroundStyle(water >= 5 ? Palette.eatAccent : Palette.sub)
+                Text(water >= waterGoal ? "\(waterGoal * 200) ml ✓" : "\(water * 200) ml")
+                    .font(.caption).foregroundStyle(water >= waterGoal ? Palette.eatAccent : Palette.sub)
             }
         }
         .padding(14)
