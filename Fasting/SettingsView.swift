@@ -56,7 +56,7 @@ struct SettingsView: View {
                             Image("CrazyBeeLabs")
                                 .resizable()
                                 .scaledToFit()
-                                .frame(height: 48)
+                                .frame(height: 30)
                                 .opacity(0.95)
                                 .padding(.top, 10)
                                 .padding(.bottom, 4)
