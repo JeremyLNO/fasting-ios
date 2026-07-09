@@ -29,6 +29,11 @@ final class NotificationManager {
         print("[Notifications] scheduled: start \(schedule.startLabel), end \(schedule.endLabel)")
     }
 
+    /// Cancels every pending notification (used for account deletion).
+    func cancelAll() {
+        center.removeAllPendingNotificationRequests()
+    }
+
     func rescheduleWater(enabled: Bool, goal: Int) {
         let ids = (0..<8).map { "water.reminder.\($0)" }
         center.removePendingNotificationRequests(withIdentifiers: ids)

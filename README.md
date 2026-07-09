@@ -24,6 +24,8 @@ App iOS native (SwiftUI + WidgetKit) pour suivre l'état de son jeûne intermitt
 - **Widgets écran d'accueil** (petit/moyen/grand pour le jeûne + petit widget eau **interactif**, tap direct sur un verre via App Intents iOS 17) + widget rond pour l'écran verrouillé, alimentés via un **App Group** partagé.
 - **Live Activity / Dynamic Island** : suivi en direct du jeûne dans la Dynamic Island et sur l'écran verrouillé (chrono et progression qui avancent tout seuls, sans push). Bouton *Suivre / Arrêter le suivi en direct* dans l'app.
 - **Onboarding** au premier lancement : bienvenue + choix de la langue, choix du programme de jeûne, notifications + présentation de l'essai gratuit.
+- **Compte** (optionnel) : Sign in with Apple, lien vers la gestion de l'identifiant Apple (mot de passe/sécurité gérés par Apple), **suppression de compte** qui efface réellement toutes les données locales (planning, eau, historique, préférences). App 100% locale : se connecter n'active aucune synchronisation, ça sert uniquement à avoir une identité pour la conformité App Store.
+- **Politique de confidentialité** et **gestion de l'abonnement** (lien App Store) accessibles depuis les réglages. Erreurs réseau/StoreKit (achat, restauration) affichées proprement au lieu d'échouer silencieusement.
 - **Multilingue** : anglais par défaut, bascule 🇬🇧 / 🇫🇷 / 🇩🇪 / 🇪🇸 dans les réglages (et dès l'onboarding).
 - **Essai gratuit 7 jours** (dès l'installation) puis abonnement **9,99 $/an** (StoreKit 2).
 - Thème **pastel** (lavande / pêche / menthe) partagé entre l'app, les widgets et la Live Activity.
@@ -101,6 +103,21 @@ espacés dans la journée (`NotificationManager.rescheduleWater`). Le petit widg
 **interactif** (iOS 17 App Intents, `FastingWidget/WaterIntents.swift`) : taper un verre directement
 sur l'écran d'accueil met à jour l'app instantanément (App Group).
 
+## Conformité App Store
+- **Compte & suppression** (`Fasting/AuthManager.swift`, `AccountView.swift`) : Sign in with Apple
+  (capability `com.apple.developer.applesignin` dans `Fasting.entitlements`, nécessite une équipe
+  payante comme l'App Group). Pas de backend : l'identité sert uniquement à satisfaire la directive
+  App Store 5.1.1(v) (compte + suppression réelle). « Reset password » est délégué à Apple
+  (`appleid.apple.com/account/manage`) — il n'y a pas de mot de passe applicatif à réinitialiser.
+  La suppression de compte efface planning, eau, historique, préférences, notifications et Live
+  Activity (`AuthManager.deleteAccount()`), sans toucher à l'abonnement StoreKit (géré séparément,
+  lien « Gérer l'abonnement » fourni).
+- **Restore Purchases** : présent dans le paywall et dans Réglages.
+- **Erreurs StoreKit propres** : `Store.swift` ne masque plus les échecs (`try?`) — une alerte
+  localisée s'affiche en cas d'échec réseau/achat (paywall + réglages).
+- **Contact support** : lien vers `crazybeelabs.com/support/` dans Réglages.
+- **Privacy Policy** : lien vers `crazybeelabs.com/privacy-policy/` dans Réglages.
+
 ## Arguments de lancement (dev uniquement)
 - `-skipNotifPrompt` : ne pas demander l'autorisation notifications (captures propres).
 - `-skipOnboarding` : saute l'assistant de premier lancement.
@@ -110,5 +127,6 @@ sur l'écran d'accueil met à jour l'app instantanément (App Group).
 - `-demoWater <n>` : fixe le nombre de verres du jour.
 - `-demoInstallDaysAgo <n>` : simule une date d'installation passée (pour peupler l'historique/série).
 - `-openSettings` : ouvre les réglages au lancement. `-openHistory` : ouvre l'historique.
+  `-openAccount` : ouvre l'écran Compte directement.
 - `-widgetGallery` : affiche l'aperçu in-app des widgets.
 - `-showPaywall` : force l'écran d'abonnement. `-forceExpired` : simule l'essai terminé.

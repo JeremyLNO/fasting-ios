@@ -59,8 +59,10 @@ struct ContentView: View {
     @State private var schedule = SharedStore.load()
     @State private var showSettings = false
     @State private var showHistory = false
+    @State private var showAccount = false
     @State private var glasses = SharedStore.waterGlasses()
     @StateObject private var live = LiveActivityManager()
+    @StateObject private var auth = AuthManager()
     @AppStorage(AppLanguage.storageKey) private var languageRaw = "en"
     private var lang: AppLanguage { AppLanguage(rawValue: languageRaw) ?? .en }
 
@@ -107,6 +109,7 @@ struct ContentView: View {
             HistoryStore.syncIfNeeded(schedule: schedule, installDate: Trial.installDate)
             if CommandLine.arguments.contains("-openSettings") { showSettings = true }
             if CommandLine.arguments.contains("-openHistory") { showHistory = true }
+            if CommandLine.arguments.contains("-openAccount") { showAccount = true }
             if CommandLine.arguments.contains("-startLiveActivity") {
                 let now = Date()
                 let demo = FastingState(phase: .fasting, progress: 0.56,
@@ -121,6 +124,9 @@ struct ContentView: View {
         }
         .sheet(isPresented: $showHistory) {
             HistoryView()
+        }
+        .sheet(isPresented: $showAccount) {
+            NavigationStack { AccountView(auth: auth) }
         }
     }
 

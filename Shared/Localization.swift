@@ -148,6 +148,28 @@ enum L {
         "onb_trial_title":      [.en: "7 days free, then $9.99/year", .fr: "7 jours gratuits, puis 9,99 $/an", .de: "7 Tage kostenlos, dann 9,99 $/Jahr", .es: "7 días gratis, luego $9.99/año"],
         "onb_trial_subtitle":   [.en: "Cancel anytime. No commitment.", .fr: "Annulable à tout moment. Sans engagement.", .de: "Jederzeit kündbar. Unverbindlich.", .es: "Cancela cuando quieras. Sin compromiso."],
         "onb_continue":         [.en: "Continue", .fr: "Continuer", .de: "Weiter", .es: "Continuar"],
-        "onb_get_started":      [.en: "Get started", .fr: "C'est parti", .de: "Los geht's", .es: "Empezar"]
+        "onb_get_started":      [.en: "Get started", .fr: "C'est parti", .de: "Los geht's", .es: "Empezar"],
+
+        // Legal / compliance links
+        "privacy_policy":       [.en: "Privacy Policy", .fr: "Politique de confidentialité", .de: "Datenschutzrichtlinie", .es: "Política de privacidad"],
+        "manage_subscription":  [.en: "Manage subscription", .fr: "Gérer l'abonnement", .de: "Abo verwalten", .es: "Gestionar suscripción"],
+
+        // Account
+        "account_title":           [.en: "Account", .fr: "Compte", .de: "Konto", .es: "Cuenta"],
+        "account_signin_title":    [.en: "Sign in", .fr: "Se connecter", .de: "Anmelden", .es: "Iniciar sesión"],
+        "account_signin_subtitle": [.en: "Optional — sign in to have a linked account. Fasting works fully offline either way.", .fr: "Optionnel — connecte-toi pour associer un compte. Fasting fonctionne hors-ligne dans tous les cas.", .de: "Optional — melde dich an, um ein verknüpftes Konto zu haben. Fasting funktioniert in jedem Fall komplett offline.", .es: "Opcional — inicia sesión para tener una cuenta vinculada. Fasting funciona totalmente sin conexión de todas formas."],
+        "account_signed_in_as":   [.en: "Signed in with Apple", .fr: "Connecté avec Apple", .de: "Angemeldet mit Apple", .es: "Sesión iniciada con Apple"],
+        "account_manage_apple_id": [.en: "Manage Apple ID (password & security)", .fr: "Gérer l'identifiant Apple (mot de passe et sécurité)", .de: "Apple-ID verwalten (Passwort & Sicherheit)", .es: "Gestionar el ID de Apple (contraseña y seguridad)"],
+        "account_sign_out":       [.en: "Sign out", .fr: "Se déconnecter", .de: "Abmelden", .es: "Cerrar sesión"],
+        "account_delete":         [.en: "Delete account & data", .fr: "Supprimer le compte et les données", .de: "Konto & Daten löschen", .es: "Eliminar cuenta y datos"],
+        "account_delete_confirm_title": [.en: "Delete account & data?", .fr: "Supprimer le compte et les données ?", .de: "Konto & Daten löschen?", .es: "¿Eliminar cuenta y datos?"],
+        "account_delete_confirm_body":  [.en: "This permanently erases your schedule, water history, fasting history and preferences from this device. This can't be undone.", .fr: "Ceci efface définitivement ton planning, ton historique d'eau, ton historique de jeûne et tes préférences sur cet appareil. Action irréversible.", .de: "Dies löscht deinen Zeitplan, deinen Wasserverlauf, deinen Fastenverlauf und deine Einstellungen auf diesem Gerät dauerhaft. Kann nicht rückgängig gemacht werden.", .es: "Esto borra permanentemente tu horario, historial de agua, historial de ayuno y preferencias de este dispositivo. No se puede deshacer."],
+        "account_delete_confirm_action": [.en: "Delete everything", .fr: "Tout supprimer", .de: "Alles löschen", .es: "Eliminar todo"],
+        "account_delete_note":    [.en: "This doesn't cancel an active subscription — manage that separately below.", .fr: "Ceci n'annule pas un abonnement actif — gère-le séparément ci-dessous.", .de: "Dies kündigt kein aktives Abo — verwalte es unten separat.", .es: "Esto no cancela una suscripción activa — gestiónala por separado abajo."],
+
+        // Errors / offline
+        "error_title":          [.en: "Something went wrong", .fr: "Un problème est survenu", .de: "Etwas ist schiefgelaufen", .es: "Algo salió mal"],
+        "error_offline_hint":   [.en: "Check your internet connection and try again.", .fr: "Vérifie ta connexion internet et réessaie.", .de: "Überprüfe deine Internetverbindung und versuche es erneut.", .es: "Comprueba tu conexión a internet e inténtalo de nuevo."],
+        "error_dismiss":        [.en: "OK", .fr: "OK", .de: "OK", .es: "Aceptar"]
     ]
 }

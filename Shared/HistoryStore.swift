@@ -106,6 +106,9 @@ enum HistoryStore {
         return completed.reduce(0, +) / completed.count
     }
 
+    /// Erases all recorded fasting history (used for account deletion).
+    static func wipe() { defaults.removeObject(forKey: recordsKey) }
+
     /// Last `days` calendar days (oldest first), with their record if any — for a simple heatmap.
     static func recentDays(_ days: Int, now: Date = Date(), calendar: Calendar = .current) -> [(date: Date, record: FastRecord?)] {
         let records = load()

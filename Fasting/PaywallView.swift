@@ -75,6 +75,14 @@ struct PaywallView: View {
             }
             .padding(24)
         }
+        .alert(L.t("error_title", lang), isPresented: Binding(
+            get: { store.lastError != nil },
+            set: { if !$0 { store.lastError = nil } }
+        )) {
+            Button(L.t("error_dismiss", lang)) { store.lastError = nil }
+        } message: {
+            Text((store.lastError ?? "") + "\n" + L.t("error_offline_hint", lang))
+        }
     }
 
     private var headline: String {

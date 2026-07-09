@@ -54,4 +54,13 @@ enum SharedStore {
         defaults.set(now, forKey: waterDateKey)
         WidgetCenter.shared.reloadAllTimelines()
     }
+
+    /// Deletes the schedule and water tracking data, resetting to defaults (used for account deletion).
+    static func wipeScheduleAndWater() {
+        defaults.removeObject(forKey: key)
+        defaults.removeObject(forKey: waterGoalKey)
+        defaults.removeObject(forKey: waterCountKey)
+        defaults.removeObject(forKey: waterDateKey)
+        WidgetCenter.shared.reloadAllTimelines()
+    }
 }

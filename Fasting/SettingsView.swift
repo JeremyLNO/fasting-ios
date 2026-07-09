@@ -11,6 +11,7 @@ struct SettingsView: View {
     @State private var end = Date()
     @State private var waterGoal = SharedStore.waterGoal
     @AppStorage("water.reminders.enabled") private var waterRemindersEnabled = false
+    @StateObject private var auth = AuthManager()
 
     var body: some View {
         NavigationStack {
@@ -27,6 +28,7 @@ struct SettingsView: View {
                         summary
                         waterSettingsCard
                         languageCard
+                        accountCard
                         subscriptionCard
                         Button(action: save) {
                             Text(L.t("set_save", lang))
@@ -52,6 +54,15 @@ struct SettingsView: View {
                         }
                         .padding(.top, 8)
 
+                        Link(destination: URL(string: "https://www.crazybeelabs.com/privacy-policy/")!) {
+                            HStack(spacing: 6) {
+                                Image(systemName: "hand.raised.fill")
+                                Text(L.t("privacy_policy", lang))
+                            }
+                            .font(.system(.subheadline, design: .rounded).weight(.medium))
+                            .foregroundStyle(Palette.fastAccent)
+                        }
+
                         Link(destination: URL(string: "https://crazybeelabs.com/")!) {
                             Image("CrazyBeeLabs")
                                 .resizable()
@@ -76,6 +87,14 @@ struct SettingsView: View {
             }
         }
         .onAppear(perform: load)
+        .alert(L.t("error_title", lang), isPresented: Binding(
+            get: { store.lastError != nil },
+            set: { if !$0 { store.lastError = nil } }
+        )) {
+            Button(L.t("error_dismiss", lang)) { store.lastError = nil }
+        } message: {
+            Text((store.lastError ?? "") + "\n" + L.t("error_offline_hint", lang))
+        }
     }
 
     private var presetsCard: some View {
@@ -193,6 +212,28 @@ struct SettingsView: View {
         .background(.white.opacity(0.6), in: RoundedRectangle(cornerRadius: 18))
     }
 
+    private var accountCard: some View {
+        NavigationLink {
+            AccountView(auth: auth)
+        } label: {
+            HStack(spacing: 12) {
+                Image(systemName: "person.crop.circle.fill")
+                    .font(.title2)
+                    .foregroundStyle(Palette.fastAccent)
+                Text(L.t("account_title", lang))
+                    .font(.system(.body, design: .rounded).weight(.semibold))
+                    .foregroundStyle(Palette.ink)
+                Spacer()
+                if auth.isSignedIn {
+                    Image(systemName: "checkmark.seal.fill").foregroundStyle(Palette.eatAccent)
+                }
+                Image(systemName: "chevron.right").font(.caption).foregroundStyle(Palette.sub)
+            }
+        }
+        .padding(18)
+        .background(.white.opacity(0.6), in: RoundedRectangle(cornerRadius: 18))
+    }
+
     private var subscriptionCard: some View {
         VStack(alignment: .leading, spacing: 14) {
             Text(L.t("set_plan", lang).uppercased())
@@ -214,6 +255,15 @@ struct SettingsView: View {
                 Spacer()
                 if store.isSubscribed {
                     Image(systemName: "checkmark.seal.fill").foregroundStyle(Palette.eatAccent)
+                }
+            }
+
+            if store.isSubscribed {
+                Link(destination: URL(string: "https://apps.apple.com/account/subscriptions")!) {
+                    Text(L.t("manage_subscription", lang))
+                        .font(.system(.subheadline, design: .rounded).weight(.semibold))
+                        .foregroundStyle(Palette.fastAccent)
+                        .frame(maxWidth: .infinity)
                 }
             }
 

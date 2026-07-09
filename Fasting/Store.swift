@@ -34,6 +34,7 @@ final class StoreManager: ObservableObject {
     @Published var product: Product?
     @Published var isSubscribed = false
     @Published var purchasing = false
+    @Published var lastError: String?
 
     private var updatesTask: Task<Void, Never>?
 
@@ -70,19 +71,40 @@ final class StoreManager: ObservableObject {
     }
 
     func purchase() async {
-        guard let product else { return }
+        guard let product else {
+            lastError = L.t("error_title")
+            return
+        }
         purchasing = true
         defer { purchasing = false }
-        if let result = try? await product.purchase(),
-           case .success(let verification) = result,
-           case .verified(let transaction) = verification {
-            await transaction.finish()
-            await refresh()
+        do {
+            let result = try await product.purchase()
+            switch result {
+            case .success(let verification):
+                guard case .verified(let transaction) = verification else {
+                    lastError = L.t("error_title")
+                    return
+                }
+                await transaction.finish()
+                await refresh()
+                lastError = nil
+            case .userCancelled, .pending:
+                break // not an error — nothing to surface
+            @unknown default:
+                break
+            }
+        } catch {
+            lastError = error.localizedDescription
         }
     }
 
     func restore() async {
-        try? await AppStore.sync()
-        await refresh()
+        do {
+            try await AppStore.sync()
+            await refresh()
+            lastError = nil
+        } catch {
+            lastError = error.localizedDescription
+        }
     }
 }
