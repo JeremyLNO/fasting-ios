@@ -43,4 +43,22 @@ final class LiveActivityManager: ObservableObject {
             isActive = false
         }
     }
+
+    /// Pushes a fresh snapshot to any already-running activity — used after a manual
+    /// start/interrupt so the Dynamic Island doesn't keep showing a stale phase.
+    func refreshIfActive(state: FastingState) {
+        guard isActive else { return }
+        let content = ActivityContent(
+            state: FastingActivityAttributes.ContentState(
+                windowStart: state.windowStart,
+                windowEnd: state.windowEnd,
+                isFasting: state.isFasting,
+                progress: state.progress),
+            staleDate: state.windowEnd)
+        Task {
+            for activity in Activity<FastingActivityAttributes>.activities {
+                await activity.update(content)
+            }
+        }
+    }
 }

@@ -58,6 +58,13 @@ enum L {
         "btn_track": [.en: "Track in Dynamic Island", .fr: "Suivre dans la Dynamic Island", .de: "In Dynamic Island verfolgen", .es: "Seguir en la Isla Dinámica"],
         "btn_stop":  [.en: "Stop live tracking", .fr: "Arrêter le suivi en direct", .de: "Live-Verfolgung stoppen", .es: "Detener el seguimiento"],
 
+        // Manual start/interrupt (tap the ring)
+        "tap_to_end":   [.en: "Tap the ring to end your fast now", .fr: "Touche l'anneau pour arrêter ton jeûne maintenant", .de: "Tippe auf den Ring, um dein Fasten jetzt zu beenden", .es: "Toca el anillo para terminar tu ayuno ahora"],
+        "tap_to_start": [.en: "Tap the ring to start fasting now", .fr: "Touche l'anneau pour démarrer ton jeûne maintenant", .de: "Tippe auf den Ring, um jetzt mit dem Fasten zu beginnen", .es: "Toca el anillo para empezar a ayunar ahora"],
+        "end_fast_confirm_title":  [.en: "End your fast now?", .fr: "Arrêter ton jeûne maintenant ?", .de: "Fasten jetzt beenden?", .es: "¿Terminar tu ayuno ahora?"],
+        "end_fast_confirm_body":   [.en: "Your eating window will start right now instead of following the schedule.", .fr: "Ta fenêtre alimentaire commencera maintenant, au lieu de suivre le planning.", .de: "Dein Essensfenster beginnt jetzt sofort, statt dem Zeitplan zu folgen.", .es: "Tu ventana de comida empezará ahora mismo, en lugar de seguir el horario."],
+        "end_fast_confirm_action": [.en: "End fast now", .fr: "Arrêter le jeûne", .de: "Fasten beenden", .es: "Terminar ayuno"],
+
         // Settings
         "set_title":      [.en: "Settings", .fr: "Réglages", .de: "Einstellungen", .es: "Ajustes"],
         "set_fast_start": [.en: "Fast start", .fr: "Début du jeûne", .de: "Fastenbeginn", .es: "Inicio del ayuno"],

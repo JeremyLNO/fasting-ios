@@ -68,6 +68,12 @@ struct FastingWidgetContent: View {
                     .foregroundStyle(Palette.ink)
                 StageChip(emoji: FastingStage.current(forHours: state.elapsedHours).emoji,
                           name: FastingStage.current(forHours: state.elapsedHours).name(), compact: true)
+                HStack(spacing: 4) {
+                    Image(systemName: water >= waterGoal ? "checkmark.seal.fill" : "drop.fill")
+                        .font(.caption2)
+                        .foregroundStyle(water >= waterGoal ? Palette.eatAccent : Palette.water)
+                    WaterGlassesRow(count: water, total: waterGoal, size: 11, spacing: 3)
+                }
             }
             Spacer(minLength: 0)
         }

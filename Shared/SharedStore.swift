@@ -61,6 +61,23 @@ enum SharedStore {
         defaults.removeObject(forKey: waterGoalKey)
         defaults.removeObject(forKey: waterCountKey)
         defaults.removeObject(forKey: waterDateKey)
+        defaults.removeObject(forKey: overrideKey)
+        WidgetCenter.shared.reloadAllTimelines()
+    }
+
+    // MARK: Manual override ("start fasting now" / "end fasting now")
+
+    private static let overrideKey = "manual.override.v1"
+
+    static func manualOverride() -> ManualSession? {
+        guard let data = defaults.data(forKey: overrideKey) else { return nil }
+        return try? JSONDecoder().decode(ManualSession.self, from: data)
+    }
+
+    static func setManualOverride(_ session: ManualSession) {
+        if let data = try? JSONEncoder().encode(session) {
+            defaults.set(data, forKey: overrideKey)
+        }
         WidgetCenter.shared.reloadAllTimelines()
     }
 }

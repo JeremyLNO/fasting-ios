@@ -98,6 +98,31 @@ extension FastingSchedule {
         }
         return results
     }
+
+    /// Like `state(at:)`, but a manual override (tap-to-start/interrupt) takes priority while its
+    /// own target duration hasn't elapsed yet. Once it has, this falls back to the normal recurring
+    /// schedule — a one-off override doesn't permanently shift future days.
+    func effectiveState(at now: Date, override: ManualSession?, calendar: Calendar = .current) -> FastingState {
+        if let override {
+            let targetMinutes = override.isFasting ? fastingMinutes : (24 * 60 - fastingMinutes)
+            let end = override.start.addingTimeInterval(Double(targetMinutes) * 60)
+            if now < end {
+                let total = end.timeIntervalSince(override.start)
+                let p = total > 0 ? now.timeIntervalSince(override.start) / total : 0
+                return FastingState(phase: override.isFasting ? .fasting : .eating, progress: min(max(p, 0), 1),
+                                    windowStart: override.start, windowEnd: end, now: now)
+            }
+        }
+        return state(at: now, calendar: calendar)
+    }
+}
+
+/// A manual "start fasting now" / "end fasting now" action, overriding the recurring schedule
+/// for the current session only. Stored in the App Group so the app, widgets and Live Activity
+/// all agree on the real, actual state.
+struct ManualSession: Codable, Equatable {
+    var isFasting: Bool
+    var start: Date
 }
 
 /// Common fasting protocols, expressed as the fasting-window duration in hours.

@@ -43,6 +43,11 @@ de référence aux sessions Claude Code : à lire avant toute modification.
 - **App gratuite, pas de StoreKit/IAP** : aucun essai, aucun paywall — `RootView` va direct à
   `ContentView` après l'onboarding. `AppInstall.swift` (ex-`Trial`) ne sert plus qu'à ancrer
   l'historique/séries, plus à compter un essai.
+- **Session manuelle** (tap sur l'anneau pour démarrer/interrompre à tout moment) : `ManualSession`
+  + `FastingSchedule.effectiveState(at:override:)` dans `Shared/FastingModel.swift`, persistée via
+  `SharedStore.manualOverride()` (App Group → app, widgets et Dynamic Island cohérents). Toujours
+  utiliser `effectiveState(at:override:)`, jamais `state(at:)` seul, dans tout nouveau consommateur
+  d'état (widget, Live Activity, etc.) sous peine d'ignorer une session manuelle en cours.
 - Déploiement **iOS 17+**, Swift 5 mode.
 - ⚠️ **Piège récurrent** : toute vue plein-écran doit appliquer `FastingBackground` via
   `.background(FastingBackground(phase:))` sur le contenu, **jamais** en calque frère dans un

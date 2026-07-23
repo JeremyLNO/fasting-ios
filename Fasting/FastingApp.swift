@@ -17,6 +17,16 @@ struct FastingApp: App {
            let n = Int(CommandLine.arguments[i + 1]) {
             SharedStore.setWaterGlasses(n)
         }
+        if let i = CommandLine.arguments.firstIndex(of: "-demoManualFast"), i + 1 < CommandLine.arguments.count,
+           let isFasting = Bool(CommandLine.arguments[i + 1]) {
+            // Respect -demoNow so the override's anchor matches whatever "now" the demo renders.
+            var demoNow = Date()
+            if let j = CommandLine.arguments.firstIndex(of: "-demoNow"), j + 1 < CommandLine.arguments.count,
+               let t = TimeInterval(CommandLine.arguments[j + 1]) {
+                demoNow = Date(timeIntervalSince1970: t)
+            }
+            SharedStore.setManualOverride(ManualSession(isFasting: isFasting, start: demoNow))
+        }
         _ = SharedStore.load() // ensure a default schedule exists on first launch
         if !CommandLine.arguments.contains("-skipNotifPrompt") {
             NotificationManager.shared.requestAuthorizationAndSchedule()
@@ -54,6 +64,8 @@ struct ContentView: View {
     @State private var showHistory = false
     @State private var showAccount = false
     @State private var glasses = SharedStore.waterGlasses()
+    @State private var showEndFastConfirm = false
+    @State private var toggleTrigger = false
     @StateObject private var live = LiveActivityManager()
     @StateObject private var auth = AuthManager()
     @AppStorage(AppLanguage.storageKey) private var languageRaw = "en"
@@ -78,12 +90,13 @@ struct ContentView: View {
     private var mainView: some View {
         TimelineView(.periodic(from: Date(), by: 1)) { context in
             let now = overrideNow ?? context.date
-            let s = schedule.state(at: now)
+            let s = schedule.effectiveState(at: now, override: SharedStore.manualOverride())
 
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 16) {
                     header
                     heroRing(s)
+                    tapHint(s)
                     stageSection(s)
                     statsRow(s)
                     waterTracker
@@ -183,6 +196,43 @@ struct ContentView: View {
         }
         .frame(width: 298, height: 298)
         .padding(.vertical, 4)
+        .contentShape(Circle())
+        .onTapGesture { toggleFasting(s) }
+        .sensoryFeedback(.impact(weight: .medium), trigger: toggleTrigger)
+        .confirmationDialog(L.t("end_fast_confirm_title", lang), isPresented: $showEndFastConfirm, titleVisibility: .visible) {
+            Button(L.t("end_fast_confirm_action", lang), role: .destructive) {
+                applyOverride(isFasting: false)
+            }
+            Button(L.t("set_close", lang), role: .cancel) {}
+        } message: {
+            Text(L.t("end_fast_confirm_body", lang))
+        }
+    }
+
+    private func tapHint(_ s: FastingState) -> some View {
+        HStack(spacing: 4) {
+            Image(systemName: "hand.tap.fill")
+            Text(s.isFasting ? L.t("tap_to_end", lang) : L.t("tap_to_start", lang))
+        }
+        .font(.caption2)
+        .foregroundStyle(Palette.sub.opacity(0.8))
+        .multilineTextAlignment(.center)
+    }
+
+    private func toggleFasting(_ s: FastingState) {
+        if s.isFasting {
+            showEndFastConfirm = true
+        } else {
+            applyOverride(isFasting: true)
+        }
+    }
+
+    private func applyOverride(isFasting: Bool) {
+        let now = overrideNow ?? Date()
+        let session = ManualSession(isFasting: isFasting, start: now)
+        SharedStore.setManualOverride(session)
+        toggleTrigger.toggle()
+        live.refreshIfActive(state: schedule.effectiveState(at: now, override: session))
     }
 
     // MARK: Stage
@@ -224,7 +274,8 @@ struct ContentView: View {
             if live.isActive {
                 live.stop()
             } else {
-                live.start(schedule: schedule, state: schedule.state(at: Date()))
+                let now = overrideNow ?? Date()
+                live.start(schedule: schedule, state: schedule.effectiveState(at: now, override: SharedStore.manualOverride()))
             }
         } label: {
             Label(live.isActive ? L.t("btn_stop", lang) : L.t("btn_track", lang),
@@ -304,7 +355,7 @@ struct WidgetGalleryView: View {
 
                 sectionTitle("Widgets écran d'accueil")
                 card(width: 158, height: 158) { FastingWidgetContent(family: .systemSmall, state: s) }
-                card(width: 338, height: 158) { FastingWidgetContent(family: .systemMedium, state: s) }
+                card(width: 338, height: 158) { FastingWidgetContent(family: .systemMedium, state: s, water: 3) }
                 card(width: 338, height: 354) { FastingWidgetContent(family: .systemLarge, state: s, water: 3) }
 
                 sectionTitle("Widget eau")

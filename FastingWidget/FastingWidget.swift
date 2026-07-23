@@ -5,22 +5,24 @@ import AppIntents
 struct FastingEntry: TimelineEntry {
     let date: Date
     let schedule: FastingSchedule
+    let override: ManualSession?
     let water: Int
     let waterGoal: Int
 }
 
 struct FastingProvider: TimelineProvider {
     func placeholder(in context: Context) -> FastingEntry {
-        FastingEntry(date: Date(), schedule: .default, water: 2, waterGoal: SharedStore.defaultWaterGoal)
+        FastingEntry(date: Date(), schedule: .default, override: nil, water: 2, waterGoal: SharedStore.defaultWaterGoal)
     }
 
     func getSnapshot(in context: Context, completion: @escaping (FastingEntry) -> Void) {
-        completion(FastingEntry(date: Date(), schedule: SharedStore.load(), water: SharedStore.waterGlasses(),
-                                waterGoal: SharedStore.waterGoal))
+        completion(FastingEntry(date: Date(), schedule: SharedStore.load(), override: SharedStore.manualOverride(),
+                                water: SharedStore.waterGlasses(), waterGoal: SharedStore.waterGoal))
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<FastingEntry>) -> Void) {
         let schedule = SharedStore.load()
+        let override = SharedStore.manualOverride()
         let water = SharedStore.waterGlasses()
         let waterGoal = SharedStore.waterGoal
         let now = Date()
@@ -29,7 +31,7 @@ struct FastingProvider: TimelineProvider {
         var entries: [FastingEntry] = []
         for minute in stride(from: 0, through: 240, by: 2) {
             entries.append(FastingEntry(date: now.addingTimeInterval(Double(minute) * 60), schedule: schedule,
-                                        water: water, waterGoal: waterGoal))
+                                        override: override, water: water, waterGoal: waterGoal))
         }
         completion(Timeline(entries: entries, policy: .after(now.addingTimeInterval(240 * 60))))
     }
@@ -40,7 +42,7 @@ struct FastingWidgetEntryView: View {
     let entry: FastingEntry
 
     var body: some View {
-        let s = entry.schedule.state(at: entry.date)
+        let s = entry.schedule.effectiveState(at: entry.date, override: entry.override)
         FastingWidgetContent(family: family, state: s, water: entry.water, waterGoal: entry.waterGoal)
             .containerBackground(for: .widget) {
                 LinearGradient(colors: Palette.bgColors(for: s.phase),
