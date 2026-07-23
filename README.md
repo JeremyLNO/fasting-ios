@@ -11,9 +11,13 @@ App iOS native (SwiftUI + WidgetKit) pour suivre l'état de son jeûne intermitt
 |:---:|:---:|
 | ![Widgets et Live Activity](screenshots/03-widgets-accueil.png) | ![Dynamic Island](screenshots/04-dynamic-island.png) |
 
-| Onboarding | Historique |
+| Onboarding | Engagement gratuit (onboarding) |
 |:---:|:---:|
-| ![Onboarding](screenshots/08-onboarding-welcome.png) | ![Historique](screenshots/11-history.png) |
+| ![Onboarding](screenshots/08-onboarding-welcome.png) | ![Gratuit grâce à Crazy Bee Labs](screenshots/10-onboarding-free.png) |
+
+| Historique |
+|:---:|
+| ![Historique](screenshots/11-history.png) |
 
 ## Fonctionnalités
 - **Configuration** : heure de **début**/**fin** du jeûne, ou **préréglages rapides** (16:8, 18:6, 20:4, OMAD).
@@ -23,11 +27,11 @@ App iOS native (SwiftUI + WidgetKit) pour suivre l'état de son jeûne intermitt
 - **Notifications locales** quotidiennes au **début** et à la **fin** du jeûne (+ rappels d'hydratation optionnels).
 - **Widgets écran d'accueil** (petit/moyen/grand pour le jeûne + petit widget eau **interactif**, tap direct sur un verre via App Intents iOS 17) + widget rond pour l'écran verrouillé, alimentés via un **App Group** partagé.
 - **Live Activity / Dynamic Island** : suivi en direct du jeûne dans la Dynamic Island et sur l'écran verrouillé (chrono et progression qui avancent tout seuls, sans push). Bouton *Suivre / Arrêter le suivi en direct* dans l'app.
-- **Onboarding** au premier lancement : bienvenue + choix de la langue, choix du programme de jeûne, notifications + présentation de l'essai gratuit.
+- **Onboarding** au premier lancement : bienvenue + choix de la langue, choix du programme de jeûne, mise en avant de l'app **gratuite** (engagement Crazy Bee Labs), puis notifications.
 - **Compte** (optionnel) : Sign in with Apple, lien vers la gestion de l'identifiant Apple (mot de passe/sécurité gérés par Apple), **suppression de compte** qui efface réellement toutes les données locales (planning, eau, historique, préférences). App 100% locale : se connecter n'active aucune synchronisation, ça sert uniquement à avoir une identité pour la conformité App Store.
-- **Politique de confidentialité** et **gestion de l'abonnement** (lien App Store) accessibles depuis les réglages. Erreurs réseau/StoreKit (achat, restauration) affichées proprement au lieu d'échouer silencieusement.
+- **Politique de confidentialité** accessible depuis les réglages.
+- **Gratuite** : aucun essai, aucun abonnement — engagement Crazy Bee Labs, mis en avant dès l'onboarding et rappelé dans les réglages.
 - **Multilingue** : anglais par défaut, bascule 🇬🇧 / 🇫🇷 / 🇩🇪 / 🇪🇸 dans les réglages (et dès l'onboarding).
-- **Essai gratuit 7 jours** (dès l'installation) puis abonnement **9,99 $/an** (StoreKit 2).
 - Thème **pastel** (lavande / pêche / menthe) partagé entre l'app, les widgets et la Live Activity.
 
 ## Structure
@@ -82,14 +86,14 @@ Vide les 2 entitlements (`Fasting/Fasting.entitlements` et `FastingWidget/Fastin
 en `<dict/>`. Les widgets afficheront alors un placeholder (pas de partage app↔widget), mais l'app
 fonctionne et se signe avec un Personal Team gratuit.
 
-## Essai gratuit & abonnement (StoreKit)
-- **Essai 7 jours** compté depuis la 1ʳᵉ ouverture (`Trial`, stocké en local). Pendant l'essai
-  l'app est pleinement utilisable ; après 7 jours, un **paywall bloque** l'accès jusqu'à l'abonnement.
-- Abonnement annuel **9,99 $/an**, produit `com.lno.fasting.pro.yearly` (StoreKit 2, `Store.swift`).
-- **Tester l'achat sans App Store Connect** : Xcode → *Edit Scheme → Run → Options →
-  StoreKit Configuration* → choisir **`Fasting/Fasting.storekit`**. L'achat se simule alors en local.
-- **Pour vendre pour de vrai** : compte **Apple Developer payant** + créer dans App Store Connect
-  un abonnement auto-renouvelable avec l'ID `com.lno.fasting.pro.yearly`.
+## App gratuite (engagement Crazy Bee Labs)
+Fasting fait partie des applications gratuites suite à l'engagement de Crazy Bee Labs — aucun
+essai, aucun abonnement, aucun paywall. Il n'y a **plus de StoreKit / IAP** dans le projet
+(`Store.swift`, `PaywallView.swift`, `Fasting.storekit` ont été retirés) : `RootView` ouvre
+directement l'app après l'onboarding, sans aucune vérification de trial. Le premier lancement
+(`AppInstall.swift`, ex-`Trial`) sert uniquement de point d'ancrage pour l'historique/séries, plus
+pour un compte à rebours payant. L'engagement est mis en avant sur une page dédiée de
+l'onboarding (🐝 « Free, thanks to Crazy Bee Labs ») et rappelé dans une carte des réglages.
 
 ## Historique & séries
 `Shared/HistoryStore.swift` reconstruit l'historique **à partir du planning** (pas de check-in
@@ -110,18 +114,16 @@ sur l'écran d'accueil met à jour l'app instantanément (App Group).
   App Store 5.1.1(v) (compte + suppression réelle). « Reset password » est délégué à Apple
   (`appleid.apple.com/account/manage`) — il n'y a pas de mot de passe applicatif à réinitialiser.
   La suppression de compte efface planning, eau, historique, préférences, notifications et Live
-  Activity (`AuthManager.deleteAccount()`), sans toucher à l'abonnement StoreKit (géré séparément,
-  lien « Gérer l'abonnement » fourni).
-- **Restore Purchases** : présent dans le paywall et dans Réglages.
-- **Erreurs StoreKit propres** : `Store.swift` ne masque plus les échecs (`try?`) — une alerte
-  localisée s'affiche en cas d'échec réseau/achat (paywall + réglages).
+  Activity (`AuthManager.deleteAccount()`).
 - **Contact support** : lien vers `crazybeelabs.com/support/` dans Réglages.
 - **Privacy Policy** : lien vers `crazybeelabs.com/privacy-policy/` dans Réglages.
+- *(Restore Purchases et la gestion des erreurs StoreKit ne s'appliquent plus : l'app n'a aucun
+  achat in-app depuis le retrait du paywall — voir section ci-dessus.)*
 
 ## Arguments de lancement (dev uniquement)
 - `-skipNotifPrompt` : ne pas demander l'autorisation notifications (captures propres).
 - `-skipOnboarding` : saute l'assistant de premier lancement.
-- `-onboardingStep <0|1|2>` : ouvre l'onboarding directement sur une page donnée.
+- `-onboardingStep <0-3>` : ouvre l'onboarding directement sur une page donnée.
 - `-demoNow <timestamp>` : fige l'heure « maintenant » (démo).
 - `-demoLang <en|fr|de|es>` : force la langue.
 - `-demoWater <n>` : fixe le nombre de verres du jour.
@@ -129,4 +131,3 @@ sur l'écran d'accueil met à jour l'app instantanément (App Group).
 - `-openSettings` : ouvre les réglages au lancement. `-openHistory` : ouvre l'historique.
   `-openAccount` : ouvre l'écran Compte directement.
 - `-widgetGallery` : affiche l'aperçu in-app des widgets.
-- `-showPaywall` : force l'écran d'abonnement. `-forceExpired` : simule l'essai terminé.

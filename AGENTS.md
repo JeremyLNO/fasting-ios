@@ -38,8 +38,11 @@ de référence aux sessions Claude Code : à lire avant toute modification.
 - **`Shared/`** compilé dans **les deux** targets : modèle (+ presets + fenêtres passées), store
   App Group (schedule + eau), historique (`HistoryStore`), palette, vues, contenu widget, Live
   Activity (attributs + vues), localisation.
-- **`Fasting/`** = app uniquement (Settings, Onboarding, History, Store/Paywall, notifs).
+- **`Fasting/`** = app uniquement (Settings, Onboarding, History, Account/Auth, notifs).
   **`FastingWidget/`** = widget uniquement (widgets, Live Activity, `WaterIntents` AppIntents).
+- **App gratuite, pas de StoreKit/IAP** : aucun essai, aucun paywall — `RootView` va direct à
+  `ContentView` après l'onboarding. `AppInstall.swift` (ex-`Trial`) ne sert plus qu'à ancrer
+  l'historique/séries, plus à compter un essai.
 - Déploiement **iOS 17+**, Swift 5 mode.
 - ⚠️ **Piège récurrent** : toute vue plein-écran doit appliquer `FastingBackground` via
   `.background(FastingBackground(phase:))` sur le contenu, **jamais** en calque frère dans un
@@ -58,9 +61,9 @@ de référence aux sessions Claude Code : à lire avant toute modification.
   (`GlowRing`, `StatCard`, `FastingBackground`, `StageChip`, `SparkleDivider`, `PhaseBadge`).
   Style pastel / verre dépoli, teinté par phase (violet = jeûne, vert = repas).
 - **Arguments de lancement (Debug, captures/preview)** : `-skipNotifPrompt`, `-skipOnboarding`,
-  `-onboardingStep <0-2>`, `-demoNow <timestamp unix>`, `-demoLang <en|fr|de|es>`,
-  `-demoWater <n>`, `-demoInstallDaysAgo <n>`, `-openSettings`, `-openHistory`,
-  `-startLiveActivity`, `-widgetGallery`, `-showPaywall`, `-forceExpired`.
+  `-onboardingStep <0-3>`, `-demoNow <timestamp unix>`, `-demoLang <en|fr|de|es>`,
+  `-demoWater <n>`, `-demoInstallDaysAgo <n>`, `-openSettings`, `-openHistory`, `-openAccount`,
+  `-startLiveActivity`, `-widgetGallery`.
 
 ## Vérification (côté Claude)
 - `xcrun simctl` sur un simulateur existant ; `-demoNow`/`-demoInstallDaysAgo` pour un état

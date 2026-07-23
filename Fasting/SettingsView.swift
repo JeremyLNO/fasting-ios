@@ -2,7 +2,6 @@ import SwiftUI
 
 struct SettingsView: View {
     @Binding var schedule: FastingSchedule
-    @ObservedObject var store: StoreManager
     @Environment(\.dismiss) private var dismiss
     @AppStorage(AppLanguage.storageKey) private var languageRaw = "en"
     private var lang: AppLanguage { AppLanguage(rawValue: languageRaw) ?? .en }
@@ -29,7 +28,7 @@ struct SettingsView: View {
                         waterSettingsCard
                         languageCard
                         accountCard
-                        subscriptionCard
+                        freeAppCard
                         Button(action: save) {
                             Text(L.t("set_save", lang))
                                 .font(.system(.headline, design: .rounded))
@@ -87,14 +86,6 @@ struct SettingsView: View {
             }
         }
         .onAppear(perform: load)
-        .alert(L.t("error_title", lang), isPresented: Binding(
-            get: { store.lastError != nil },
-            set: { if !$0 { store.lastError = nil } }
-        )) {
-            Button(L.t("error_dismiss", lang)) { store.lastError = nil }
-        } message: {
-            Text((store.lastError ?? "") + "\n" + L.t("error_offline_hint", lang))
-        }
     }
 
     private var presetsCard: some View {
@@ -234,74 +225,22 @@ struct SettingsView: View {
         .background(.white.opacity(0.6), in: RoundedRectangle(cornerRadius: 18))
     }
 
-    private var subscriptionCard: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            Text(L.t("set_plan", lang).uppercased())
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(Palette.sub)
-
-            HStack(spacing: 12) {
-                Image(systemName: store.isSubscribed ? "crown.fill" : "gift.fill")
-                    .font(.title3)
-                    .foregroundStyle(store.isSubscribed ? Palette.peach : Palette.fastAccent)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(planTitle)
-                        .font(.system(.body, design: .rounded).weight(.semibold))
-                        .foregroundStyle(Palette.ink)
-                    Text(planSubtitle)
-                        .font(.caption)
-                        .foregroundStyle(Palette.sub)
-                }
-                Spacer()
-                if store.isSubscribed {
-                    Image(systemName: "checkmark.seal.fill").foregroundStyle(Palette.eatAccent)
-                }
-            }
-
-            if store.isSubscribed {
-                Link(destination: URL(string: "https://apps.apple.com/account/subscriptions")!) {
-                    Text(L.t("manage_subscription", lang))
-                        .font(.system(.subheadline, design: .rounded).weight(.semibold))
-                        .foregroundStyle(Palette.fastAccent)
-                        .frame(maxWidth: .infinity)
-                }
-            }
-
-            if !store.isSubscribed {
-                Button { Task { await store.purchase() } } label: {
-                    Text("\(L.t("pay_subscribe", lang)) · \(String(format: L.t("pay_per_year", lang), store.priceText))")
-                        .font(.system(.subheadline, design: .rounded).weight(.bold))
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 13)
-                        .background(
-                            LinearGradient(colors: [Palette.fastingA, Palette.fastingB],
-                                           startPoint: .leading, endPoint: .trailing),
-                            in: RoundedRectangle(cornerRadius: 14)
-                        )
-                }
-                .disabled(store.purchasing)
-
-                Button(L.t("pay_restore", lang)) { Task { await store.restore() } }
-                    .font(.footnote)
+    private var freeAppCard: some View {
+        HStack(spacing: 12) {
+            Text("🐝").font(.title2)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(L.t("free_badge_title", lang))
+                    .font(.system(.body, design: .rounded).weight(.semibold))
+                    .foregroundStyle(Palette.ink)
+                Text(L.t("free_badge_subtitle", lang))
+                    .font(.caption)
                     .foregroundStyle(Palette.sub)
-                    .frame(maxWidth: .infinity)
             }
+            Spacer()
         }
         .padding(18)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(.white.opacity(0.6), in: RoundedRectangle(cornerRadius: 18))
-    }
-
-    private var planTitle: String {
-        store.isSubscribed ? L.t("pay_title", lang) : L.t("plan_free", lang)
-    }
-
-    private var planSubtitle: String {
-        if store.isSubscribed { return L.t("plan_active", lang) }
-        let days = Trial.daysRemaining
-        if days <= 0 { return L.t("pay_trial_ended", lang) }
-        return days <= 1 ? L.t("pay_one_day_left", lang) : String(format: L.t("pay_days_left", lang), days)
     }
 
     private func scheduleFromPickers() -> FastingSchedule {

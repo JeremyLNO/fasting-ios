@@ -132,10 +132,6 @@ struct AccountView: View {
                     .padding(.vertical, 14)
                     .background(Color.red.opacity(0.85), in: RoundedRectangle(cornerRadius: 16))
             }
-            Text(L.t("account_delete_note", lang))
-                .font(.caption2)
-                .foregroundStyle(Palette.sub)
-                .multilineTextAlignment(.center)
         }
         .padding(.top, 6)
     }

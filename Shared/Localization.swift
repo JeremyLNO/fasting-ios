@@ -94,25 +94,10 @@ enum L {
         "stage_extended":         [.en: "Extended fast", .fr: "Jeûne prolongé", .de: "Verlängertes Fasten", .es: "Ayuno prolongado"],
         "stage_extended_detail":  [.en: "Deeper benefits", .fr: "Bénéfices renforcés", .de: "Verstärkte Vorteile", .es: "Beneficios reforzados"],
 
-        // Paywall
-        "pay_title":         [.en: "Fasting Pro", .fr: "Fasting Pro", .de: "Fasting Pro", .es: "Fasting Pro"],
-        "pay_trial_ended":   [.en: "Your free trial has ended", .fr: "Ton essai gratuit est terminé", .de: "Deine kostenlose Testphase ist beendet", .es: "Tu prueba gratuita ha terminado"],
-        "pay_subtitle":      [.en: "Keep tracking your fasts, your streaks and your widgets.", .fr: "Continue à suivre tes jeûnes, tes séries et tes widgets.", .de: "Verfolge weiter dein Fasten, deine Serien und deine Widgets.", .es: "Sigue registrando tus ayunos, tus rachas y tus widgets."],
-        "pay_feature_1":     [.en: "Unlimited fasting tracking", .fr: "Suivi des jeûnes illimité", .de: "Unbegrenztes Fasten-Tracking", .es: "Seguimiento de ayunos ilimitado"],
-        "pay_feature_2":     [.en: "Home-screen widgets & Dynamic Island", .fr: "Widgets écran d'accueil & Dynamic Island", .de: "Widgets & Dynamic Island", .es: "Widgets y Isla Dinámica"],
-        "pay_feature_3":     [.en: "All metabolic stages", .fr: "Toutes les étapes métaboliques", .de: "Alle Stoffwechselphasen", .es: "Todas las etapas metabólicas"],
-        "pay_subscribe":     [.en: "Subscribe", .fr: "S'abonner", .de: "Abonnieren", .es: "Suscribirse"],
-        "pay_per_year":      [.en: "%@ / year", .fr: "%@ / an", .de: "%@ / Jahr", .es: "%@ / año"],
-        "pay_restore":       [.en: "Restore purchase", .fr: "Restaurer l'achat", .de: "Kauf wiederherstellen", .es: "Restaurar compra"],
-        "pay_continue":      [.en: "Continue free trial", .fr: "Continuer l'essai gratuit", .de: "Kostenlose Testphase fortsetzen", .es: "Continuar prueba gratuita"],
-        "pay_days_left":     [.en: "%d days left in your free trial", .fr: "%d jours restants dans ton essai gratuit", .de: "Noch %d Tage in deiner Testphase", .es: "%d días restantes de prueba gratuita"],
-        "pay_one_day_left":  [.en: "Last day of your free trial", .fr: "Dernier jour de ton essai gratuit", .de: "Letzter Tag deiner Testphase", .es: "Último día de tu prueba gratuita"],
-        "pay_terms":         [.en: "Auto-renewable. Cancel anytime in the App Store.", .fr: "Renouvellement automatique. Annulable à tout moment dans l'App Store.", .de: "Automatische Verlängerung. Jederzeit im App Store kündbar.", .es: "Renovación automática. Cancela cuando quieras en la App Store."],
+        // Free app (Crazy Bee Labs commitment)
+        "free_badge_title":    [.en: "Free app", .fr: "Application gratuite", .de: "Kostenlose App", .es: "Aplicación gratuita"],
+        "free_badge_subtitle": [.en: "Fasting is free, part of Crazy Bee Labs' commitment.", .fr: "Fasting est gratuite, dans le cadre de l'engagement Crazy Bee Labs.", .de: "Fasting ist kostenlos, Teil des Engagements von Crazy Bee Labs.", .es: "Fasting es gratis, parte del compromiso de Crazy Bee Labs."],
 
-        // Subscription status (Settings)
-        "set_plan":    [.en: "Subscription", .fr: "Abonnement", .de: "Abo", .es: "Suscripción"],
-        "plan_active": [.en: "Pro subscription active", .fr: "Abonnement Pro actif", .de: "Pro-Abo aktiv", .es: "Suscripción Pro activa"],
-        "plan_free":   [.en: "Free trial", .fr: "Essai gratuit", .de: "Testphase", .es: "Prueba gratuita"],
         "water_title": [.en: "Water", .fr: "Eau", .de: "Wasser", .es: "Agua"],
         "water_done":  [.en: "Goal reached!", .fr: "Objectif atteint !", .de: "Ziel erreicht!", .es: "¡Objetivo logrado!"],
         "support":     [.en: "Support & ideas", .fr: "Support et idées", .de: "Support & Ideen", .es: "Soporte e ideas"],
@@ -145,14 +130,14 @@ enum L {
         "onb_schedule_subtitle":[.en: "You can fine-tune the exact times anytime in Settings.", .fr: "Tu pourras affiner les horaires exacts à tout moment dans les réglages.", .de: "Du kannst die genauen Zeiten jederzeit in den Einstellungen anpassen.", .es: "Puedes ajustar las horas exactas cuando quieras en Ajustes."],
         "onb_notif_title":      [.en: "Stay on track", .fr: "Reste sur la bonne voie", .de: "Bleib dran", .es: "Mantente en el camino"],
         "onb_notif_subtitle":   [.en: "We'll send you a notification when your fast starts and ends.", .fr: "Tu recevras une notification au début et à la fin de ton jeûne.", .de: "Wir benachrichtigen dich, wenn dein Fasten beginnt und endet.", .es: "Te avisaremos cuando tu ayuno empiece y termine."],
-        "onb_trial_title":      [.en: "7 days free, then $9.99/year", .fr: "7 jours gratuits, puis 9,99 $/an", .de: "7 Tage kostenlos, dann 9,99 $/Jahr", .es: "7 días gratis, luego $9.99/año"],
-        "onb_trial_subtitle":   [.en: "Cancel anytime. No commitment.", .fr: "Annulable à tout moment. Sans engagement.", .de: "Jederzeit kündbar. Unverbindlich.", .es: "Cancela cuando quieras. Sin compromiso."],
+        "onb_free_title":       [.en: "Free, thanks to Crazy Bee Labs", .fr: "Gratuite, grâce à Crazy Bee Labs", .de: "Kostenlos, dank Crazy Bee Labs", .es: "Gratis, gracias a Crazy Bee Labs"],
+        "onb_free_subtitle":    [.en: "Fasting is part of Crazy Bee Labs' commitment to simple, honest apps — free, with no trial and no subscription.", .fr: "Fasting fait partie de l'engagement de Crazy Bee Labs pour des applications simples et honnêtes — gratuite, sans essai ni abonnement.", .de: "Fasting ist Teil von Crazy Bee Labs' Engagement für einfache, ehrliche Apps — kostenlos, ohne Testphase und ohne Abo.", .es: "Fasting forma parte del compromiso de Crazy Bee Labs con aplicaciones simples y honestas — gratis, sin prueba ni suscripción."],
+        "onb_free_feature":     [.en: "No trial. No subscription. Ever.", .fr: "Aucun essai. Aucun abonnement. Jamais.", .de: "Keine Testphase. Kein Abo. Nie.", .es: "Sin prueba. Sin suscripción. Nunca."],
         "onb_continue":         [.en: "Continue", .fr: "Continuer", .de: "Weiter", .es: "Continuar"],
         "onb_get_started":      [.en: "Get started", .fr: "C'est parti", .de: "Los geht's", .es: "Empezar"],
 
         // Legal / compliance links
         "privacy_policy":       [.en: "Privacy Policy", .fr: "Politique de confidentialité", .de: "Datenschutzrichtlinie", .es: "Política de privacidad"],
-        "manage_subscription":  [.en: "Manage subscription", .fr: "Gérer l'abonnement", .de: "Abo verwalten", .es: "Gestionar suscripción"],
 
         // Account
         "account_title":           [.en: "Account", .fr: "Compte", .de: "Konto", .es: "Cuenta"],
@@ -164,12 +149,6 @@ enum L {
         "account_delete":         [.en: "Delete account & data", .fr: "Supprimer le compte et les données", .de: "Konto & Daten löschen", .es: "Eliminar cuenta y datos"],
         "account_delete_confirm_title": [.en: "Delete account & data?", .fr: "Supprimer le compte et les données ?", .de: "Konto & Daten löschen?", .es: "¿Eliminar cuenta y datos?"],
         "account_delete_confirm_body":  [.en: "This permanently erases your schedule, water history, fasting history and preferences from this device. This can't be undone.", .fr: "Ceci efface définitivement ton planning, ton historique d'eau, ton historique de jeûne et tes préférences sur cet appareil. Action irréversible.", .de: "Dies löscht deinen Zeitplan, deinen Wasserverlauf, deinen Fastenverlauf und deine Einstellungen auf diesem Gerät dauerhaft. Kann nicht rückgängig gemacht werden.", .es: "Esto borra permanentemente tu horario, historial de agua, historial de ayuno y preferencias de este dispositivo. No se puede deshacer."],
-        "account_delete_confirm_action": [.en: "Delete everything", .fr: "Tout supprimer", .de: "Alles löschen", .es: "Eliminar todo"],
-        "account_delete_note":    [.en: "This doesn't cancel an active subscription — manage that separately below.", .fr: "Ceci n'annule pas un abonnement actif — gère-le séparément ci-dessous.", .de: "Dies kündigt kein aktives Abo — verwalte es unten separat.", .es: "Esto no cancela una suscripción activa — gestiónala por separado abajo."],
-
-        // Errors / offline
-        "error_title":          [.en: "Something went wrong", .fr: "Un problème est survenu", .de: "Etwas ist schiefgelaufen", .es: "Algo salió mal"],
-        "error_offline_hint":   [.en: "Check your internet connection and try again.", .fr: "Vérifie ta connexion internet et réessaie.", .de: "Überprüfe deine Internetverbindung und versuche es erneut.", .es: "Comprueba tu conexión a internet e inténtalo de nuevo."],
-        "error_dismiss":        [.en: "OK", .fr: "OK", .de: "OK", .es: "Aceptar"]
+        "account_delete_confirm_action": [.en: "Delete everything", .fr: "Tout supprimer", .de: "Alles löschen", .es: "Eliminar todo"]
     ]
 }

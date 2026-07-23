@@ -10,9 +10,9 @@ struct FastingApp: App {
         if let i = CommandLine.arguments.firstIndex(of: "-demoInstallDaysAgo"), i + 1 < CommandLine.arguments.count,
            let days = Int(CommandLine.arguments[i + 1]) {
             let past = Calendar.current.date(byAdding: .day, value: -days, to: Date()) ?? Date()
-            UserDefaults.standard.set(past, forKey: Trial.installKey)
+            UserDefaults.standard.set(past, forKey: AppInstall.installKey)
         }
-        Trial.ensureInstallDate()
+        AppInstall.ensureInstallDate()
         if let i = CommandLine.arguments.firstIndex(of: "-demoWater"), i + 1 < CommandLine.arguments.count,
            let n = Int(CommandLine.arguments[i + 1]) {
             SharedStore.setWaterGlasses(n)
@@ -28,16 +28,12 @@ struct FastingApp: App {
     }
 }
 
-/// Gates the app behind first-launch onboarding, then the 7-day free trial / Pro subscription.
+/// Fasting is a free app — this just gates first-launch onboarding, nothing else.
 struct RootView: View {
-    @StateObject private var store = StoreManager()
-    @AppStorage(AppLanguage.storageKey) private var languageRaw = "en"
     @AppStorage("onboarding.completed") private var onboardingDone = false
     @State private var schedule = SharedStore.load()
-    private var lang: AppLanguage { AppLanguage(rawValue: languageRaw) ?? .en }
 
     var body: some View {
-        let forced = CommandLine.arguments.contains("-showPaywall")
         let skipOnboarding = CommandLine.arguments.contains("-skipOnboarding")
 
         if !onboardingDone && !skipOnboarding {
@@ -46,16 +42,13 @@ struct RootView: View {
                 NotificationManager.shared.requestAuthorizationAndSchedule()
                 onboardingDone = true
             }
-        } else if !forced && (store.isSubscribed || Trial.isActive) {
-            ContentView(store: store)
         } else {
-            PaywallView(store: store, lang: lang)
+            ContentView()
         }
     }
 }
 
 struct ContentView: View {
-    let store: StoreManager
     @State private var schedule = SharedStore.load()
     @State private var showSettings = false
     @State private var showHistory = false
@@ -106,7 +99,7 @@ struct ContentView: View {
         .onAppear {
             live.refresh()
             glasses = SharedStore.waterGlasses()
-            HistoryStore.syncIfNeeded(schedule: schedule, installDate: Trial.installDate)
+            HistoryStore.syncIfNeeded(schedule: schedule, installDate: AppInstall.installDate)
             if CommandLine.arguments.contains("-openSettings") { showSettings = true }
             if CommandLine.arguments.contains("-openHistory") { showHistory = true }
             if CommandLine.arguments.contains("-openAccount") { showAccount = true }
@@ -120,7 +113,7 @@ struct ContentView: View {
             }
         }
         .sheet(isPresented: $showSettings) {
-            SettingsView(schedule: $schedule, store: store)
+            SettingsView(schedule: $schedule)
         }
         .sheet(isPresented: $showHistory) {
             HistoryView()

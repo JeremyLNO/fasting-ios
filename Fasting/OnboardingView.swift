@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// First-launch wizard: language -> fasting schedule -> notifications & trial.
+/// First-launch wizard: language -> fasting schedule -> free commitment -> notifications.
 struct OnboardingView: View {
     @Binding var schedule: FastingSchedule
     var onFinish: () -> Void
@@ -16,7 +16,7 @@ struct OnboardingView: View {
         return 0
     }()
     @State private var selectedPresetLabel = "16:8"
-    private let totalSteps = 3
+    private let totalSteps = 4
 
     var body: some View {
         VStack(spacing: 22) {
@@ -25,7 +25,8 @@ struct OnboardingView: View {
                 switch step {
                 case 0: welcomePage
                 case 1: schedulePage
-                default: notifTrialPage
+                case 2: freeCommitmentPage
+                default: notifPage
                 }
             }
             Spacer(minLength: 10)
@@ -154,9 +155,37 @@ struct OnboardingView: View {
         }
     }
 
-    // MARK: Page 2 — Notifications & trial
+    // MARK: Page 2 — Free, thanks to Crazy Bee Labs
 
-    private var notifTrialPage: some View {
+    private var freeCommitmentPage: some View {
+        VStack(spacing: 22) {
+            Text("🐝").font(.system(size: 56))
+            Text(L.t("onb_free_title", lang))
+                .font(.system(size: 28, weight: .heavy, design: .rounded))
+                .foregroundStyle(Palette.ink)
+                .multilineTextAlignment(.center)
+            Text(L.t("onb_free_subtitle", lang))
+                .font(.subheadline)
+                .foregroundStyle(Palette.sub)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 12)
+
+            HStack(spacing: 10) {
+                Image(systemName: "checkmark.seal.fill").foregroundStyle(Palette.eatAccent)
+                Text(L.t("onb_free_feature", lang))
+                    .font(.system(.subheadline, design: .rounded).weight(.semibold))
+                    .foregroundStyle(Palette.ink)
+                    .multilineTextAlignment(.leading)
+            }
+            .padding(18)
+            .frame(maxWidth: .infinity)
+            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 18))
+        }
+    }
+
+    // MARK: Page 3 — Notifications
+
+    private var notifPage: some View {
         VStack(spacing: 18) {
             Text("🔔").font(.system(size: 48))
             Text(L.t("onb_notif_title", lang))
@@ -168,20 +197,6 @@ struct OnboardingView: View {
                 .foregroundStyle(Palette.sub)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 12)
-
-            VStack(spacing: 8) {
-                Text(L.t("onb_trial_title", lang))
-                    .font(.system(.headline, design: .rounded).weight(.bold))
-                    .foregroundStyle(Palette.fastAccent)
-                    .multilineTextAlignment(.center)
-                Text(L.t("onb_trial_subtitle", lang))
-                    .font(.footnote)
-                    .foregroundStyle(Palette.sub)
-                    .multilineTextAlignment(.center)
-            }
-            .padding(18)
-            .frame(maxWidth: .infinity)
-            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 18))
         }
     }
 }
