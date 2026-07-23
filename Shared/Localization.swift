@@ -118,6 +118,9 @@ enum L {
         "history_last":   [.en: "Last 4 weeks", .fr: "4 dernières semaines", .de: "Letzte 4 Wochen", .es: "Últimas 4 semanas"],
         "history_days":   [.en: "days", .fr: "jours", .de: "Tage", .es: "días"],
         "history_empty":  [.en: "Your streak starts with your first completed fast.", .fr: "Ta série commence avec ton premier jeûne complété.", .de: "Deine Serie beginnt mit deinem ersten abgeschlossenen Fasten.", .es: "Tu racha empieza con tu primer ayuno completado."],
+        "history_legend_completed":   [.en: "Completed", .fr: "Complété", .de: "Abgeschlossen", .es: "Completado"],
+        "history_legend_interrupted": [.en: "Interrupted", .fr: "Interrompu", .de: "Unterbrochen", .es: "Interrumpido"],
+        "history_legend_none":        [.en: "No data", .fr: "Aucune donnée", .de: "Keine Daten", .es: "Sin datos"],
 
         // Presets
         "set_presets": [.en: "Quick presets", .fr: "Préréglages rapides", .de: "Schnellauswahl", .es: "Preajustes rápidos"],

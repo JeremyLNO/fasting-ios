@@ -23,6 +23,10 @@ App iOS native (SwiftUI + WidgetKit) pour suivre l'état de son jeûne intermitt
 |:---:|:---:|
 | ![Interrompre](screenshots/15-manual-interrupt.png) | ![Démarrer](screenshots/16-manual-start.png) |
 
+| Historique avec interruption |
+|:---:|
+| ![Historique avec jour interrompu](screenshots/17-history-interrupted.png) |
+
 ## Fonctionnalités
 - **Configuration** : heure de **début**/**fin** du jeûne, ou **préréglages rapides** (16:8, 18:6, 20:4, OMAD).
 - **Écran principal** : anneau de progression pastel, **temps écoulé** en direct, **état d'avancement** métabolique (Digestion → Glycémie → Glycogène → Combustion des graisses → Cétose → Autophagie), et la phase en cours (jeûne / fenêtre alimentaire). **Un tap sur l'anneau** permet d'**interrompre le jeûne** (avec confirmation) ou de **démarrer un jeûne** à n'importe quelle heure, en dehors du planning — l'app, les widgets et la Dynamic Island s'ajustent immédiatement ; le planning normal reprend automatiquement une fois la session (manuelle) écoulée.
@@ -107,6 +111,14 @@ utilisateur) : chaque fenêtre de jeûne entièrement écoulée depuis l'install
 comme complétée. Série actuelle / meilleure série / total / durée moyenne + calendrier des 4
 dernières semaines dans l'écran **Historique** (icône graphique, à côté de l'engrenage).
 
+**Les interruptions manuelles sont reflétées fidèlement** : au moment précis où on interrompt un
+jeûne (tap sur l'anneau → confirmation), `HistoryStore.logInterruption` enregistre la durée
+*réellement* écoulée pour ce jour-là (`completed: false` si en dessous de l'objectif) — c'est le
+seul instant où cette info existe, puisque la session manuelle suivante l'écraserait sinon.
+`syncIfNeeded` ne réécrit jamais un jour déjà enregistré, donc cette interruption reste définitive.
+Dans le calendrier, un jour interrompu apparaît en **orange** (distinct du vert « complété » et du
+gris « aucune donnée », avec légende) ; il casse aussi la série et est exclu du total/de la moyenne.
+
 ## Tracker d'eau
 Objectif réglable (3 à 8 verres, `SharedStore.waterGoal`) dans Réglages, avec rappels optionnels
 espacés dans la journée (`NotificationManager.rescheduleWater`). Le petit widget « Eau » est
@@ -126,9 +138,9 @@ même état réel. Une fois la session manuelle terminée, l'app revient automat
 normal (une interruption ponctuelle ne décale pas les jours suivants). La Live Activity déjà active
 est mise à jour en direct (`LiveActivityManager.refreshIfActive`).
 
-⚠️ **Limites connues** : les notifications programmées (début/fin) restent calées sur le planning
-configuré, pas sur la session manuelle. L'historique (`HistoryStore`) reste lui aussi basé sur le
-planning — une interruption manuelle n'est pas (encore) reflétée comme un jeûne incomplet.
+⚠️ **Limite connue** : les notifications programmées (début/fin) restent calées sur le planning
+configuré, pas sur la session manuelle. (L'historique, lui, reflète bien les interruptions réelles
+— voir section ci-dessus.)
 
 ## Conformité App Store
 - **Compte & suppression** (`Fasting/AuthManager.swift`, `AccountView.swift`) : Sign in with Apple
@@ -152,6 +164,7 @@ planning — une interruption manuelle n'est pas (encore) reflétée comme un je
 - `-demoWater <n>` : fixe le nombre de verres du jour.
 - `-demoInstallDaysAgo <n>` : simule une date d'installation passée (pour peupler l'historique/série).
 - `-demoManualFast <true|false>` : force une session manuelle (démarrée/interrompue) dès le lancement.
+- `-demoInterruptDaysAgo <n>` : enregistre un jeûne interrompu (à moitié) pour le jour `n` (test Historique).
 - `-openSettings` : ouvre les réglages au lancement. `-openHistory` : ouvre l'historique.
   `-openAccount` : ouvre l'écran Compte directement.
 - `-widgetGallery` : affiche l'aperçu in-app des widgets.

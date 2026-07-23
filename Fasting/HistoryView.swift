@@ -87,13 +87,32 @@ struct HistoryView: View {
             LazyVGrid(columns: columns, spacing: 8) {
                 ForEach(days, id: \.date) { day in
                     RoundedRectangle(cornerRadius: 7, style: .continuous)
-                        .fill(day.record?.completed == true ? Palette.eatAccent : Palette.track)
+                        .fill(cellColor(day.record))
                         .aspectRatio(1, contentMode: .fit)
                 }
             }
+
+            HStack(spacing: 14) {
+                legendItem(Palette.eatAccent, L.t("history_legend_completed", lang))
+                legendItem(Palette.peach.opacity(0.6), L.t("history_legend_interrupted", lang))
+                legendItem(Palette.track, L.t("history_legend_none", lang))
+            }
+            .padding(.top, 2)
         }
         .padding(18)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(.white.opacity(0.6), in: RoundedRectangle(cornerRadius: 18))
+    }
+
+    private func cellColor(_ record: FastRecord?) -> Color {
+        guard let record else { return Palette.track }
+        return record.completed ? Palette.eatAccent : Palette.peach.opacity(0.6)
+    }
+
+    private func legendItem(_ color: Color, _ label: String) -> some View {
+        HStack(spacing: 5) {
+            RoundedRectangle(cornerRadius: 3, style: .continuous).fill(color).frame(width: 10, height: 10)
+            Text(label).font(.caption2).foregroundStyle(Palette.sub)
+        }
     }
 }

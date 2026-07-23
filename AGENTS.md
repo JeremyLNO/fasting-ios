@@ -48,6 +48,11 @@ de référence aux sessions Claude Code : à lire avant toute modification.
   `SharedStore.manualOverride()` (App Group → app, widgets et Dynamic Island cohérents). Toujours
   utiliser `effectiveState(at:override:)`, jamais `state(at:)` seul, dans tout nouveau consommateur
   d'état (widget, Live Activity, etc.) sous peine d'ignorer une session manuelle en cours.
+  Interrompre un jeûne (dans `FastingApp.applyOverride`) appelle aussi
+  `HistoryStore.logInterruption(day:targetMinutes:actualMinutes:)` **au moment précis du tap** —
+  c'est le seul instant où la durée réellement écoulée est connue, avant que la session suivante
+  n'écrase l'override. `syncIfNeeded` ne réécrit jamais un jour déjà enregistré, donc ce log reste
+  définitif (jour affiché en orange dans le calendrier de `HistoryView`, casse la série).
 - Déploiement **iOS 17+**, Swift 5 mode.
 - ⚠️ **Piège récurrent** : toute vue plein-écran doit appliquer `FastingBackground` via
   `.background(FastingBackground(phase:))` sur le contenu, **jamais** en calque frère dans un

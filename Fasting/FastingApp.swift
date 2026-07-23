@@ -27,6 +27,12 @@ struct FastingApp: App {
             }
             SharedStore.setManualOverride(ManualSession(isFasting: isFasting, start: demoNow))
         }
+        if let i = CommandLine.arguments.firstIndex(of: "-demoInterruptDaysAgo"), i + 1 < CommandLine.arguments.count,
+           let daysAgo = Int(CommandLine.arguments[i + 1]) {
+            let day = Calendar.current.date(byAdding: .day, value: -daysAgo, to: Date()) ?? Date()
+            let target = SharedStore.load().fastingMinutes
+            HistoryStore.logInterruption(day: day, targetMinutes: target, actualMinutes: target / 2)
+        }
         _ = SharedStore.load() // ensure a default schedule exists on first launch
         if !CommandLine.arguments.contains("-skipNotifPrompt") {
             NotificationManager.shared.requestAuthorizationAndSchedule()
@@ -201,7 +207,7 @@ struct ContentView: View {
         .sensoryFeedback(.impact(weight: .medium), trigger: toggleTrigger)
         .confirmationDialog(L.t("end_fast_confirm_title", lang), isPresented: $showEndFastConfirm, titleVisibility: .visible) {
             Button(L.t("end_fast_confirm_action", lang), role: .destructive) {
-                applyOverride(isFasting: false)
+                applyOverride(isFasting: false, currentState: s)
             }
             Button(L.t("set_close", lang), role: .cancel) {}
         } message: {
@@ -223,12 +229,18 @@ struct ContentView: View {
         if s.isFasting {
             showEndFastConfirm = true
         } else {
-            applyOverride(isFasting: true)
+            applyOverride(isFasting: true, currentState: s)
         }
     }
 
-    private func applyOverride(isFasting: Bool) {
+    private func applyOverride(isFasting: Bool, currentState: FastingState) {
         let now = overrideNow ?? Date()
+        // Interrupting an in-progress fast: log it now, with the real elapsed time — this is the
+        // only moment that's known, since the next session will overwrite the override entirely.
+        if currentState.isFasting && !isFasting {
+            HistoryStore.logInterruption(day: currentState.windowStart, targetMinutes: schedule.fastingMinutes,
+                                         actualMinutes: Int(currentState.elapsed / 60))
+        }
         let session = ManualSession(isFasting: isFasting, start: now)
         SharedStore.setManualOverride(session)
         toggleTrigger.toggle()

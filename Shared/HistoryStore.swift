@@ -36,7 +36,8 @@ enum HistoryStore {
     }
 
     /// Call on launch/foreground: logs any fasting windows that fully elapsed since install
-    /// and aren't recorded yet.
+    /// and aren't recorded yet. Never overwrites a day that already has a record — in particular,
+    /// a real interruption logged by `logInterruption` always wins over this reconstruction.
     @discardableResult
     static func syncIfNeeded(schedule: FastingSchedule, installDate: Date, now: Date = Date()) -> Bool {
         var records = load()
@@ -50,6 +51,15 @@ enum HistoryStore {
         }
         if changed { save(records) }
         return changed
+    }
+
+    /// Logs a fasting session that was manually ended before its target duration — called at the
+    /// exact moment of interruption, since that's the only time the real elapsed duration is known
+    /// (once overwritten by the next session, it can no longer be reconstructed from the schedule).
+    static func logInterruption(day: Date, targetMinutes: Int, actualMinutes: Int) {
+        var records = load()
+        records[dayKey(day)] = FastRecord(targetMinutes: targetMinutes, completed: actualMinutes >= targetMinutes)
+        save(records)
     }
 
     static func currentStreak(now: Date = Date(), calendar: Calendar = .current) -> Int {
