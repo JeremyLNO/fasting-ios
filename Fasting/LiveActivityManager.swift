@@ -12,13 +12,12 @@ final class LiveActivityManager: ObservableObject {
         isActive = !Activity<FastingActivityAttributes>.activities.isEmpty
     }
 
-    func start(schedule: FastingSchedule, state: FastingState) {
+    func start(state: FastingState) {
         guard available else { return }
         // Avoid duplicates.
         if !Activity<FastingActivityAttributes>.activities.isEmpty { return }
 
-        let attributes = FastingActivityAttributes(startLabel: schedule.startLabel,
-                                                   endLabel: schedule.endLabel)
+        let attributes = FastingActivityAttributes()
         let content = ActivityContent(
             state: FastingActivityAttributes.ContentState(
                 windowStart: state.windowStart,

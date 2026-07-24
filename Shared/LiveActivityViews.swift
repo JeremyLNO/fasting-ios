@@ -7,13 +7,18 @@ struct LiveActivityData {
     let windowEnd: Date
     let isFasting: Bool
     let progress: Double
-    let startLabel: String
-    let endLabel: String
 
     var phaseTitle: String { isFasting ? L.t("phase_fasting") : L.t("phase_eating") }
     var ringColors: [Color] { Palette.ringColors(for: isFasting ? .fasting : .eating) }
     var stage: FastingStage {
         FastingStage.current(forHours: max(0, Date().timeIntervalSince(windowStart)) / 3600)
+    }
+    /// The *current* window's end, formatted — not a static label, so it's always correct whether
+    /// we're fasting or eating (fixes "END" showing the wrong, frozen clock time after a transition).
+    var endTimeLabel: String {
+        let f = DateFormatter()
+        f.dateFormat = "HH:mm"
+        return f.string(from: windowEnd)
     }
 }
 
@@ -59,7 +64,7 @@ struct LiveLockView: View {
 
             VStack(spacing: 2) {
                 Text(L.t("la_end").uppercased()).font(.caption2).foregroundStyle(Palette.subtle)
-                Text(data.endLabel).font(.headline).foregroundStyle(Palette.ink)
+                Text(data.endTimeLabel).font(.headline).foregroundStyle(Palette.ink)
             }
         }
     }

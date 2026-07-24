@@ -27,6 +27,10 @@ App iOS native (SwiftUI + WidgetKit) pour suivre l'état de son jeûne intermitt
 |:---:|
 | ![Historique avec jour interrompu](screenshots/17-history-interrupted.png) |
 
+| Live Activity — écran verrouillé & CarPlay/Watch (label END + « small family » corrects) |
+|:---:|
+| ![Live Activity écran verrouillé et CarPlay/Watch](screenshots/18-live-activity-carplay-fixed.png) |
+
 ## Fonctionnalités
 - **Configuration** : heure de **début**/**fin** du jeûne, ou **préréglages rapides** (16:8, 18:6, 20:4, OMAD).
 - **Écran principal** : anneau de progression pastel, **temps écoulé** en direct, **état d'avancement** métabolique (Digestion → Glycémie → Glycogène → Combustion des graisses → Cétose → Autophagie), et la phase en cours (jeûne / fenêtre alimentaire). **Un tap sur l'anneau** permet d'**interrompre le jeûne** (avec confirmation) ou de **démarrer un jeûne** à n'importe quelle heure, en dehors du planning — l'app, les widgets et la Dynamic Island s'ajustent immédiatement ; le planning normal reprend automatiquement une fois la session (manuelle) écoulée.
@@ -51,7 +55,8 @@ Fasting.xcodeproj/  projet Xcode (2 targets : Fasting + FastingWidget)
 ```
 - Bundle id app : `company.lno.fasting` — widget : `company.lno.fasting.FastingWidget`
 - App Group : `group.company.lno.fasting`
-- Cible iOS minimum : 17.0
+- Cible iOS minimum : **18.0** (relevé depuis 17.0 le 2026-07 pour la Live Activity CarPlay/Watch —
+  voir section dédiée ; app pas encore publiée, donc aucun impact sur des utilisateurs existants)
 - Jeûne par défaut : **22:00 → 18:00** (20h de jeûne), modifiable dans l'app ou via les préréglages.
 - Icône : `AppIcon.appiconset/AppIcon.png` (1024×1024, sans alpha), source canonique dans
   `~/Desktop/crazybee-icons/Fasting made easy.png` — remplacer les deux si l'icône change.
@@ -125,6 +130,30 @@ espacés dans la journée (`NotificationManager.rescheduleWater`). Le petit widg
 **interactif** (iOS 17 App Intents, `FastingWidget/WaterIntents.swift`) : taper un verre directement
 sur l'écran d'accueil met à jour l'app instantanément (App Group).
 
+## Live Activity : CarPlay/Watch, label de fin, rafraîchissement automatique
+- **CarPlay Dashboard & Apple Watch Smart Stack** (`FastingWidget/FastingLiveActivity.swift`) :
+  la Live Activity supporte la **« small activity family »** (`@Environment(\.activityFamily)`,
+  `.supplementalActivityFamilies([.small])`, iOS 18+). Sans elle, CarPlay retombe sur un pill
+  minimal (icône + barre nue, sans aucun texte) — c'est ce qui causait un affichage peu clair.
+  Avec elle, CarPlay/Watch affichent le statut (Jeûne/Repas) + le temps restant en toutes lettres,
+  en plus de la barre de progression. **C'est la raison du relèvement de la cible iOS à 18.0** :
+  SwiftUI n'a pas de mécanisme propre pour brancher `if #available` entre deux configurations de
+  widget différentes (`some WidgetConfiguration` et `WidgetBundleBuilder` refusent tous les deux ce
+  genre de branchement conditionnel) ; l'app n'étant pas encore publiée, ce relèvement ne coûte rien.
+- **Label « END » corrigé** : il affichait l'heure de fin **statique** du planning (capturée une
+  fois au démarrage de la Live Activity, dans `FastingActivityAttributes`), donc figée sur l'heure
+  de fin du *jeûne* même pendant la fenêtre alimentaire. Il est maintenant dérivé de `windowEnd`
+  (`LiveActivityData.endTimeLabel`), donc toujours l'heure de fin de la fenêtre **réellement en
+  cours**. `FastingActivityAttributes` n'a plus aucune donnée statique.
+- **Transition automatique jeûne ↔ repas** : ActivityKit n'offre **aucun moyen purement local** de
+  programmer une mise à jour future (il faut soit un push serveur — absent ici, l'app n'a pas de
+  backend — soit que l'app tourne exactement au bon moment). Solution best-effort : la Live Activity
+  se rafraîchit automatiquement dès que l'app est **ouverte/active** — au changement de phase pendant
+  qu'elle tourne (`.onChange(of: s.isFasting)`) et à chaque réouverture (`onAppear`). ⚠️ Si l'app
+  reste fermée pendant toute une transition (ex. le jeûne se termine sans que l'app soit rouverte),
+  la Live Activity peut rester figée jusqu'à la prochaine ouverture — limite inhérente à une app
+  100 % locale sans serveur de push.
+
 ## Démarrer / interrompre le jeûne à tout moment
 Un **tap sur l'anneau** de l'écran principal bascule immédiatement l'état :
 - En jeûne → une **confirmation** (« End fast now ») puis bascule en fenêtre alimentaire à cet instant.
@@ -168,3 +197,5 @@ configuré, pas sur la session manuelle. (L'historique, lui, reflète bien les i
 - `-openSettings` : ouvre les réglages au lancement. `-openHistory` : ouvre l'historique.
   `-openAccount` : ouvre l'écran Compte directement.
 - `-widgetGallery` : affiche l'aperçu in-app des widgets.
+- `-liveActivityGallery` : aperçu dédié Live Activity (écran verrouillé + CarPlay/Watch « small »),
+  sans besoin de scroller (utile car ces cartes sont tout en bas de `-widgetGallery`).

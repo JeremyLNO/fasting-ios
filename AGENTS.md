@@ -53,7 +53,20 @@ de référence aux sessions Claude Code : à lire avant toute modification.
   c'est le seul instant où la durée réellement écoulée est connue, avant que la session suivante
   n'écrase l'override. `syncIfNeeded` ne réécrit jamais un jour déjà enregistré, donc ce log reste
   définitif (jour affiché en orange dans le calendrier de `HistoryView`, casse la série).
-- Déploiement **iOS 17+**, Swift 5 mode.
+- Déploiement **iOS 18+** (relevé depuis 17.0 le 2026-07 pour la Live Activity CarPlay/Watch —
+  `some WidgetConfiguration`/`WidgetBundleBuilder` ne supportent PAS de brancher `if #available`
+  entre deux configs différentes ; app pas encore publiée donc ce relevage ne coûte rien), Swift 5 mode.
+- **Live Activity** (`FastingWidget/FastingLiveActivity.swift`) : présentation « small activity
+  family » (CarPlay Dashboard + Apple Watch Smart Stack, `@Environment(\.activityFamily)` +
+  `.supplementalActivityFamilies([.small])`) en plus de l'écran verrouillé + Dynamic Island.
+  `FastingActivityAttributes` n'a **aucune donnée statique** (tout est dans `ContentState` :
+  windowStart/windowEnd/isFasting/progress) — piège déjà rencontré : un champ statique capturé une
+  fois au démarrage (ex. l'heure de fin du planning) devient FAUX dès que la phase change ; toujours
+  dériver l'affichage de `windowEnd`/`ContentState`, jamais d'attributs figés à la création.
+  ⚠️ Aucun mécanisme ActivityKit purement local pour programmer une transition future (il faut un
+  push serveur, absent ici) — `LiveActivityManager.refreshIfActive` est appelé au changement de
+  phase (`.onChange(of: s.isFasting)`) et à chaque `onAppear`, en best-effort ; si l'app reste
+  fermée pendant toute une transition, la Live Activity peut rester figée jusqu'à la réouverture.
 - ⚠️ **Piège récurrent** : toute vue plein-écran doit appliquer `FastingBackground` via
   `.background(FastingBackground(phase:))` sur le contenu, **jamais** en calque frère dans un
   `ZStack` — les formes décoratives (hors-cadre) élargissent alors le layout et coupent le

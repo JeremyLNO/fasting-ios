@@ -88,6 +88,8 @@ struct ContentView: View {
     var body: some View {
         if CommandLine.arguments.contains("-widgetGallery") {
             WidgetGalleryView()
+        } else if CommandLine.arguments.contains("-liveActivityGallery") {
+            LiveActivityGalleryView()
         } else {
             mainView
         }
@@ -114,9 +116,20 @@ struct ContentView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(FastingBackground(phase: s.phase))
+            // ActivityKit has no local-only way to schedule a future content update (that needs a
+            // push server, which this app deliberately doesn't have) — so a Live Activity started
+            // during, say, the eating window would otherwise sit frozen at 0:00 forever once that
+            // window naturally elapses. Best-effort fix: whenever the app is open and re-evaluates
+            // state (every second) and the phase actually flips, push a fresh update immediately.
+            .onChange(of: s.isFasting) { _, _ in
+                live.refreshIfActive(state: s)
+            }
         }
         .onAppear {
             live.refresh()
+            // Also correct any drift accumulated while the app was backgrounded/closed, in case a
+            // transition was missed entirely (same reasoning as above).
+            live.refreshIfActive(state: schedule.effectiveState(at: Date(), override: SharedStore.manualOverride()))
             glasses = SharedStore.waterGlasses()
             HistoryStore.syncIfNeeded(schedule: schedule, installDate: AppInstall.installDate)
             if CommandLine.arguments.contains("-openSettings") { showSettings = true }
@@ -128,7 +141,7 @@ struct ContentView: View {
                                         windowStart: now.addingTimeInterval(-9 * 3600),
                                         windowEnd: now.addingTimeInterval(7 * 3600),
                                         now: now)
-                live.start(schedule: schedule, state: demo)
+                live.start(state: demo)
             }
         }
         .sheet(isPresented: $showSettings) {
@@ -287,7 +300,7 @@ struct ContentView: View {
                 live.stop()
             } else {
                 let now = overrideNow ?? Date()
-                live.start(schedule: schedule, state: schedule.effectiveState(at: now, override: SharedStore.manualOverride()))
+                live.start(state: schedule.effectiveState(at: now, override: SharedStore.manualOverride()))
             }
         } label: {
             Label(live.isActive ? L.t("btn_stop", lang) : L.t("btn_track", lang),
@@ -353,8 +366,7 @@ struct WidgetGalleryView: View {
     private var liveData: LiveActivityData {
         let s = demoState
         return LiveActivityData(windowStart: s.windowStart, windowEnd: s.windowEnd,
-                                isFasting: true, progress: s.progress,
-                                startLabel: "20:00", endLabel: "12:00")
+                                isFasting: true, progress: s.progress)
     }
 
     var body: some View {
@@ -381,11 +393,37 @@ struct WidgetGalleryView: View {
                     .padding(16)
                     .frame(width: 360)
                     .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+
+                sectionTitle("Live Activity — CarPlay / Watch (small)")
+                smallFamilyPreview
+                    .frame(width: 280)
+                    .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
             }
             .padding(.vertical, 28)
             .frame(maxWidth: .infinity)
         }
         .background(FastingBackground(phase: .fasting))
+    }
+
+    /// Mirrors FastingWidget/FastingLiveActivity.swift's SmallFamilyContent (CarPlay Dashboard /
+    /// Apple Watch Smart Stack) using only Shared components, for in-app preview purposes.
+    private var smallFamilyPreview: some View {
+        let d = liveData
+        return VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 6) {
+                Text(d.stage.emoji)
+                Text(d.phaseTitle)
+                    .font(.system(.subheadline, design: .rounded).weight(.semibold))
+                    .foregroundStyle(Palette.ink)
+                Spacer(minLength: 0)
+            }
+            liveRemaining(d)
+                .font(.system(.title3, design: .rounded).weight(.bold))
+                .foregroundStyle(Palette.ink)
+                .monospacedDigit()
+            liveBar(d)
+        }
+        .padding(12)
     }
 
     private var waterWidgetCard: some View {
@@ -430,5 +468,55 @@ struct WidgetGalleryView: View {
             .background(LinearGradient(colors: Palette.bgColors(for: .fasting), startPoint: .top, endPoint: .bottom))
             .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
             .shadow(color: .black.opacity(0.15), radius: 12, y: 6)
+    }
+}
+
+/// Focused, no-scroll-needed preview of just the Live Activity presentations (Lock Screen +
+/// CarPlay/Watch "small" family), for verification. Shown via -liveActivityGallery.
+/// Uses a demo eating-window state whose windowEnd deliberately differs from the schedule's
+/// static clock labels, to make the END-label fix visually obvious.
+struct LiveActivityGalleryView: View {
+    private var liveData: LiveActivityData {
+        let now = Date()
+        return LiveActivityData(windowStart: now.addingTimeInterval(-3 * 3600),
+                                windowEnd: now.addingTimeInterval(2 * 3600 + 37 * 60),
+                                isFasting: false, progress: 0.55)
+    }
+
+    var body: some View {
+        VStack(spacing: 24) {
+            Text("Live Activity — Lock Screen").font(.caption.weight(.bold)).foregroundStyle(Palette.sub)
+            LiveLockView(data: liveData)
+                .padding(16)
+                .frame(width: 360)
+                .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+
+            Text("Live Activity — CarPlay / Watch (small)").font(.caption.weight(.bold)).foregroundStyle(Palette.sub)
+            smallFamilyPreview
+                .frame(width: 280)
+                .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        }
+        .padding(.vertical, 40)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(FastingBackground(phase: .eating))
+    }
+
+    private var smallFamilyPreview: some View {
+        let d = liveData
+        return VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 6) {
+                Text(d.stage.emoji)
+                Text(d.phaseTitle)
+                    .font(.system(.subheadline, design: .rounded).weight(.semibold))
+                    .foregroundStyle(Palette.ink)
+                Spacer(minLength: 0)
+            }
+            liveRemaining(d)
+                .font(.system(.title3, design: .rounded).weight(.bold))
+                .foregroundStyle(Palette.ink)
+                .monospacedDigit()
+            liveBar(d)
+        }
+        .padding(12)
     }
 }
