@@ -65,7 +65,7 @@ struct FastingWidget: Widget {
         StaticConfiguration(kind: "FastingWidget", provider: FastingProvider()) { entry in
             FastingWidgetEntryView(entry: entry)
         }
-        .configurationDisplayName("Fasting")
+        .configurationDisplayName("Fasting made easy")
         .description("Suis l'avancement de ton jeûne depuis l'écran d'accueil.")
         .supportedFamilies([.systemSmall, .systemMedium, .systemLarge, .accessoryCircular])
     }

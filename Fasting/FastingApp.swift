@@ -147,7 +147,7 @@ struct ContentView: View {
     private var header: some View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 2) {
-                Text("Fasting")
+                Text("Fasting made easy")
                     .font(.system(size: 40, weight: .heavy, design: .rounded))
                     .foregroundStyle(Palette.ink)
                 Text("\(schedule.startLabel) → \(schedule.endLabel) · \(schedule.fastingHoursText)")

@@ -103,7 +103,7 @@ enum L {
 
         // Free app (Crazy Bee Labs commitment)
         "free_badge_title":    [.en: "Free app", .fr: "Application gratuite", .de: "Kostenlose App", .es: "Aplicación gratuita"],
-        "free_badge_subtitle": [.en: "Fasting is free, part of Crazy Bee Labs' commitment.", .fr: "Fasting est gratuite, dans le cadre de l'engagement Crazy Bee Labs.", .de: "Fasting ist kostenlos, Teil des Engagements von Crazy Bee Labs.", .es: "Fasting es gratis, parte del compromiso de Crazy Bee Labs."],
+        "free_badge_subtitle": [.en: "Fasting made easy is free, part of Crazy Bee Labs' commitment.", .fr: "Fasting made easy est gratuite, dans le cadre de l'engagement Crazy Bee Labs.", .de: "Fasting made easy ist kostenlos, Teil des Engagements von Crazy Bee Labs.", .es: "Fasting made easy es gratis, parte del compromiso de Crazy Bee Labs."],
 
         "water_title": [.en: "Water", .fr: "Eau", .de: "Wasser", .es: "Agua"],
         "water_done":  [.en: "Goal reached!", .fr: "Objectif atteint !", .de: "Ziel erreicht!", .es: "¡Objetivo logrado!"],
@@ -133,7 +133,7 @@ enum L {
         "water_reminder_body":   [.en: "Don't forget to drink some water.", .fr: "N'oublie pas de boire de l'eau.", .de: "Vergiss nicht, Wasser zu trinken.", .es: "No olvides beber agua."],
 
         // Onboarding
-        "onb_welcome_title":    [.en: "Welcome to Fasting", .fr: "Bienvenue sur Fasting", .de: "Willkommen bei Fasting", .es: "Bienvenido a Fasting"],
+        "onb_welcome_title":    [.en: "Welcome to Fasting made easy", .fr: "Bienvenue sur Fasting made easy", .de: "Willkommen bei Fasting made easy", .es: "Bienvenido a Fasting made easy"],
         "onb_welcome_subtitle": [.en: "A simple way to track your intermittent fasting, right from your home screen.", .fr: "Un moyen simple de suivre ton jeûne intermittent, depuis ton écran d'accueil.", .de: "Eine einfache Art, dein intermittierendes Fasten zu verfolgen — direkt vom Homescreen.", .es: "Una forma sencilla de seguir tu ayuno intermitente, desde tu pantalla de inicio."],
         "onb_language_title":   [.en: "Choose your language", .fr: "Choisis ta langue", .de: "Wähle deine Sprache", .es: "Elige tu idioma"],
         "onb_schedule_title":   [.en: "Pick your fasting schedule", .fr: "Choisis ton programme de jeûne", .de: "Wähle deinen Fastenplan", .es: "Elige tu horario de ayuno"],
@@ -141,7 +141,7 @@ enum L {
         "onb_notif_title":      [.en: "Stay on track", .fr: "Reste sur la bonne voie", .de: "Bleib dran", .es: "Mantente en el camino"],
         "onb_notif_subtitle":   [.en: "We'll send you a notification when your fast starts and ends.", .fr: "Tu recevras une notification au début et à la fin de ton jeûne.", .de: "Wir benachrichtigen dich, wenn dein Fasten beginnt und endet.", .es: "Te avisaremos cuando tu ayuno empiece y termine."],
         "onb_free_title":       [.en: "Free, thanks to Crazy Bee Labs", .fr: "Gratuite, grâce à Crazy Bee Labs", .de: "Kostenlos, dank Crazy Bee Labs", .es: "Gratis, gracias a Crazy Bee Labs"],
-        "onb_free_subtitle":    [.en: "Fasting is part of Crazy Bee Labs' commitment to simple, honest apps — free, with no trial and no subscription.", .fr: "Fasting fait partie de l'engagement de Crazy Bee Labs pour des applications simples et honnêtes — gratuite, sans essai ni abonnement.", .de: "Fasting ist Teil von Crazy Bee Labs' Engagement für einfache, ehrliche Apps — kostenlos, ohne Testphase und ohne Abo.", .es: "Fasting forma parte del compromiso de Crazy Bee Labs con aplicaciones simples y honestas — gratis, sin prueba ni suscripción."],
+        "onb_free_subtitle":    [.en: "Fasting made easy is part of Crazy Bee Labs' commitment to simple, honest apps — free, with no trial and no subscription.", .fr: "Fasting made easy fait partie de l'engagement de Crazy Bee Labs pour des applications simples et honnêtes — gratuite, sans essai ni abonnement.", .de: "Fasting made easy ist Teil von Crazy Bee Labs' Engagement für einfache, ehrliche Apps — kostenlos, ohne Testphase und ohne Abo.", .es: "Fasting made easy forma parte del compromiso de Crazy Bee Labs con aplicaciones simples y honestas — gratis, sin prueba ni suscripción."],
         "onb_free_feature":     [.en: "No trial. No subscription. Ever.", .fr: "Aucun essai. Aucun abonnement. Jamais.", .de: "Keine Testphase. Kein Abo. Nie.", .es: "Sin prueba. Sin suscripción. Nunca."],
         "onb_continue":         [.en: "Continue", .fr: "Continuer", .de: "Weiter", .es: "Continuar"],
         "onb_get_started":      [.en: "Get started", .fr: "C'est parti", .de: "Los geht's", .es: "Empezar"],
