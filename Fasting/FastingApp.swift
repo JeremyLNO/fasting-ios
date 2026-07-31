@@ -547,7 +547,7 @@ struct WidgetGalleryView: View {
                 sectionTitle("Live Activity — CarPlay / Watch (small)")
                 smallFamilyPreview
                     .frame(width: 280)
-                    .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                    .background(Palette.ink, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
             }
             .padding(.vertical, 28)
             .frame(maxWidth: .infinity)
@@ -555,25 +555,10 @@ struct WidgetGalleryView: View {
         .background(FastingBackground(phase: .fasting))
     }
 
-    /// Mirrors FastingWidget/FastingLiveActivity.swift's SmallFamilyContent (CarPlay Dashboard /
-    /// Apple Watch Smart Stack) using only Shared components, for in-app preview purposes.
+    /// The very view the widget ships (CarPlay Dashboard / Apple Watch Smart Stack), on the dark
+    /// card CarPlay draws behind it — the only way to judge its contrast without a car.
     private var smallFamilyPreview: some View {
-        let d = liveData
-        return VStack(alignment: .leading, spacing: 6) {
-            HStack(spacing: 6) {
-                Text(d.stage.emoji)
-                Text(d.phaseTitle)
-                    .font(.system(.subheadline, design: .rounded).weight(.semibold))
-                    .foregroundStyle(Palette.ink)
-                Spacer(minLength: 0)
-            }
-            liveRemaining(d)
-                .font(.system(.title3, design: .rounded).weight(.bold))
-                .foregroundStyle(Palette.ink)
-                .monospacedDigit()
-            liveBar(d)
-        }
-        .padding(12)
+        LiveSmallView(data: liveData)
     }
 
     private var waterWidgetCard: some View {

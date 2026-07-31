@@ -87,6 +87,10 @@ de référence aux sessions Claude Code : à lire avant toute modification.
   `.background(FastingBackground(phase:))` sur le contenu, **jamais** en calque frère dans un
   `ZStack` — les formes décoratives (hors-cadre) élargissent alors le layout et coupent le
   contenu à gauche (bug rencontré 2 fois : écran principal, puis onboarding).
+- ⚠️ **Surfaces sombres** : CarPlay Dashboard, Smart Stack de la Watch et Dynamic Island étendue
+  sont dessinées sur du sombre/noir et n'héritent pas du thème pastel de l'app. `Palette.ink` (bleu
+  nuit) y est illisible : tout ce qui s'affiche là doit être en clair-sur-sombre. Aperçu réel via
+  `-widgetGallery` (la carte « small » y est rendue sur `Palette.ink`).
 - ⚠️ **Notifications vs session manuelle** : un `UNCalendarNotificationTrigger(repeats: true)` ne
   sait pas sauter une occurrence. Tant qu'une session manuelle tourne, `NotificationManager` bascule
   donc sur des déclencheurs **datés** (horizon 14 jours) en filtrant `override.covers(date:)`, et

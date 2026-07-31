@@ -177,6 +177,15 @@ sur l'écran d'accueil met à jour l'app instantanément (App Group).
   SwiftUI n'a pas de mécanisme propre pour brancher `if #available` entre deux configurations de
   widget différentes (`some WidgetConfiguration` et `WidgetBundleBuilder` refusent tous les deux ce
   genre de branchement conditionnel) ; l'app n'étant pas encore publiée, ce relèvement ne coûte rien.
+- **Contraste sur fond sombre** (`LiveSmallView`, `Shared/LiveActivityViews.swift`) : CarPlay
+  dessine cette carte sur **son** fond sombre et ignore un `activityBackgroundTint` clair — l'encre
+  bleu nuit de l'app y était donc quasi invisible. La « small family » est désormais assumée en
+  clair-sur-sombre (texte blanc, `activityBackgroundTint(Palette.ink)`, piste de la barre de
+  progression éclaircie via `liveBar(_:onDark:)`), ce qui vaut aussi pour le Smart Stack de la
+  Watch. **Même correction sur la Dynamic Island étendue**, dessinée sur du noir pur : elle utilisait
+  la même encre sombre. Le layout vit dans `Shared/` et l'aperçu in-app (`-widgetGallery`) rend
+  exactement la même vue sur le même fond sombre — c'est le seul moyen de juger le contraste sans
+  voiture.
 - **Label « END » corrigé** : il affichait l'heure de fin **statique** du planning (capturée une
   fois au démarrage de la Live Activity, dans `FastingActivityAttributes`), donc figée sur l'heure
   de fin du *jeûne* même pendant la fenêtre alimentaire. Il est maintenant dérivé de `windowEnd`

@@ -25,13 +25,49 @@ func liveRemaining(_ data: LiveActivityData) -> some View {
 }
 
 /// Auto-filling progress bar driven purely by the time interval.
-func liveBar(_ data: LiveActivityData) -> some View {
+/// `onDark`: brightens the unfilled track, which is otherwise a dim grey barely visible on the
+/// CarPlay Dashboard's dark card.
+func liveBar(_ data: LiveActivityData, onDark: Bool = false) -> some View {
     ProgressView(timerInterval: data.windowStart...data.windowEnd, countsDown: false) {
         EmptyView()
     } currentValueLabel: {
         EmptyView()
     }
     .tint(data.ringColors.first ?? Palette.fastingA)
+    .background(onDark ? Color.white.opacity(0.25) : .clear, in: Capsule())
+}
+
+/// "Small" activity family presentation — CarPlay Dashboard and Apple Watch Smart Stack.
+///
+/// Deliberately light-on-dark: CarPlay draws this card on its own dark background and ignores a
+/// light `activityBackgroundTint`, so the app's dark-navy ink came out nearly invisible there. The
+/// caller supplies the dark card (`activityBackgroundTint(Palette.ink)`); this view only ever draws
+/// light text, so the two can't disagree.
+struct LiveSmallView: View {
+    let data: LiveActivityData
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 6) {
+                Text(data.stage.emoji)
+                Text(data.phaseTitle)
+                    .font(.system(.subheadline, design: .rounded).weight(.semibold))
+                    .foregroundStyle(.white.opacity(0.85))
+                    .lineLimit(1)
+                Spacer(minLength: 0)
+                Text(data.endTimeLabel)
+                    .font(.system(.footnote, design: .rounded).weight(.semibold))
+                    .foregroundStyle(.white.opacity(0.7))
+                    .monospacedDigit()
+            }
+            liveRemaining(data)
+                .font(.system(.title2, design: .rounded).weight(.heavy))
+                .foregroundStyle(.white)
+                .monospacedDigit()
+            liveBar(data, onDark: true)
+        }
+        .padding(12)
+    }
 }
 
 /// Lock Screen / banner presentation of the Live Activity.

@@ -25,24 +25,11 @@ private struct SmallFamilyContent: View {
     let data: LiveActivityData
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack(spacing: 6) {
-                Text(data.stage.emoji)
-                Text(data.phaseTitle)
-                    .font(.system(.subheadline, design: .rounded).weight(.semibold))
-                    .foregroundStyle(Palette.ink)
-                    .lineLimit(1)
-                Spacer(minLength: 0)
-            }
-            liveRemaining(data)
-                .font(.system(.title3, design: .rounded).weight(.bold))
-                .foregroundStyle(Palette.ink)
-                .monospacedDigit()
-            liveBar(data)
-        }
-        .padding(12)
-        .activityBackgroundTint(Palette.bgTop.opacity(0.7))
-        .activitySystemActionForegroundColor(Palette.ink)
+        // Layout lives in Shared/LiveActivityViews.swift so the in-app gallery previews the exact
+        // same card. Dark tint + light text: see LiveSmallView.
+        LiveSmallView(data: data)
+            .activityBackgroundTint(Palette.ink)
+            .activitySystemActionForegroundColor(.white)
     }
 }
 
@@ -67,10 +54,12 @@ struct FastingLiveActivity: Widget {
         } dynamicIsland: { context in
             let d = data(context)
             return DynamicIsland {
+                // The expanded island is drawn on pure black: same reason as LiveSmallView, the
+                // app's dark-navy ink is unreadable there, so everything here is light-on-dark.
                 DynamicIslandExpandedRegion(.leading) {
                     Label {
                         Text(d.isFasting ? L.t("phase_fasting") : L.t("phase_eating"))
-                            .font(.caption).foregroundStyle(Palette.ink)
+                            .font(.caption).foregroundStyle(.white.opacity(0.85))
                     } icon: {
                         Text(d.stage.emoji)
                     }
@@ -78,14 +67,14 @@ struct FastingLiveActivity: Widget {
                 DynamicIslandExpandedRegion(.trailing) {
                     liveRemaining(d)
                         .font(.system(.title3, design: .rounded).weight(.bold))
-                        .foregroundStyle(Palette.ink)
+                        .foregroundStyle(.white)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
                     VStack(spacing: 4) {
-                        liveBar(d)
+                        liveBar(d, onDark: true)
                         Text("\(d.stage.emoji) \(d.stage.name()) · \(L.t("la_ends_at")) \(d.endTimeLabel)")
                             .font(.caption2)
-                            .foregroundStyle(Palette.subtle)
+                            .foregroundStyle(.white.opacity(0.7))
                     }
                 }
             } compactLeading: {
