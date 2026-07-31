@@ -60,6 +60,22 @@ enum L {
         "week_partial": [.en: "Partial", .fr: "Partiel", .de: "Teilweise", .es: "Parcial"],
         "week_today":   [.en: "TODAY", .fr: "AUJ.", .de: "HEUTE", .es: "HOY"],
 
+        // Day editor (tap a day in the strip)
+        "edit_day_title":     [.en: "Edit this day", .fr: "Modifier ce jour", .de: "Diesen Tag bearbeiten", .es: "Editar este día"],
+        "edit_day_start":     [.en: "Fast started", .fr: "Jeûne commencé", .de: "Fasten begann", .es: "Ayuno empezó"],
+        "edit_day_end":       [.en: "Fast ended", .fr: "Jeûne terminé", .de: "Fasten endete", .es: "Ayuno terminó"],
+        "edit_day_duration":  [.en: "Duration", .fr: "Durée", .de: "Dauer", .es: "Duración"],
+        "edit_day_invalid":   [.en: "The end must be after the start.", .fr: "La fin doit être après le début.", .de: "Das Ende muss nach dem Beginn liegen.", .es: "El final debe ser posterior al inicio."],
+        "edit_day_clear":     [.en: "Mark as no fast", .fr: "Marquer comme sans jeûne", .de: "Als kein Fasten markieren", .es: "Marcar como sin ayuno"],
+        "edit_day_goal":      [.en: "Goal %@", .fr: "Objectif %@", .de: "Ziel %@", .es: "Objetivo %@"],
+
+        // Start-time editor (tap the START card)
+        "edit_start_title":   [.en: "Adjust the start", .fr: "Ajuster le début", .de: "Beginn anpassen", .es: "Ajustar el inicio"],
+        "edit_start_fasting": [.en: "When did this fast actually start?", .fr: "Quand ce jeûne a-t-il vraiment commencé ?", .de: "Wann hat dieses Fasten wirklich begonnen?", .es: "¿Cuándo empezó realmente este ayuno?"],
+        "edit_start_eating":  [.en: "When did this eating window actually start?", .fr: "Quand cette fenêtre alimentaire a-t-elle vraiment commencé ?", .de: "Wann hat dieses Essensfenster wirklich begonnen?", .es: "¿Cuándo empezó realmente esta ventana de comida?"],
+        "edit_start_future":  [.en: "The start can't be in the future.", .fr: "Le début ne peut pas être dans le futur.", .de: "Der Beginn kann nicht in der Zukunft liegen.", .es: "El inicio no puede estar en el futuro."],
+        "edit_ends_at":       [.en: "Ends at %@", .fr: "Se termine à %@", .de: "Endet um %@", .es: "Termina a las %@"],
+
         // Stage hint
         "next_stage": [.en: "Next stage", .fr: "Prochaine étape", .de: "Nächste Phase", .es: "Próxima etapa"],
         "word_in":    [.en: "in", .fr: "dans", .de: "in", .es: "en"],

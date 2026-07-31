@@ -7,15 +7,27 @@ struct FastRecord: Codable {
     /// How long the fast actually lasted. Optional so records written before this field existed
     /// still decode; for those, fall back to the target when completed (that's what they meant).
     let actualMinutes: Int?
+    /// Exact clock times, present once the day has been edited by hand (or logged with them).
+    /// Optional for the same backward-compatibility reason — older records only knew a duration.
+    let startTime: Date?
+    let endTime: Date?
 
-    init(targetMinutes: Int, completed: Bool, actualMinutes: Int? = nil) {
+    init(targetMinutes: Int, completed: Bool, actualMinutes: Int? = nil,
+         startTime: Date? = nil, endTime: Date? = nil) {
         self.targetMinutes = targetMinutes
         self.completed = completed
         self.actualMinutes = actualMinutes
+        self.startTime = startTime
+        self.endTime = endTime
     }
 
-    /// Best available real duration, in minutes.
-    var effectiveMinutes: Int { actualMinutes ?? (completed ? targetMinutes : 0) }
+    /// Best available real duration, in minutes — explicit times win when they're known.
+    var effectiveMinutes: Int {
+        if let start = startTime, let end = endTime, end > start {
+            return Int(end.timeIntervalSince(start) / 60)
+        }
+        return actualMinutes ?? (completed ? targetMinutes : 0)
+    }
 }
 
 /// How a given day turned out, for the "last 7 days" strip.
@@ -35,6 +47,9 @@ struct DayOutcome: Identifiable {
     let hours: Double
     /// 0...1 against the day's target, for the ring.
     let progress: Double
+    /// Exact times when they're known, so the day editor opens pre-filled with what's shown.
+    var startTime: Date? = nil
+    var endTime: Date? = nil
 
     var isToday: Bool { Calendar.current.isDateInToday(date) }
 
@@ -104,6 +119,32 @@ enum HistoryStore {
         records[dayKey(day)] = FastRecord(targetMinutes: targetMinutes,
                                           completed: actualMinutes >= targetMinutes,
                                           actualMinutes: max(0, actualMinutes))
+        save(records)
+    }
+
+    /// The record stored for a given day, if any — used to pre-fill the day editor.
+    static func record(for day: Date) -> FastRecord? { load()[dayKey(day)] }
+
+    /// Writes a hand-edited day. `completed` is derived from the edited times rather than trusted
+    /// from the caller, so the strip, the streaks and the stats can't disagree with what's shown.
+    static func setEntry(day: Date, start: Date, end: Date, targetMinutes: Int) {
+        guard end > start else { return }
+        let minutes = Int(end.timeIntervalSince(start) / 60)
+        var records = load()
+        records[dayKey(day)] = FastRecord(targetMinutes: targetMinutes,
+                                          completed: minutes >= targetMinutes,
+                                          actualMinutes: minutes,
+                                          startTime: start, endTime: end)
+        save(records)
+    }
+
+    /// Marks a day as "nothing fasted". Stored as an explicit zero rather than deleted: a deleted
+    /// day whose scheduled window has already elapsed would simply be re-created by `syncIfNeeded`
+    /// on the next launch, so clearing it would silently undo itself. A zero-minute record renders
+    /// exactly like "no data" and survives the sync.
+    static func clearEntry(day: Date, targetMinutes: Int) {
+        var records = load()
+        records[dayKey(day)] = FastRecord(targetMinutes: targetMinutes, completed: false, actualMinutes: 0)
         save(records)
     }
 
@@ -181,7 +222,8 @@ enum HistoryStore {
                 return DayOutcome(date: date,
                                   status: record.completed ? .full : (minutes > 0 ? .partial : .none),
                                   hours: Double(minutes) / 60,
-                                  progress: min(1, Double(minutes) / Double(record.targetMinutes)))
+                                  progress: min(1, Double(minutes) / Double(record.targetMinutes)),
+                                  startTime: record.startTime, endTime: record.endTime)
             }
 
             // No record yet: if a fast is running and started on this day, show it live.
@@ -190,7 +232,8 @@ enum HistoryStore {
                 let minutes = Int(s.elapsed / 60)
                 return DayOutcome(date: date, status: .inProgress,
                                   hours: Double(minutes) / 60,
-                                  progress: min(1, Double(minutes) / Double(target)))
+                                  progress: min(1, Double(minutes) / Double(target)),
+                                  startTime: s.windowStart, endTime: s.windowEnd)
             }
 
             return DayOutcome(date: date, status: .none, hours: 0, progress: 0)

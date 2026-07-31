@@ -69,6 +69,12 @@ struct RootView: View {
     }
 }
 
+/// Identifiable snapshot of the window being edited (see `editingStart`).
+struct EditingWindow: Identifiable {
+    let id = UUID()
+    let state: FastingState
+}
+
 struct ContentView: View {
     @State private var schedule = SharedStore.load()
     @State private var showSettings = false
@@ -77,6 +83,12 @@ struct ContentView: View {
     @State private var glasses = SharedStore.waterGlasses()
     @State private var showEndFastConfirm = false
     @State private var toggleTrigger = false
+    @State private var editingDay: DayOutcome?
+    /// Snapshot of the window being edited. Wrapped rather than making `FastingState` Identifiable:
+    /// that struct is rebuilt every second, and a changing id would re-present the sheet.
+    @State private var editingStart: EditingWindow?
+    /// Bumped after an edit so the strip re-reads the store (its data is computed, not observed).
+    @State private var historyVersion = 0
     @StateObject private var live = LiveActivityManager()
     @StateObject private var auth = AuthManager()
     @AppStorage(AppLanguage.storageKey) private var languageRaw = "en"
@@ -114,7 +126,8 @@ struct ContentView: View {
                     statsRow(s)
                     waterRow
                     WeekStrip(days: HistoryStore.last7Days(schedule: schedule, liveState: s, now: now),
-                              lang: lang)
+                              lang: lang) { editingDay = $0 }
+                        .id(historyVersion)
                     liveButton
                 }
                 .padding(.horizontal, 20)
@@ -159,6 +172,19 @@ struct ContentView: View {
         }
         .sheet(isPresented: $showAccount) {
             NavigationStack { AccountView(auth: auth) }
+        }
+        .sheet(item: $editingDay) { day in
+            DayEditorView(day: day.date, schedule: schedule,
+                          initialStart: day.startTime, initialEnd: day.endTime) {
+                historyVersion += 1
+            }
+        }
+        .sheet(item: $editingStart) { window in
+            StartEditorView(schedule: schedule, state: window.state) { session in
+                SharedStore.setManualOverride(session)
+                live.refreshIfActive(state: schedule.effectiveState(at: Date(), override: session))
+                historyVersion += 1
+            }
         }
     }
 
@@ -374,8 +400,13 @@ struct ContentView: View {
     /// configured schedule still has its own place: the header line under the title.
     private func statsRow(_ s: FastingState) -> some View {
         HStack(spacing: 12) {
-            StatCard(icon: "clock", tint: Palette.fastAccent, label: L.t("stat_start", lang),
-                     value: clockLabel(s.windowStart))
+            // Tappable: the start is the one value you may need to correct after the fact
+            // (you forgot to open the app, or ate earlier than planned).
+            Button { editingStart = EditingWindow(state: s) } label: {
+                StatCard(icon: "clock", tint: Palette.fastAccent, label: L.t("stat_start", lang),
+                         value: clockLabel(s.windowStart), showsEditAffordance: true)
+            }
+            .buttonStyle(.plain)
             StatCard(icon: s.isFasting ? "hourglass" : "calendar",
                      tint: Palette.accent(s.phase),
                      label: s.isFasting ? L.t("stat_remaining", lang) : L.t("stat_next_fast", lang),

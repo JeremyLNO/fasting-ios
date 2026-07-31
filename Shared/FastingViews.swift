@@ -169,6 +169,8 @@ struct GlowRing: View {
 struct WeekStrip: View {
     let days: [DayOutcome]
     var lang: AppLanguage = .current
+    /// Tapping a day opens its editor. Optional so the widgets/previews can render it inert.
+    var onSelect: ((DayOutcome) -> Void)? = nil
 
     private static let weekdayFormatter: DateFormatter = {
         let f = DateFormatter()
@@ -190,7 +192,12 @@ struct WeekStrip: View {
 
             HStack(spacing: 6) {
                 ForEach(days) { day in
-                    dayColumn(day)
+                    if let onSelect {
+                        Button { onSelect(day) } label: { dayColumn(day) }
+                            .buttonStyle(.plain)
+                    } else {
+                        dayColumn(day)
+                    }
                 }
             }
         }
@@ -369,15 +376,23 @@ struct StatCard: View {
     let tint: Color
     let label: String
     let value: String
+    /// Adds a small pencil next to the label, so an editable card doesn't look identical to a
+    /// read-only one.
+    var showsEditAffordance: Bool = false
 
     var body: some View {
         VStack(spacing: 6) {
-            Text(label.uppercased())
-                .font(.system(size: 10, weight: .semibold))
-                .tracking(0.3)
-                .foregroundStyle(tint)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
+            HStack(spacing: 3) {
+                Text(label.uppercased())
+                    .font(.system(size: 10, weight: .semibold))
+                    .tracking(0.3)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                if showsEditAffordance {
+                    Image(systemName: "pencil").font(.system(size: 8, weight: .bold))
+                }
+            }
+            .foregroundStyle(tint)
             Text(value)
                 .font(.system(.title3, design: .rounded).weight(.bold))
                 .foregroundStyle(Palette.ink)

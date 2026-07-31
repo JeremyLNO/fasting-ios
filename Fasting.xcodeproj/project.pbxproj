@@ -28,6 +28,8 @@
 		BA0000000000000000000015 /* AccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC000000000000000000000E /* AccountView.swift */; };
 		BA0000000000000000000016 /* AppInstall.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC000000000000000000000F /* AppInstall.swift */; };
 		BA0000000000000000000017 /* CommitmentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC0000000000000000000010 /* CommitmentView.swift */; };
+		BA0000000000000000000018 /* DayEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC0000000000000000000011 /* DayEditorView.swift */; };
+		BA0000000000000000000019 /* StartEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC0000000000000000000012 /* StartEditorView.swift */; };
 		BD0000000000000000000001 /* FastingWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD0000000000000000000001 /* FastingWidget.swift */; };
 		BD0000000000000000000002 /* FastingModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000001 /* FastingModel.swift */; };
 		BD0000000000000000000003 /* Palette.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000002 /* Palette.swift */; };
@@ -88,6 +90,8 @@
 		AC000000000000000000000E /* AccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountView.swift; sourceTree = "<group>"; };
 		AC000000000000000000000F /* AppInstall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppInstall.swift; sourceTree = "<group>"; };
 		AC0000000000000000000010 /* CommitmentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommitmentView.swift; sourceTree = "<group>"; };
+		AC0000000000000000000011 /* DayEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayEditorView.swift; sourceTree = "<group>"; };
+		AC0000000000000000000012 /* StartEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartEditorView.swift; sourceTree = "<group>"; };
 		AD0000000000000000000001 /* FastingWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FastingWidget.swift; sourceTree = "<group>"; };
 		AD0000000000000000000002 /* FastingWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = FastingWidget.entitlements; sourceTree = "<group>"; };
 		AD0000000000000000000003 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -165,6 +169,8 @@
 				AC000000000000000000000E /* AccountView.swift */,
 				AC000000000000000000000F /* AppInstall.swift */,
 				AC0000000000000000000010 /* CommitmentView.swift */,
+				AC0000000000000000000011 /* DayEditorView.swift */,
+				AC0000000000000000000012 /* StartEditorView.swift */,
 			);
 			path = Fasting;
 			sourceTree = "<group>";
@@ -291,6 +297,8 @@
 				BA0000000000000000000015 /* AccountView.swift in Sources */,
 				BA0000000000000000000016 /* AppInstall.swift in Sources */,
 				BA0000000000000000000017 /* CommitmentView.swift in Sources */,
+				BA0000000000000000000018 /* DayEditorView.swift in Sources */,
+				BA0000000000000000000019 /* StartEditorView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

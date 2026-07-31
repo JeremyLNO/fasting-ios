@@ -36,6 +36,7 @@ App iOS native (SwiftUI + WidgetKit) pour suivre l'état de son jeûne intermitt
 - **Écran principal** : anneau de progression pastel, **temps écoulé** en direct, **état d'avancement** métabolique (Digestion → Glycémie → Glycogène → Combustion des graisses → Cétose → Autophagie), et la phase en cours (jeûne / fenêtre alimentaire). **Un tap sur l'anneau** permet d'**interrompre le jeûne** (avec confirmation) ou de **démarrer un jeûne** à n'importe quelle heure, en dehors du planning — l'app, les widgets et la Dynamic Island s'ajustent immédiatement ; le planning normal reprend automatiquement une fois la session (manuelle) écoulée.
 - **Historique & séries** : série en cours / meilleure série, jeûnes complétés, durée moyenne, calendrier des 4 dernières semaines — calculés à partir du planning (pas de check-in requis).
 - **Bande « 7 derniers jours »** sur l'écran principal : un anneau par jour avec les **heures réellement jeûnées**, vert + trophée pour un objectif atteint, ambre + étoile pour un jeûne écourté, gris quand rien n'est enregistré, et le jeûne du jour affiché en pointillés tant qu'il tourne.
+- **Correction a posteriori** : un **tap sur un jour** de la bande ouvre son éditeur (heure de **début** et de **fin**, date incluse pour les jeûnes qui passent minuit) avec la durée et le statut recalculés en direct, plus un « marquer comme sans jeûne » ; un **tap sur la carte START** corrige l'heure de départ de la **fenêtre en cours** — le chrono, le pourcentage, la carte END, les widgets et la Live Activity repartent immédiatement de cette heure-là.
 - **Tracker d'eau** : objectif quotidien réglable (3 à 8 verres), 5 verres cliquables qui se remplissent, état « objectif atteint », **rappels de boire** (notifications espacées dans la journée).
 - **Notifications locales** quotidiennes au **début** et à la **fin** du jeûne (+ rappels d'hydratation optionnels).
 - **Widgets écran d'accueil** (petit/moyen/grand pour le jeûne, le moyen et le grand affichent aussi l'eau + petit widget eau **interactif**, tap direct sur un verre via App Intents iOS 17) + widget rond pour l'écran verrouillé, alimentés via un **App Group** partagé.
@@ -136,6 +137,29 @@ gris « aucune donnée », avec légende) ; il casse aussi la série et est excl
 C'est ce qui permet à `HistoryStore.last7Days(schedule:liveState:)` d'afficher « 10h » sur un jour
 écourté plutôt qu'un simple échec binaire, et de montrer le jeûne du jour en cours (`liveState`)
 avant qu'il ne soit enregistré. Rendu par `WeekStrip` (`Shared/FastingViews.swift`).
+
+### Corriger un jeûne
+`FastRecord` porte aussi `startTime`/`endTime` (optionnels eux aussi) dès qu'un jour a été **édité à
+la main**. Deux entrées :
+
+- **Un jour de la bande** → `Fasting/DayEditorView.swift`. Les deux `DatePicker` incluent la **date**
+  en plus de l'heure : un jeûne de 20 h se termine le lendemain, sans ça il serait inexprimable.
+  L'écran s'ouvre sur les heures enregistrées ; à défaut, sur l'heure planifiée du jour **avec la
+  durée déjà loguée** (un jour interrompu à 10 h s'ouvre sur 10 h, pas sur l'objectif — sinon ouvrir
+  l'éditeur réécrirait silencieusement l'historique). `HistoryStore.setEntry` recalcule `completed`
+  lui-même, donc l'aperçu (trophée / étoile) ne peut pas diverger de ce qui sera enregistré. Le
+  record est clé sur le jour où le jeûne a **commencé**, comme partout ailleurs.
+  « Marquer comme sans jeûne » écrit un **zéro explicite** plutôt que de supprimer la clé : une clé
+  supprimée dont la fenêtre planifiée est déjà passée serait simplement recréée par `syncIfNeeded`.
+- **La carte START** (crayon) → `Fasting/StartEditorView.swift`, pour corriger la fenêtre **en
+  cours**. Elle enregistre une `ManualSession` ancrée à l'heure choisie, donc le chrono, le
+  pourcentage, la carte END, les widgets et la Live Activity en découlent (la session vit dans l'App
+  Group). Le picker est borné à `...Date()` : une fenêtre qui commence dans le futur donnerait un
+  temps écoulé négatif.
+
+L'écran principal garde un compteur `historyVersion` passé en `.id()` à la bande : `HistoryStore`
+étant un store de fichiers et non un `ObservableObject`, c'est ce qui force la relecture après une
+édition.
 
 ## Tracker d'eau
 Objectif réglable (3 à 8 verres, `SharedStore.waterGoal`) dans Réglages, avec rappels optionnels

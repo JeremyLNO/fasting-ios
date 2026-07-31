@@ -87,6 +87,16 @@ de référence aux sessions Claude Code : à lire avant toute modification.
   `.background(FastingBackground(phase:))` sur le contenu, **jamais** en calque frère dans un
   `ZStack` — les formes décoratives (hors-cadre) élargissent alors le layout et coupent le
   contenu à gauche (bug rencontré 2 fois : écran principal, puis onboarding).
+- ⚠️ **Éditeurs d'historique** (`DayEditorView` / `StartEditorView`) :
+  - `FastingState` est reconstruit **chaque seconde** ; le passer directement à `.sheet(item:)`
+    rouvrirait/reconstruirait la feuille en boucle. D'où le wrapper `EditingWindow` à `id` stable.
+  - Ouvrir l'éditeur d'un jour ne doit **rien réécrire** : à défaut d'heures explicites, pré-remplir
+    avec la **durée déjà enregistrée** (`HistoryStore.record(for:)`), pas avec l'objectif — sinon un
+    jour interrompu à 10 h remonterait à 20 h au premier « Save ».
+  - Effacer un jour = écrire un **zéro explicite** (`clearEntry`), jamais supprimer la clé :
+    `syncIfNeeded` recréerait le jour dès que sa fenêtre planifiée est passée.
+  - `HistoryStore` est un store de fichiers (pas un `ObservableObject`) : après une édition, forcer
+    la relecture de la bande via un compteur passé en `.id()` (`historyVersion`).
 
 ## Conventions
 - `project.pbxproj` est **écrit à la main** avec un schéma d'UUID lisible :
