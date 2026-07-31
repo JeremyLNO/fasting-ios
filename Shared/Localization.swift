@@ -52,7 +52,6 @@ enum L {
 
         // Ring labels
         "ring_elapsed":   [.en: "elapsed", .fr: "écoulé", .de: "vergangen", .es: "transcurrido"],
-        "ring_remaining": [.en: "remaining", .fr: "restant", .de: "übrig", .es: "restante"],
 
         // Last 7 days strip
         "week_title":   [.en: "Last 7 days", .fr: "7 derniers jours", .de: "Letzte 7 Tage", .es: "Últimos 7 días"],

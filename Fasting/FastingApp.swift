@@ -251,7 +251,11 @@ struct ContentView: View {
 
             GlowRing(progress: s.progress, colors: Palette.ring(s.phase), glow: Palette.glow(s.phase), lineWidth: 20)
 
-            VStack(spacing: 5) {
+            // Four lines, no more: a disc has far less usable width than it looks, and the previous
+            // layout (badge + phase + timer + divider + % + remaining) spilled past the white circle
+            // onto the tick ring. The countdown lives on the REMAINING card just below, so repeating
+            // it here was only costing room.
+            VStack(spacing: 6) {
                 PhaseBadge(phase: s.phase)
                 Text((s.isFasting ? L.t("phase_fasting", lang) : L.t("phase_eating", lang)).uppercased())
                     .font(.caption2.weight(.bold))
@@ -260,25 +264,24 @@ struct ContentView: View {
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
                 Text(formatHMS(s.elapsed))
-                    .font(.system(size: 40, weight: .heavy, design: .rounded))
+                    .font(.system(size: 38, weight: .heavy, design: .rounded))
                     .monospacedDigit()
                     .foregroundStyle(Palette.ink)
                     .lineLimit(1)
                     .minimumScaleFactor(0.6)
-                // Spell out what the big number is, then the counterpart — the old layout showed a
-                // bare timer and a bare %, which read ambiguously.
-                labelledDivider(L.t("ring_elapsed", lang))
-                Text("\(Int((s.progress * 100).rounded()))%")
-                    .font(.system(.title3, design: .rounded).weight(.bold))
-                    .foregroundStyle(Palette.accent(s.phase))
-                Text("\(L.t("ring_remaining", lang)) \(formatHMS(s.remaining))")
-                    .font(.caption)
-                    .monospacedDigit()
-                    .foregroundStyle(Palette.sub)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
+                // Says what the big number is, and how far along it is, on one line.
+                HStack(spacing: 6) {
+                    Text(L.t("ring_elapsed", lang))
+                        .foregroundStyle(Palette.sub)
+                    Text("\(Int((s.progress * 100).rounded()))%")
+                        .fontWeight(.bold)
+                        .foregroundStyle(Palette.accent(s.phase))
+                }
+                .font(.system(.caption, design: .rounded))
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
             }
-            .padding(.horizontal, 30)
+            .padding(.horizontal, 28)
         }
         .frame(width: 258, height: 258)
         .padding(.vertical, 2)
@@ -293,15 +296,6 @@ struct ContentView: View {
         } message: {
             Text(L.t("end_fast_confirm_body", lang))
         }
-    }
-
-    private func labelledDivider(_ text: String) -> some View {
-        HStack(spacing: 8) {
-            Rectangle().fill(Palette.sub.opacity(0.25)).frame(height: 1)
-            Text(text).font(.caption2).foregroundStyle(Palette.sub).fixedSize()
-            Rectangle().fill(Palette.sub.opacity(0.25)).frame(height: 1)
-        }
-        .frame(width: 150)
     }
 
     /// The main action, promoted from a faint hint to a real button — it's the one thing you can
