@@ -14,6 +14,17 @@ func formatHM(_ t: TimeInterval) -> String {
     return h > 0 ? "\(h)h\(String(format: "%02d", m))" : "\(m) min"
 }
 
+private let clockFormatter: DateFormatter = {
+    let f = DateFormatter()
+    f.dateFormat = "HH:mm"
+    return f
+}()
+
+/// Wall-clock label ("HH:mm") for a moment in time. Used for the *current* window's start/end,
+/// which can differ from the configured schedule after a manual start/interrupt — never format
+/// `schedule.startLabel`/`endLabel` into those slots or they'll go stale.
+func clockLabel(_ date: Date) -> String { clockFormatter.string(from: date) }
+
 // MARK: - Decorative background
 
 /// Soft pastel gradient with blurred colour blobs and sparkles, tinted by phase.

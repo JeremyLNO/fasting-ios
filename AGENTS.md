@@ -71,9 +71,14 @@ de référence aux sessions Claude Code : à lire avant toute modification.
   family » (CarPlay Dashboard + Apple Watch Smart Stack, `@Environment(\.activityFamily)` +
   `.supplementalActivityFamilies([.small])`) en plus de l'écran verrouillé + Dynamic Island.
   `FastingActivityAttributes` n'a **aucune donnée statique** (tout est dans `ContentState` :
-  windowStart/windowEnd/isFasting/progress) — piège déjà rencontré : un champ statique capturé une
-  fois au démarrage (ex. l'heure de fin du planning) devient FAUX dès que la phase change ; toujours
-  dériver l'affichage de `windowEnd`/`ContentState`, jamais d'attributs figés à la création.
+  windowStart/windowEnd/isFasting/progress).
+- 🔁 **Piège n°1 du projet, rencontré 3 fois** — afficher `schedule.startLabel`/`endLabel` (le
+  planning *configuré*) là où il faut l'heure de la **fenêtre en cours**. Les deux diffèrent dès
+  qu'il y a une session manuelle, et le résultat se contredit lui-même (des heures figées à côté
+  d'un décompte qui tourne). Occurrences corrigées : attributs de la Live Activity, libellé « END »
+  de l'écran verrouillé, puis cartes START/END de l'écran principal. **Règle** : pour toute heure
+  affichée, utiliser `clockLabel(s.windowStart / s.windowEnd)` (helper partagé de `FastingViews.swift`) ;
+  `schedule.*Label` n'a sa place que dans l'en-tête qui rappelle le planning configuré.
   ⚠️ Aucun mécanisme ActivityKit purement local pour programmer une transition future (il faut un
   push serveur, absent ici) — `LiveActivityManager.refreshIfActive` est appelé au changement de
   phase (`.onChange(of: s.isFasting)`) et à chaque `onAppear`, en best-effort ; si l'app reste

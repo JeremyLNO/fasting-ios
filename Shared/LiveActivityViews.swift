@@ -15,11 +15,7 @@ struct LiveActivityData {
     }
     /// The *current* window's end, formatted — not a static label, so it's always correct whether
     /// we're fasting or eating (fixes "END" showing the wrong, frozen clock time after a transition).
-    var endTimeLabel: String {
-        let f = DateFormatter()
-        f.dateFormat = "HH:mm"
-        return f.string(from: windowEnd)
-    }
+    var endTimeLabel: String { clockLabel(windowEnd) }
 }
 
 /// Live, self-ticking remaining-time text (no activity updates required).

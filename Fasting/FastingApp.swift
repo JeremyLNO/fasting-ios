@@ -286,14 +286,20 @@ struct ContentView: View {
 
     // MARK: Stats
 
+    /// START / REMAINING / END all describe the **window currently running**, not the configured
+    /// schedule — after a manual start or interrupt the two differ, and mixing them (static ends
+    /// next to a live countdown) made the row contradict itself and the Live Activity. The
+    /// configured schedule still has its own place: the header line under the title.
     private func statsRow(_ s: FastingState) -> some View {
         HStack(spacing: 12) {
-            StatCard(icon: "clock", tint: Palette.fastAccent, label: L.t("stat_start", lang), value: schedule.startLabel)
+            StatCard(icon: "clock", tint: Palette.fastAccent, label: L.t("stat_start", lang),
+                     value: clockLabel(s.windowStart))
             StatCard(icon: s.isFasting ? "hourglass" : "calendar",
                      tint: Palette.accent(s.phase),
                      label: s.isFasting ? L.t("stat_remaining", lang) : L.t("stat_next_fast", lang),
                      value: formatHM(s.remaining))
-            StatCard(icon: "sunrise.fill", tint: Palette.peach, label: L.t("stat_end", lang), value: schedule.endLabel)
+            StatCard(icon: "sunrise.fill", tint: Palette.peach, label: L.t("stat_end", lang),
+                     value: clockLabel(s.windowEnd))
         }
     }
 
