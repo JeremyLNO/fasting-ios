@@ -65,6 +65,9 @@ jobs:
           security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
 
+          # Non-fatal on purpose: a broken secret for one certificate must not take the whole
+          # release down when the other one is enough to sign. The find-identity dump below is
+          # what actually says which identities the run had.
           import_cert() {
             local payload="$1" password="$2" label="$3"
             if [ -z "$payload" ]; then
@@ -72,10 +75,13 @@ jobs:
               return
             fi
             echo "$payload" | base64 --decode > "$RUNNER_TEMP/cert.p12"
-            security import "$RUNNER_TEMP/cert.p12" -k "$KEYCHAIN_PATH" -P "$password" \
-              -T /usr/bin/codesign -T /usr/bin/security
+            if security import "$RUNNER_TEMP/cert.p12" -k "$KEYCHAIN_PATH" -P "$password" \
+              -T /usr/bin/codesign -T /usr/bin/security; then
+              echo "imported $label certificate"
+            else
+              echo "::warning::could not import the $label certificate (wrong password or bad p12 secret)"
+            fi
             rm -f "$RUNNER_TEMP/cert.p12"
-            echo "imported $label certificate"
           }
           import_cert "$DIST_P12" "$DIST_PASSWORD" distribution
           import_cert "$DEV_P12" "$DEV_PASSWORD" development
