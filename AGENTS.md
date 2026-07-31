@@ -40,9 +40,17 @@ de référence aux sessions Claude Code : à lire avant toute modification.
   Activity (attributs + vues), localisation.
 - **`Fasting/`** = app uniquement (Settings, Onboarding, History, Account/Auth, notifs).
   **`FastingWidget/`** = widget uniquement (widgets, Live Activity, `WaterIntents` AppIntents).
-- **App gratuite, pas de StoreKit/IAP** : aucun essai, aucun paywall — `RootView` va direct à
-  `ContentView` après l'onboarding. `AppInstall.swift` (ex-`Trial`) ne sert plus qu'à ancrer
-  l'historique/séries, plus à compter un essai.
+- **App gratuite, pas de StoreKit/IAP** : aucun essai, aucun paywall — `RootView` enchaîne
+  `CommitmentView` (une fois) → `OnboardingView` (une fois) → `ContentView`. `AppInstall.swift`
+  (ex-`Trial`) ne sert plus qu'à ancrer l'historique/séries, plus à compter un essai.
+- **Écran d'engagement** (`Fasting/CommitmentView.swift`) : convention **partagée par toutes les
+  apps gratuites Crazy Bee Labs** — écran autonome affiché une seule fois AVANT l'onboarding
+  (clé `commitment.seen`), pas une page de l'onboarding. Référence canonique :
+  `~/respire-app/Respire/Views/CommitmentView.swift` (icône cadeau, carte « pourquoi c'est
+  gratuit », carte « l'engagement Crazy Bee Labs », logo CBL cliquable, bouton Continuer).
+  Toujours garder la vue autonome (closure `onContinue`) pour qu'un réglage puisse la re-présenter
+  en sheet. ⚠️ Respire pointe vers `crazybeelabs.com/commitment`, **page qui n'existe pas** sur le
+  site (retombe sur l'accueil) — Fasting pointe donc vers la racine du site.
 - **Session manuelle** (tap sur l'anneau pour démarrer/interrompre à tout moment) : `ManualSession`
   + `FastingSchedule.effectiveState(at:override:)` dans `Shared/FastingModel.swift`, persistée via
   `SharedStore.manualOverride()` (App Group → app, widgets et Dynamic Island cohérents). Toujours

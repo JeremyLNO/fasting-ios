@@ -44,15 +44,20 @@ struct FastingApp: App {
     }
 }
 
-/// Fasting is a free app — this just gates first-launch onboarding, nothing else.
+/// Fasting is a free app — first launch shows the Crazy Bee Labs commitment screen (why the app
+/// is free, exactly once), then onboarding. Nothing else gates the app.
 struct RootView: View {
+    @AppStorage(CommitmentView.seenKey) private var hasSeenCommitment = false
     @AppStorage("onboarding.completed") private var onboardingDone = false
     @State private var schedule = SharedStore.load()
 
     var body: some View {
         let skipOnboarding = CommandLine.arguments.contains("-skipOnboarding")
+        let forceCommitment = CommandLine.arguments.contains("-showCommitment")
 
-        if !onboardingDone && !skipOnboarding {
+        if forceCommitment || (!hasSeenCommitment && !skipOnboarding) {
+            CommitmentView { hasSeenCommitment = true }
+        } else if !onboardingDone && !skipOnboarding {
             OnboardingView(schedule: $schedule) {
                 SharedStore.save(schedule)
                 NotificationManager.shared.requestAuthorizationAndSchedule()

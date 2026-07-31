@@ -11,9 +11,9 @@ App iOS native (SwiftUI + WidgetKit) pour suivre l'état de son jeûne intermitt
 |:---:|:---:|
 | ![Widgets et Live Activity](screenshots/03-widgets-accueil.png) | ![Dynamic Island](screenshots/04-dynamic-island.png) |
 
-| Onboarding | Engagement gratuit (onboarding) |
+| Onboarding | Engagement Crazy Bee Labs (1er lancement) |
 |:---:|:---:|
-| ![Onboarding](screenshots/08-onboarding-welcome.png) | ![Gratuit grâce à Crazy Bee Labs](screenshots/10-onboarding-free.png) |
+| ![Onboarding](screenshots/08-onboarding-welcome.png) | ![Engagement Crazy Bee Labs](screenshots/10-commitment.png) |
 
 | Historique | Icône (écran d'accueil) |
 |:---:|:---:|
@@ -39,10 +39,10 @@ App iOS native (SwiftUI + WidgetKit) pour suivre l'état de son jeûne intermitt
 - **Notifications locales** quotidiennes au **début** et à la **fin** du jeûne (+ rappels d'hydratation optionnels).
 - **Widgets écran d'accueil** (petit/moyen/grand pour le jeûne, le moyen et le grand affichent aussi l'eau + petit widget eau **interactif**, tap direct sur un verre via App Intents iOS 17) + widget rond pour l'écran verrouillé, alimentés via un **App Group** partagé.
 - **Live Activity / Dynamic Island** : suivi en direct du jeûne dans la Dynamic Island et sur l'écran verrouillé (chrono et progression qui avancent tout seuls, sans push). Bouton *Suivre / Arrêter le suivi en direct* dans l'app.
-- **Onboarding** au premier lancement : bienvenue + choix de la langue, choix du programme de jeûne, mise en avant de l'app **gratuite** (engagement Crazy Bee Labs), puis notifications.
+- **Premier lancement** : un écran **engagement Crazy Bee Labs** (pourquoi l'app est gratuite — même écran dédié que les autres apps santé gratuites du studio), puis un **onboarding** en 3 pages : bienvenue + choix de la langue, choix du programme de jeûne, notifications.
 - **Compte** (optionnel) : Sign in with Apple, lien vers la gestion de l'identifiant Apple (mot de passe/sécurité gérés par Apple), **suppression de compte** qui efface réellement toutes les données locales (planning, eau, historique, préférences). App 100% locale : se connecter n'active aucune synchronisation, ça sert uniquement à avoir une identité pour la conformité App Store.
 - **Politique de confidentialité** accessible depuis les réglages.
-- **Gratuite** : aucun essai, aucun abonnement — engagement Crazy Bee Labs, mis en avant dès l'onboarding et rappelé dans les réglages.
+- **Gratuite** : aucun essai, aucun abonnement — engagement Crazy Bee Labs, présenté au premier lancement et re-consultable à tout moment depuis les réglages.
 - **Multilingue** : anglais par défaut, bascule 🇬🇧 / 🇫🇷 / 🇩🇪 / 🇪🇸 dans les réglages (et dès l'onboarding).
 - Thème **pastel** (lavande / pêche / menthe) partagé entre l'app, les widgets et la Live Activity.
 
@@ -107,8 +107,14 @@ essai, aucun abonnement, aucun paywall. Il n'y a **plus de StoreKit / IAP** dans
 (`Store.swift`, `PaywallView.swift`, `Fasting.storekit` ont été retirés) : `RootView` ouvre
 directement l'app après l'onboarding, sans aucune vérification de trial. Le premier lancement
 (`AppInstall.swift`, ex-`Trial`) sert uniquement de point d'ancrage pour l'historique/séries, plus
-pour un compte à rebours payant. L'engagement est mis en avant sur une page dédiée de
-l'onboarding (🐝 « Free, thanks to Crazy Bee Labs ») et rappelé dans une carte des réglages.
+pour un compte à rebours payant.
+
+L'engagement est présenté par `Fasting/CommitmentView.swift` : un **écran dédié affiché une seule
+fois, avant l'onboarding** (clé `commitment.seen`), reprenant le pattern des autres apps santé
+gratuites du studio (cf. `CommitmentView` de Respire) — icône cadeau, carte « pourquoi c'est
+gratuit », carte « l'engagement Crazy Bee Labs », logo CBL cliquable vers le site. La vue est
+autonome (closure `onContinue`), donc la carte 🐝 des **réglages** la re-présente en sheet sans
+dupliquer la moindre mise en page. Localisée EN/FR/DE/ES.
 
 ## Historique & séries
 `Shared/HistoryStore.swift` reconstruit l'historique **à partir du planning** (pas de check-in
@@ -187,7 +193,8 @@ configuré, pas sur la session manuelle. (L'historique, lui, reflète bien les i
 ## Arguments de lancement (dev uniquement)
 - `-skipNotifPrompt` : ne pas demander l'autorisation notifications (captures propres).
 - `-skipOnboarding` : saute l'assistant de premier lancement.
-- `-onboardingStep <0-3>` : ouvre l'onboarding directement sur une page donnée.
+- `-onboardingStep <0-2>` : ouvre l'onboarding directement sur une page donnée.
+- `-showCommitment` : force l'écran d'engagement Crazy Bee Labs (même s'il a déjà été vu).
 - `-demoNow <timestamp>` : fige l'heure « maintenant » (démo).
 - `-demoLang <en|fr|de|es>` : force la langue.
 - `-demoWater <n>` : fixe le nombre de verres du jour.

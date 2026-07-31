@@ -9,6 +9,7 @@ struct SettingsView: View {
     @State private var start = Date()
     @State private var end = Date()
     @State private var waterGoal = SharedStore.waterGoal
+    @State private var showCommitment = false
     @AppStorage("water.reminders.enabled") private var waterRemindersEnabled = false
     @StateObject private var auth = AuthManager()
 
@@ -225,22 +226,32 @@ struct SettingsView: View {
         .background(.white.opacity(0.6), in: RoundedRectangle(cornerRadius: 18))
     }
 
+    /// Tapping re-presents the one-time commitment screen (the view is standalone precisely so it
+    /// can be shown again from here without duplicating any layout).
     private var freeAppCard: some View {
-        HStack(spacing: 12) {
-            Text("🐝").font(.title2)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(L.t("free_badge_title", lang))
-                    .font(.system(.body, design: .rounded).weight(.semibold))
-                    .foregroundStyle(Palette.ink)
-                Text(L.t("free_badge_subtitle", lang))
-                    .font(.caption)
-                    .foregroundStyle(Palette.sub)
+        Button { showCommitment = true } label: {
+            HStack(spacing: 12) {
+                Text("🐝").font(.title2)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(L.t("free_badge_title", lang))
+                        .font(.system(.body, design: .rounded).weight(.semibold))
+                        .foregroundStyle(Palette.ink)
+                    Text(L.t("free_badge_subtitle", lang))
+                        .font(.caption)
+                        .foregroundStyle(Palette.sub)
+                        .multilineTextAlignment(.leading)
+                }
+                Spacer()
+                Image(systemName: "chevron.right").font(.caption).foregroundStyle(Palette.sub)
             }
-            Spacer()
         }
+        .buttonStyle(.plain)
         .padding(18)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(.white.opacity(0.6), in: RoundedRectangle(cornerRadius: 18))
+        .sheet(isPresented: $showCommitment) {
+            CommitmentView { showCommitment = false }
+        }
     }
 
     private func scheduleFromPickers() -> FastingSchedule {
