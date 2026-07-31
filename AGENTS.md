@@ -49,8 +49,11 @@ de référence aux sessions Claude Code : à lire avant toute modification.
   `~/respire-app/Respire/Views/CommitmentView.swift` (icône cadeau, carte « pourquoi c'est
   gratuit », carte « l'engagement Crazy Bee Labs », logo CBL cliquable, bouton Continuer).
   Toujours garder la vue autonome (closure `onContinue`) pour qu'un réglage puisse la re-présenter
-  en sheet. ⚠️ Respire pointe vers `crazybeelabs.com/commitment`, **page qui n'existe pas** sur le
-  site (retombe sur l'accueil) — Fasting pointe donc vers la racine du site.
+  en sheet. Le logo pointe vers `crazybeelabs.com/commitment` (page réelle, comme Respire).
+- ⚠️ **Le site public crazybeelabs.com n'est PAS `~/crazy-bee-labs-site`** (vieux site statique, routage
+  par hash) mais **`~/crazybeelabs-app`** (Next.js 15 + Vercel + Neon, routage par chemin, comptes).
+  Toute modif du site public (catalogue d'apps, contenu) se fait dans `~/crazybeelabs-app` :
+  `src/lib/showcase.ts` + `src/lib/content/{en,fr,es,de,pt}.json` + `public/apps/<slug>.png`.
 - **Session manuelle** (tap sur l'anneau pour démarrer/interrompre à tout moment) : `ManualSession`
   + `FastingSchedule.effectiveState(at:override:)` dans `Shared/FastingModel.swift`, persistée via
   `SharedStore.manualOverride()` (App Group → app, widgets et Dynamic Island cohérents). Toujours

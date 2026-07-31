@@ -9,9 +9,9 @@ struct CommitmentView: View {
     /// `UserDefaults`/`@AppStorage` key remembering this screen has already been shown once.
     static let seenKey = "commitment.seen"
 
-    /// Crazy Bee Labs' public site — the same destination for every entry point (first launch
-    /// here, and the Settings row).
-    static let commitmentURL = URL(string: "https://www.crazybeelabs.com/")!
+    /// Crazy Bee Labs' public commitment page — the same URL as the other free apps (cf. Respire),
+    /// and the same destination for every entry point (first launch here, and the Settings row).
+    static let commitmentURL = URL(string: "https://www.crazybeelabs.com/commitment")!
 
     var onContinue: () -> Void
 
