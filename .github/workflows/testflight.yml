@@ -46,21 +46,44 @@ jobs:
           mkdir -p ~/private_keys
           printf '%s' "$ASC_KEY_P8" > ~/private_keys/AuthKey_${ASC_KEY_ID}.p8
 
-      - name: Import signing certificate
+      - name: Import signing certificates
+        # Both certificates, distribution included. An archive is signed with an *Apple
+        # Distribution* identity; with only the development one in the keychain, automatic
+        # provisioning tried to mint a new certificate on every run and eventually hit
+        # "Your account has reached the maximum number of certificates", which then surfaced as
+        # "No profiles for company.lno.fasting were found". Provisioning *profiles* are free to
+        # create — certificates are not, so the CI must reuse the ones we already have.
         env:
-          CERT_P12: ${{ secrets.IOS_DEV_CERT_P12 }}
-          CERT_PASSWORD: ${{ secrets.IOS_DEV_CERT_PASSWORD }}
+          DEV_P12: ${{ secrets.IOS_DEV_CERT_P12 }}
+          DEV_PASSWORD: ${{ secrets.IOS_DEV_CERT_PASSWORD }}
+          DIST_P12: ${{ secrets.IOS_DIST_CERT_P12 }}
+          DIST_PASSWORD: ${{ secrets.IOS_DIST_CERT_PASSWORD }}
         run: |
           KEYCHAIN_PATH="$RUNNER_TEMP/signing.keychain-db"
           KEYCHAIN_PASSWORD=$(uuidgen)
-          echo "$CERT_P12" | base64 --decode > "$RUNNER_TEMP/cert.p12"
           security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
           security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-          security import "$RUNNER_TEMP/cert.p12" -k "$KEYCHAIN_PATH" -P "$CERT_PASSWORD" -T /usr/bin/codesign -T /usr/bin/security
+
+          import_cert() {
+            local payload="$1" password="$2" label="$3"
+            if [ -z "$payload" ]; then
+              echo "::warning::no $label certificate in secrets, skipping"
+              return
+            fi
+            echo "$payload" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+            security import "$RUNNER_TEMP/cert.p12" -k "$KEYCHAIN_PATH" -P "$password" \
+              -T /usr/bin/codesign -T /usr/bin/security
+            rm -f "$RUNNER_TEMP/cert.p12"
+            echo "imported $label certificate"
+          }
+          import_cert "$DIST_P12" "$DIST_PASSWORD" distribution
+          import_cert "$DEV_P12" "$DEV_PASSWORD" development
+
           security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH" >/dev/null
           security list-keychains -d user -s "$KEYCHAIN_PATH" $(security list-keychains -d user | sed 's/"//g')
-          rm -f "$RUNNER_TEMP/cert.p12"
+          echo "--- signing identities available ---"
+          security find-identity -v -p codesigning "$KEYCHAIN_PATH"
 
       - name: Archive (signed, automatic provisioning)
         env:
