@@ -50,6 +50,16 @@ enum L {
         "stat_next_fast": [.en: "Next fast", .fr: "Prochain jeûne", .de: "Nächstes Fasten", .es: "Próximo ayuno"],
         "stat_end":       [.en: "End", .fr: "Fin", .de: "Ende", .es: "Fin"],
 
+        // Ring labels
+        "ring_elapsed":   [.en: "elapsed", .fr: "écoulé", .de: "vergangen", .es: "transcurrido"],
+        "ring_remaining": [.en: "remaining", .fr: "restant", .de: "übrig", .es: "restante"],
+
+        // Last 7 days strip
+        "week_title":   [.en: "Last 7 days", .fr: "7 derniers jours", .de: "Letzte 7 Tage", .es: "Últimos 7 días"],
+        "week_full":    [.en: "Full success", .fr: "Réussite complète", .de: "Voller Erfolg", .es: "Éxito completo"],
+        "week_partial": [.en: "Partial", .fr: "Partiel", .de: "Teilweise", .es: "Parcial"],
+        "week_today":   [.en: "TODAY", .fr: "AUJ.", .de: "HEUTE", .es: "HOY"],
+
         // Stage hint
         "next_stage": [.en: "Next stage", .fr: "Prochaine étape", .de: "Nächste Phase", .es: "Próxima etapa"],
         "word_in":    [.en: "in", .fr: "dans", .de: "in", .es: "en"],

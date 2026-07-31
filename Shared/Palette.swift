@@ -22,10 +22,15 @@ enum Palette {
         Color(red: 1.00, green: 0.61, blue: 0.74),
         Color(red: 1.00, green: 0.73, blue: 0.52)
     ]
+    /// Light → deep green, so the arc reads as a ramp rather than a flat band.
     static let eatRing: [Color] = [
-        Color(red: 0.43, green: 0.80, blue: 0.56),
-        Color(red: 0.68, green: 0.89, blue: 0.54)
+        Color(red: 0.68, green: 0.91, blue: 0.62),
+        Color(red: 0.45, green: 0.82, blue: 0.53),
+        Color(red: 0.26, green: 0.70, blue: 0.42)
     ]
+
+    /// Amber, for a fast that was started but cut short.
+    static let amber = Color(red: 0.98, green: 0.75, blue: 0.28)
     static let fastGlow = Color(red: 1.00, green: 0.60, blue: 0.78)
     static let eatGlow  = Color(red: 0.49, green: 0.82, blue: 0.55)
 

@@ -106,17 +106,19 @@ struct ContentView: View {
             let s = schedule.effectiveState(at: now, override: SharedStore.manualOverride())
 
             ScrollView(showsIndicators: false) {
-                VStack(spacing: 16) {
+                VStack(spacing: 14) {
                     header
                     heroRing(s)
-                    tapHint(s)
-                    stageSection(s)
+                    toggleButton(s)
+                    stageCard(s)
                     statsRow(s)
-                    waterTracker
+                    waterRow
+                    WeekStrip(days: HistoryStore.last7Days(schedule: schedule, liveState: s, now: now),
+                              lang: lang)
                     liveButton
                 }
-                .padding(.horizontal, 22)
-                .padding(.top, 8)
+                .padding(.horizontal, 20)
+                .padding(.top, 4)
                 .padding(.bottom, 24)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -163,20 +165,32 @@ struct ContentView: View {
     // MARK: Header
 
     private var header: some View {
-        HStack(alignment: .top) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text("Fasting made easy")
-                    .font(.system(size: 40, weight: .heavy, design: .rounded))
-                    .foregroundStyle(Palette.ink)
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(alignment: .top) {
+                (Text("Fasting ").foregroundStyle(Palette.ink)
+                 + Text(Image(systemName: "leaf.fill")).foregroundStyle(Palette.eatAccent)
+                 + Text("\nmade easy").foregroundStyle(Palette.eatAccent))
+                    .font(.system(size: 34, weight: .heavy, design: .rounded))
+                    .lineSpacing(-2)
+                Spacer()
+                HStack(spacing: 10) {
+                    Button { showHistory = true } label: { headerIcon("chart.bar.fill") }
+                    Button { showSettings = true } label: { headerIcon("slider.horizontal.3") }
+                }
+            }
+
+            // The configured schedule, as a chip — clearly separated from the live window times
+            // shown in the stat cards below.
+            HStack(spacing: 6) {
+                Image(systemName: "clock").font(.caption)
                 Text("\(schedule.startLabel) → \(schedule.endLabel) · \(schedule.fastingHoursText)")
-                    .font(.system(.subheadline, design: .rounded))
-                    .foregroundStyle(Palette.sub)
+                    .font(.system(.subheadline, design: .rounded).weight(.medium))
             }
-            Spacer()
-            HStack(spacing: 10) {
-                Button { showHistory = true } label: { headerIcon("chart.bar.fill") }
-                Button { showSettings = true } label: { headerIcon("slider.horizontal.3") }
-            }
+            .foregroundStyle(Palette.ink)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 9)
+            .background(.white.opacity(0.75), in: Capsule())
+            .overlay(Capsule().stroke(.white.opacity(0.7), lineWidth: 1))
         }
     }
 
@@ -194,32 +208,44 @@ struct ContentView: View {
     private func heroRing(_ s: FastingState) -> some View {
         ZStack {
             Circle()
-                .fill(.white.opacity(0.5))
-                .frame(width: 224, height: 224)
+                .fill(.white.opacity(0.55))
+                .frame(width: 196, height: 196)
                 .overlay(Circle().stroke(.white.opacity(0.6), lineWidth: 1))
                 .shadow(color: .black.opacity(0.05), radius: 12)
 
-            GlowRing(progress: s.progress, colors: Palette.ring(s.phase), glow: Palette.glow(s.phase), lineWidth: 24)
+            GlowRing(progress: s.progress, colors: Palette.ring(s.phase), glow: Palette.glow(s.phase), lineWidth: 20)
 
-            VStack(spacing: 7) {
+            VStack(spacing: 5) {
                 PhaseBadge(phase: s.phase)
                 Text((s.isFasting ? L.t("phase_fasting", lang) : L.t("phase_eating", lang)).uppercased())
                     .font(.caption2.weight(.bold))
-                    .tracking(1.5)
+                    .tracking(1.4)
                     .foregroundStyle(Palette.sub)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
                 Text(formatHMS(s.elapsed))
                     .font(.system(size: 40, weight: .heavy, design: .rounded))
                     .monospacedDigit()
                     .foregroundStyle(Palette.ink)
-                SparkleDivider(tint: Palette.accent(s.phase))
-                Text("\(Int((s.progress * 100).rounded())) %")
-                    .font(.system(.title3, design: .rounded).weight(.semibold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
+                // Spell out what the big number is, then the counterpart — the old layout showed a
+                // bare timer and a bare %, which read ambiguously.
+                labelledDivider(L.t("ring_elapsed", lang))
+                Text("\(Int((s.progress * 100).rounded()))%")
+                    .font(.system(.title3, design: .rounded).weight(.bold))
                     .foregroundStyle(Palette.accent(s.phase))
+                Text("\(L.t("ring_remaining", lang)) \(formatHMS(s.remaining))")
+                    .font(.caption)
+                    .monospacedDigit()
+                    .foregroundStyle(Palette.sub)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
             }
             .padding(.horizontal, 30)
         }
-        .frame(width: 298, height: 298)
-        .padding(.vertical, 4)
+        .frame(width: 258, height: 258)
+        .padding(.vertical, 2)
         .contentShape(Circle())
         .onTapGesture { toggleFasting(s) }
         .sensoryFeedback(.impact(weight: .medium), trigger: toggleTrigger)
@@ -233,14 +259,47 @@ struct ContentView: View {
         }
     }
 
-    private func tapHint(_ s: FastingState) -> some View {
-        HStack(spacing: 4) {
-            Image(systemName: "hand.tap.fill")
-            Text(s.isFasting ? L.t("tap_to_end", lang) : L.t("tap_to_start", lang))
+    private func labelledDivider(_ text: String) -> some View {
+        HStack(spacing: 8) {
+            Rectangle().fill(Palette.sub.opacity(0.25)).frame(height: 1)
+            Text(text).font(.caption2).foregroundStyle(Palette.sub).fixedSize()
+            Rectangle().fill(Palette.sub.opacity(0.25)).frame(height: 1)
         }
-        .font(.caption2)
-        .foregroundStyle(Palette.sub.opacity(0.8))
-        .multilineTextAlignment(.center)
+        .frame(width: 150)
+    }
+
+    /// The main action, promoted from a faint hint to a real button — it's the one thing you can
+    /// do from this screen, so it shouldn't look like a caption.
+    private func toggleButton(_ s: FastingState) -> some View {
+        Button { toggleFasting(s) } label: {
+            HStack(spacing: 10) {
+                Image(systemName: s.isFasting ? "moon.stars.fill" : "leaf.fill")
+                    .font(.footnote.weight(.bold))
+                    .foregroundStyle(Palette.accent(s.phase))
+                    .frame(width: 30, height: 30)
+                    .background(.white, in: Circle())
+                // Two lines allowed: the French/German labels are much longer than the English
+                // one and were being truncated mid-word inside the pill.
+                Text(s.isFasting ? L.t("tap_to_end", lang) : L.t("tap_to_start", lang))
+                    .font(.system(.subheadline, design: .rounded).weight(.semibold))
+                    .foregroundStyle(.white)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.85)
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: 0)
+            }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 8)
+            .background(
+                LinearGradient(colors: Palette.ring(s.phase).suffix(2),
+                               startPoint: .leading, endPoint: .trailing),
+                in: Capsule()
+            )
+            .shadow(color: Palette.glow(s.phase).opacity(0.35), radius: 8, y: 3)
+        }
+        .buttonStyle(.plain)
+        .padding(.horizontal, 24)
     }
 
     private func toggleFasting(_ s: FastingState) {
@@ -267,21 +326,44 @@ struct ContentView: View {
 
     // MARK: Stage
 
-    private func stageSection(_ s: FastingState) -> some View {
-        VStack(spacing: 8) {
-            let current = FastingStage.current(forHours: s.elapsedHours)
-            StageChip(emoji: current.emoji, name: current.name(lang))
+    /// Metabolic stage as a proper row: name on top, explanation below, tappable to open History
+    /// (where the stages are laid out in full).
+    private func stageCard(_ s: FastingState) -> some View {
+        let current = FastingStage.current(forHours: s.elapsedHours)
+        let subtitle: String = {
             if s.isFasting, let next = FastingStage.next(forHours: s.elapsedHours) {
-                Text("\(L.t("next_stage", lang)) \(next.emoji) \(next.name(lang)) \(L.t("word_in", lang)) \(formatHM((next.threshold - s.elapsedHours) * 3600))")
-                    .font(.caption)
-                    .foregroundStyle(Palette.sub)
-                    .multilineTextAlignment(.center)
-            } else {
-                Text(current.detail(lang))
-                    .font(.caption)
-                    .foregroundStyle(Palette.sub)
+                return "\(L.t("next_stage", lang)) \(next.name(lang)) \(L.t("word_in", lang)) \(formatHM((next.threshold - s.elapsedHours) * 3600))"
             }
+            return current.detail(lang)
+        }()
+
+        return Button { showHistory = true } label: {
+            HStack(spacing: 12) {
+                Text(current.emoji)
+                    .font(.title3)
+                    .frame(width: 44, height: 44)
+                    .background(Palette.accent(s.phase).opacity(0.14), in: Circle())
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(current.name(lang))
+                        .font(.system(.headline, design: .rounded))
+                        .foregroundStyle(Palette.ink)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                    Text(subtitle)
+                        .font(.caption)
+                        .foregroundStyle(Palette.sub)
+                        .multilineTextAlignment(.leading)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 4)
+                Image(systemName: "chevron.right").font(.footnote).foregroundStyle(Palette.sub)
+            }
+            .padding(14)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(.white.opacity(0.75), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(.white.opacity(0.7), lineWidth: 1))
         }
+        .buttonStyle(.plain)
     }
 
     // MARK: Stats
@@ -326,34 +408,54 @@ struct ContentView: View {
         .padding(.top, 2)
     }
 
-    private var waterTracker: some View {
+    /// Water on a single line — the glasses stay individually tappable, and a "+" adds the next
+    /// one, so the common case (log one glass) is one tap without aiming.
+    private var waterRow: some View {
         let goal = SharedStore.waterGoal
         let done = glasses >= goal
-        return VStack(spacing: 12) {
-            HStack(spacing: 6) {
-                Image(systemName: done ? "checkmark.seal.fill" : "drop.fill")
-                    .font(.subheadline)
-                    .foregroundStyle(done ? Palette.eatAccent : Palette.water)
-                Text(done ? L.t("water_done", lang) : L.t("water_title", lang))
-                    .font(.system(.subheadline, design: .rounded).weight(.semibold))
-                    .foregroundStyle(done ? Palette.eatAccent : Palette.ink)
-                Spacer()
-                Text(done ? "\(goal * 200) ml ✓" : "\(glasses * 200) / \(goal * 200) ml")
-                    .font(.caption.weight(done ? .bold : .regular))
-                    .foregroundStyle(done ? Palette.eatAccent : Palette.sub)
-            }
-            HStack(spacing: 10) {
-                ForEach(0..<SharedStore.waterGoal, id: \.self) { i in
-                    Button { tapGlass(i) } label: { GlassIcon(filled: i < glasses, size: SharedStore.waterGoal > 5 ? 26 : 34) }
+        return HStack(spacing: 10) {
+            Image(systemName: done ? "checkmark.seal.fill" : "drop.fill")
+                .font(.subheadline)
+                .foregroundStyle(done ? Palette.eatAccent : Palette.water)
+            Text(done ? L.t("water_done", lang) : L.t("water_title", lang))
+                .font(.system(.subheadline, design: .rounded).weight(.semibold))
+                .foregroundStyle(done ? Palette.eatAccent : Palette.ink)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+
+            HStack(spacing: 5) {
+                ForEach(0..<goal, id: \.self) { i in
+                    Button { tapGlass(i) } label: { GlassIcon(filled: i < glasses, size: goal > 6 ? 16 : 20) }
                         .buttonStyle(.plain)
                 }
             }
+            .layoutPriority(1)
+
+            Spacer(minLength: 4)
+
+            Text("\(glasses * 200) / \(goal * 200) ml")
+                .font(.caption2)
+                .foregroundStyle(done ? Palette.eatAccent : Palette.sub)
+                .lineLimit(1)
+                .fixedSize()
+
+            Button { tapGlass(min(glasses, goal - 1)) } label: {
+                Image(systemName: "plus")
+                    .font(.footnote.weight(.bold))
+                    .foregroundStyle(Palette.water)
+                    .frame(width: 30, height: 30)
+                    .background(Palette.water.opacity(0.14), in: Circle())
+            }
+            .buttonStyle(.plain)
+            .disabled(done)
+            .opacity(done ? 0.4 : 1)
         }
-        .padding(16)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
         .frame(maxWidth: .infinity)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous)
-            .stroke(done ? Palette.eatAccent.opacity(0.55) : .white.opacity(0.5), lineWidth: done ? 1.5 : 1))
+        .background(.white.opacity(0.75), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous)
+            .stroke(done ? Palette.eatAccent.opacity(0.5) : .white.opacity(0.7), lineWidth: 1))
     }
 
     private func tapGlass(_ i: Int) {

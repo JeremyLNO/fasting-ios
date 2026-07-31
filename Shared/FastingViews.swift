@@ -87,7 +87,9 @@ struct Ticks: Shape {
     }
 }
 
-/// The hero progress ring: glowing multi-stop gradient arc over a track, with tick marks.
+/// The hero progress ring: a glossy multi-stop gradient arc over a track, with tick marks and a
+/// bright head at the leading edge. The gradient is mapped across the *swept* portion only, so the
+/// colour ramp reads the same whether the arc covers 10% or 90%.
 struct GlowRing: View {
     var progress: Double
     var colors: [Color]
@@ -95,28 +97,166 @@ struct GlowRing: View {
     var lineWidth: CGFloat = 24
 
     var body: some View {
-        let p = max(0.0001, min(progress, 1))
-        let gradient = AngularGradient(gradient: Gradient(colors: colors), center: .center)
-        ZStack {
-            Ticks(count: 60)
-                .stroke(Palette.sub.opacity(0.22), lineWidth: 1)
-                .padding(lineWidth + 8)
+        let raw = min(max(progress, 0), 1)
+        // Below ~0.5% the rounded line cap would still paint a full dot on the track, which reads
+        // as a stray bead rather than "just started" — so draw nothing at all there.
+        let visible = raw > 0.005
+        let p = max(0.0001, raw)
+        // Squeeze the stops into the swept arc, then pad with the last colour so the remainder of
+        // the circle doesn't wrap the ramp back around to the first colour.
+        let stops: [Gradient.Stop] = colors.enumerated().map { i, c in
+            .init(color: c, location: Double(i) / Double(max(colors.count - 1, 1)) * p)
+        } + [.init(color: colors.last ?? glow, location: 1)]
+        let gradient = AngularGradient(gradient: Gradient(stops: stops), center: .center,
+                                       startAngle: .degrees(-90), endAngle: .degrees(270))
 
-            Circle()
-                .stroke(Palette.track, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
+        GeometryReader { geo in
+            let side = min(geo.size.width, geo.size.height)
+            let radius = (side - lineWidth) / 2
+            let angle = Angle.degrees(-90 + 360 * p)
 
-            Circle()
-                .trim(from: 0, to: p)
-                .stroke(gradient, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
-                .rotationEffect(.degrees(-90))
-                .blur(radius: 13)
-                .opacity(0.9)
+            ZStack {
+                Ticks(count: 60)
+                    .stroke(Palette.sub.opacity(0.22), lineWidth: 1)
+                    .padding(lineWidth + 8)
 
-            Circle()
-                .trim(from: 0, to: p)
-                .stroke(gradient, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
-                .rotationEffect(.degrees(-90))
-                .shadow(color: glow.opacity(0.55), radius: 6)
+                Circle()
+                    .stroke(Palette.track, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
+
+                if visible {
+                    Circle()
+                        .trim(from: 0, to: p)
+                        .stroke(gradient, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
+                        .rotationEffect(.degrees(-90))
+                        .blur(radius: 13)
+                        .opacity(0.85)
+
+                    Circle()
+                        .trim(from: 0, to: p)
+                        .stroke(gradient, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
+                        .rotationEffect(.degrees(-90))
+                        .shadow(color: glow.opacity(0.5), radius: 6)
+
+                    // Glossy sheen along the top of the stroke, for the 3D look.
+                    Circle()
+                        .trim(from: 0, to: p)
+                        .stroke(.white.opacity(0.28), style: StrokeStyle(lineWidth: lineWidth * 0.30, lineCap: .round))
+                        .rotationEffect(.degrees(-90))
+                        .offset(y: -lineWidth * 0.22)
+                        .blur(radius: 2)
+                        .mask(Circle().trim(from: 0, to: p)
+                            .stroke(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
+                            .rotationEffect(.degrees(-90)))
+
+                    // Bright head at the leading edge.
+                    Circle()
+                        .fill(.white)
+                        .frame(width: lineWidth * 0.26, height: lineWidth * 0.26)
+                        .shadow(color: .white.opacity(0.9), radius: 4)
+                        .offset(x: radius * cos(angle.radians), y: radius * sin(angle.radians))
+                }
+            }
+            .frame(width: side, height: side)
+        }
+        .aspectRatio(1, contentMode: .fit)
+    }
+}
+
+// MARK: - Last 7 days
+
+/// Seven small rings summarising the week: green when the target was reached, amber when the fast
+/// was cut short, hollow when nothing was recorded. Today's running fast shows as a dashed ring.
+struct WeekStrip: View {
+    let days: [DayOutcome]
+    var lang: AppLanguage = .current
+
+    private static let weekdayFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.setLocalizedDateFormatFromTemplate("EEE")
+        return f
+    }()
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack {
+                Text(L.t("week_title", lang).uppercased())
+                    .font(.caption.weight(.bold))
+                    .tracking(0.5)
+                    .foregroundStyle(Palette.ink)
+                Spacer()
+                legendDot(Palette.eatAccent, L.t("week_full", lang))
+                legendDot(Palette.amber, L.t("week_partial", lang))
+            }
+
+            HStack(spacing: 6) {
+                ForEach(days) { day in
+                    dayColumn(day)
+                }
+            }
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(.white.opacity(0.5), lineWidth: 1))
+    }
+
+    private func legendDot(_ color: Color, _ label: String) -> some View {
+        HStack(spacing: 4) {
+            Circle().fill(color).frame(width: 7, height: 7)
+            Text(label).font(.caption2).foregroundStyle(Palette.sub)
+        }
+    }
+
+    private func dayColumn(_ day: DayOutcome) -> some View {
+        let tint = color(for: day.status)
+        return VStack(spacing: 6) {
+            Text(day.isToday ? L.t("week_today", lang)
+                             : Self.weekdayFormatter.string(from: day.date).uppercased())
+                .font(.system(size: 9, weight: .bold))
+                .foregroundStyle(day.isToday ? Palette.eatAccent : Palette.sub)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+
+            ZStack {
+                Circle().stroke(Palette.track, lineWidth: 3)
+                Circle()
+                    .trim(from: 0, to: max(0.001, day.progress))
+                    .stroke(tint, style: StrokeStyle(lineWidth: 3, lineCap: .round,
+                                                     dash: day.status == .inProgress ? [2.5, 2.5] : []))
+                    .rotationEffect(.degrees(-90))
+                Text(day.status == .inProgress ? day.hoursLabel + "+" : day.hoursLabel)
+                    .font(.system(size: 10, weight: .bold, design: .rounded))
+                    .foregroundStyle(day.status == .none ? Palette.sub.opacity(0.5) : Palette.ink)
+                    .minimumScaleFactor(0.6)
+                    .lineLimit(1)
+                    .padding(2)
+            }
+            .frame(height: 42)
+
+            Image(systemName: icon(for: day.status))
+                .font(.system(size: 11))
+                .foregroundStyle(tint)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 8)
+        .background(day.isToday ? Palette.eatAccent.opacity(0.08) : .white.opacity(0.35),
+                    in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+    }
+
+    private func color(for status: DayStatus) -> Color {
+        switch status {
+        case .full, .inProgress: return Palette.eatAccent
+        case .partial:           return Palette.amber
+        case .none:              return Palette.sub.opacity(0.3)
+        }
+    }
+
+    private func icon(for status: DayStatus) -> String {
+        switch status {
+        case .full:       return "trophy.fill"
+        case .partial:    return "star.fill"
+        case .inProgress: return "star"
+        case .none:       return "minus"
         }
     }
 }
@@ -222,6 +362,8 @@ struct SparkleDivider: View {
 }
 
 /// A frosted-glass stat card with an icon badge, label and value.
+/// Label on top, then the value as the dominant element, then the icon — the value is what you
+/// actually read, so it gets the visual weight rather than a big decorative icon badge.
 struct StatCard: View {
     let icon: String
     let tint: Color
@@ -229,19 +371,28 @@ struct StatCard: View {
     let value: String
 
     var body: some View {
-        VStack(spacing: 7) {
-            ZStack {
-                Circle().fill(.white.opacity(0.7)).frame(width: 38, height: 38)
-                Image(systemName: icon).font(.system(size: 15, weight: .semibold)).foregroundStyle(tint)
-            }
-            Text(label.uppercased()).font(.caption2).foregroundStyle(Palette.sub)
-            Text(value).font(.system(.headline, design: .rounded)).foregroundStyle(Palette.ink)
+        VStack(spacing: 6) {
+            Text(label.uppercased())
+                .font(.system(size: 10, weight: .semibold))
+                .tracking(0.3)
+                .foregroundStyle(tint)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+            Text(value)
+                .font(.system(.title3, design: .rounded).weight(.bold))
+                .foregroundStyle(Palette.ink)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+            Image(systemName: icon)
+                .font(.system(size: 14))
+                .foregroundStyle(tint)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 15)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(.white.opacity(0.5), lineWidth: 1))
-        .shadow(color: .black.opacity(0.05), radius: 8, y: 4)
+        .padding(.vertical, 14)
+        .padding(.horizontal, 6)
+        .background(.white.opacity(0.75), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(.white.opacity(0.7), lineWidth: 1))
+        .shadow(color: .black.opacity(0.04), radius: 8, y: 3)
     }
 }
 

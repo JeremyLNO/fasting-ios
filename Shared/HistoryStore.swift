@@ -4,6 +4,47 @@ import Foundation
 struct FastRecord: Codable {
     let targetMinutes: Int
     let completed: Bool
+    /// How long the fast actually lasted. Optional so records written before this field existed
+    /// still decode; for those, fall back to the target when completed (that's what they meant).
+    let actualMinutes: Int?
+
+    init(targetMinutes: Int, completed: Bool, actualMinutes: Int? = nil) {
+        self.targetMinutes = targetMinutes
+        self.completed = completed
+        self.actualMinutes = actualMinutes
+    }
+
+    /// Best available real duration, in minutes.
+    var effectiveMinutes: Int { actualMinutes ?? (completed ? targetMinutes : 0) }
+}
+
+/// How a given day turned out, for the "last 7 days" strip.
+enum DayStatus {
+    case full       // target reached
+    case partial    // fasted, but stopped short
+    case none       // nothing recorded
+    case inProgress // today's fast is still running
+}
+
+/// One column of the "last 7 days" strip.
+struct DayOutcome: Identifiable {
+    let id = UUID()
+    let date: Date
+    let status: DayStatus
+    /// Real hours fasted (or elapsed so far, for today).
+    let hours: Double
+    /// 0...1 against the day's target, for the ring.
+    let progress: Double
+
+    var isToday: Bool { Calendar.current.isDateInToday(date) }
+
+    /// "20h", "18h30" — compact, matching the strip's small rings.
+    var hoursLabel: String {
+        guard hours > 0 else { return "—" }
+        let h = Int(hours)
+        let m = Int((hours - Double(h)) * 60)
+        return m == 0 ? "\(h)h" : "\(h)h\(String(format: "%02d", m))"
+    }
 }
 
 /// Tracks daily fasting history so streaks and stats can be shown. There is no explicit
@@ -45,7 +86,9 @@ enum HistoryStore {
         for w in schedule.pastFastingWindows(before: now, limitDate: installDate) {
             let key = dayKey(w.start)
             if records[key] == nil {
-                records[key] = FastRecord(targetMinutes: schedule.fastingMinutes, completed: true)
+                // Fully elapsed scheduled window → the real duration is the target.
+                records[key] = FastRecord(targetMinutes: schedule.fastingMinutes, completed: true,
+                                          actualMinutes: schedule.fastingMinutes)
                 changed = true
             }
         }
@@ -58,7 +101,9 @@ enum HistoryStore {
     /// (once overwritten by the next session, it can no longer be reconstructed from the schedule).
     static func logInterruption(day: Date, targetMinutes: Int, actualMinutes: Int) {
         var records = load()
-        records[dayKey(day)] = FastRecord(targetMinutes: targetMinutes, completed: actualMinutes >= targetMinutes)
+        records[dayKey(day)] = FastRecord(targetMinutes: targetMinutes,
+                                          completed: actualMinutes >= targetMinutes,
+                                          actualMinutes: max(0, actualMinutes))
         save(records)
     }
 
@@ -118,6 +163,39 @@ enum HistoryStore {
 
     /// Erases all recorded fasting history (used for account deletion).
     static func wipe() { defaults.removeObject(forKey: recordsKey) }
+
+    /// The last 7 calendar days (oldest first) as ready-to-render outcomes. `liveState` is the
+    /// fast currently running, if any: its day has no record yet, so it's shown as in-progress
+    /// with the time elapsed so far rather than as an empty day.
+    static func last7Days(schedule: FastingSchedule, liveState: FastingState? = nil,
+                          now: Date = Date(), calendar: Calendar = .current) -> [DayOutcome] {
+        let records = load()
+        let today = calendar.startOfDay(for: now)
+        let target = max(1, schedule.fastingMinutes)
+
+        return stride(from: 6, through: 0, by: -1).compactMap { offset -> DayOutcome? in
+            guard let date = calendar.date(byAdding: .day, value: -offset, to: today) else { return nil }
+
+            if let record = records[dayKey(date)] {
+                let minutes = record.effectiveMinutes
+                return DayOutcome(date: date,
+                                  status: record.completed ? .full : (minutes > 0 ? .partial : .none),
+                                  hours: Double(minutes) / 60,
+                                  progress: min(1, Double(minutes) / Double(record.targetMinutes)))
+            }
+
+            // No record yet: if a fast is running and started on this day, show it live.
+            if let s = liveState, s.isFasting,
+               calendar.isDate(s.windowStart, inSameDayAs: date) {
+                let minutes = Int(s.elapsed / 60)
+                return DayOutcome(date: date, status: .inProgress,
+                                  hours: Double(minutes) / 60,
+                                  progress: min(1, Double(minutes) / Double(target)))
+            }
+
+            return DayOutcome(date: date, status: .none, hours: 0, progress: 0)
+        }
+    }
 
     /// Last `days` calendar days (oldest first), with their record if any — for a simple heatmap.
     static func recentDays(_ days: Int, now: Date = Date(), calendar: Calendar = .current) -> [(date: Date, record: FastRecord?)] {

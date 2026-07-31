@@ -35,6 +35,7 @@ App iOS native (SwiftUI + WidgetKit) pour suivre l'état de son jeûne intermitt
 - **Configuration** : heure de **début**/**fin** du jeûne, ou **préréglages rapides** (16:8, 18:6, 20:4, OMAD).
 - **Écran principal** : anneau de progression pastel, **temps écoulé** en direct, **état d'avancement** métabolique (Digestion → Glycémie → Glycogène → Combustion des graisses → Cétose → Autophagie), et la phase en cours (jeûne / fenêtre alimentaire). **Un tap sur l'anneau** permet d'**interrompre le jeûne** (avec confirmation) ou de **démarrer un jeûne** à n'importe quelle heure, en dehors du planning — l'app, les widgets et la Dynamic Island s'ajustent immédiatement ; le planning normal reprend automatiquement une fois la session (manuelle) écoulée.
 - **Historique & séries** : série en cours / meilleure série, jeûnes complétés, durée moyenne, calendrier des 4 dernières semaines — calculés à partir du planning (pas de check-in requis).
+- **Bande « 7 derniers jours »** sur l'écran principal : un anneau par jour avec les **heures réellement jeûnées**, vert + trophée pour un objectif atteint, ambre + étoile pour un jeûne écourté, gris quand rien n'est enregistré, et le jeûne du jour affiché en pointillés tant qu'il tourne.
 - **Tracker d'eau** : objectif quotidien réglable (3 à 8 verres), 5 verres cliquables qui se remplissent, état « objectif atteint », **rappels de boire** (notifications espacées dans la journée).
 - **Notifications locales** quotidiennes au **début** et à la **fin** du jeûne (+ rappels d'hydratation optionnels).
 - **Widgets écran d'accueil** (petit/moyen/grand pour le jeûne, le moyen et le grand affichent aussi l'eau + petit widget eau **interactif**, tap direct sur un verre via App Intents iOS 17) + widget rond pour l'écran verrouillé, alimentés via un **App Group** partagé.
@@ -129,6 +130,12 @@ seul instant où cette info existe, puisque la session manuelle suivante l'écra
 `syncIfNeeded` ne réécrit jamais un jour déjà enregistré, donc cette interruption reste définitive.
 Dans le calendrier, un jour interrompu apparaît en **orange** (distinct du vert « complété » et du
 gris « aucune donnée », avec légende) ; il casse aussi la série et est exclu du total/de la moyenne.
+
+`FastRecord.actualMinutes` stocke la **durée réellement tenue** (optionnel, donc les enregistrements
+écrits avant ce champ se décodent toujours — ils retombent sur la cible quand ils étaient complétés).
+C'est ce qui permet à `HistoryStore.last7Days(schedule:liveState:)` d'afficher « 10h » sur un jour
+écourté plutôt qu'un simple échec binaire, et de montrer le jeûne du jour en cours (`liveState`)
+avant qu'il ne soit enregistré. Rendu par `WeekStrip` (`Shared/FastingViews.swift`).
 
 ## Tracker d'eau
 Objectif réglable (3 à 8 verres, `SharedStore.waterGoal`) dans Réglages, avec rappels optionnels
