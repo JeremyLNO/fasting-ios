@@ -87,6 +87,11 @@ de référence aux sessions Claude Code : à lire avant toute modification.
   `.background(FastingBackground(phase:))` sur le contenu, **jamais** en calque frère dans un
   `ZStack` — les formes décoratives (hors-cadre) élargissent alors le layout et coupent le
   contenu à gauche (bug rencontré 2 fois : écran principal, puis onboarding).
+- ⚠️ **Notifications vs session manuelle** : un `UNCalendarNotificationTrigger(repeats: true)` ne
+  sait pas sauter une occurrence. Tant qu'une session manuelle tourne, `NotificationManager` bascule
+  donc sur des déclencheurs **datés** (horizon 14 jours) en filtrant `override.covers(date:)`, et
+  revient aux déclencheurs répétitifs au premier `scenePhase == .active` suivant la fin de session.
+  Toute nouvelle écriture de `SharedStore.setManualOverride` doit être suivie d'un `reschedule`.
 - ⚠️ **Éditeurs d'historique** (`DayEditorView` / `StartEditorView`) :
   - `FastingState` est reconstruit **chaque seconde** ; le passer directement à `.sheet(item:)`
     rouvrirait/reconstruirait la feuille en boucle. D'où le wrapper `EditingWindow` à `id` stable.

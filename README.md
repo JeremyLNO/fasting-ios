@@ -38,7 +38,7 @@ App iOS native (SwiftUI + WidgetKit) pour suivre l'état de son jeûne intermitt
 - **Bande « 7 derniers jours »** sur l'écran principal : un anneau par jour avec les **heures réellement jeûnées**, vert + trophée pour un objectif atteint, ambre + étoile pour un jeûne écourté, gris quand rien n'est enregistré, et le jeûne du jour affiché en pointillés tant qu'il tourne.
 - **Correction a posteriori** : un **tap sur un jour** de la bande ouvre son éditeur (heure de **début** et de **fin**, date incluse pour les jeûnes qui passent minuit) avec la durée et le statut recalculés en direct, plus un « marquer comme sans jeûne » ; un **tap sur la carte START** corrige l'heure de départ de la **fenêtre en cours** — le chrono, le pourcentage, la carte END, les widgets et la Live Activity repartent immédiatement de cette heure-là.
 - **Tracker d'eau** : objectif quotidien réglable (3 à 8 verres), 5 verres cliquables qui se remplissent, état « objectif atteint », **rappels de boire** (notifications espacées dans la journée).
-- **Notifications locales** quotidiennes au **début** et à la **fin** du jeûne (+ rappels d'hydratation optionnels).
+- **Notifications locales** quotidiennes au **début** et à la **fin** du jeûne (+ rappels d'hydratation optionnels), **muettes quand elles contrediraient une session lancée à la main** : un jeûne démarré à 20:00 n'annonce pas « le jeûne commence » à 22:00.
 - **Widgets écran d'accueil** (petit/moyen/grand pour le jeûne, le moyen et le grand affichent aussi l'eau + petit widget eau **interactif**, tap direct sur un verre via App Intents iOS 17) + widget rond pour l'écran verrouillé, alimentés via un **App Group** partagé.
 - **Live Activity / Dynamic Island** : suivi en direct du jeûne dans la Dynamic Island et sur l'écran verrouillé (chrono et progression qui avancent tout seuls, sans push). Bouton *Suivre / Arrêter le suivi en direct* dans l'app.
 - **Premier lancement** : un écran **engagement Crazy Bee Labs** (pourquoi l'app est gratuite — même écran dédié que les autres apps santé gratuites du studio), puis un **onboarding** en 3 pages : bienvenue + choix de la langue, choix du programme de jeûne, notifications.
@@ -204,9 +204,24 @@ même état réel. Une fois la session manuelle terminée, l'app revient automat
 normal (une interruption ponctuelle ne décale pas les jours suivants). La Live Activity déjà active
 est mise à jour en direct (`LiveActivityManager.refreshIfActive`).
 
-⚠️ **Limite connue** : les notifications programmées (début/fin) restent calées sur le planning
-configuré, pas sur la session manuelle. (L'historique, lui, reflète bien les interruptions réelles
-— voir section ci-dessus.)
+### Notifications et sessions manuelles
+Une session manuelle **coupe le son** des notifications qu'elle contredirait : si le jeûne a été
+lancé à 20:00 alors que le planning dit 22:00, l'app ne prévient pas à 22:00 que « le jeûne
+commence » — il tourne depuis deux heures. Même chose pour la notification de fin pendant une
+fenêtre alimentaire déclenchée à la main. La règle est unique : **toute occurrence programmée qui
+tombe à l'intérieur de la session manuelle est muette** (`ManualSession.covers(_:schedule:)`).
+
+Techniquement, un `UNCalendarNotificationTrigger(repeats: true)` ne sait pas sauter *une* occurrence.
+Donc :
+- **sans session manuelle** → deux déclencheurs quotidiens répétitifs, comme avant (ils continuent
+  de tomber même si l'app n'est jamais rouverte) ;
+- **avec session manuelle en cours** → les 14 prochains jours sont programmés un par un (28 requêtes
+  au maximum, très en dessous de la limite iOS de 64, rappels d'eau compris), moins les occurrences
+  couvertes.
+
+Le retour au régime répétitif se fait au premier passage au premier plan une fois la session
+écoulée (`.onChange(of: scenePhase)` dans `ContentView`) — d'où l'horizon limité plutôt qu'un seul
+jour : l'app peut rester fermée un moment sans perdre ses notifications.
 
 ## Conformité App Store
 - **Compte & suppression** (`Fasting/AuthManager.swift`, `AccountView.swift`) : Sign in with Apple

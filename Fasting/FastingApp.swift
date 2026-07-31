@@ -91,6 +91,7 @@ struct ContentView: View {
     @State private var historyVersion = 0
     @StateObject private var live = LiveActivityManager()
     @StateObject private var auth = AuthManager()
+    @Environment(\.scenePhase) private var scenePhase
     @AppStorage(AppLanguage.storageKey) private var languageRaw = "en"
     private var lang: AppLanguage { AppLanguage(rawValue: languageRaw) ?? .en }
 
@@ -164,6 +165,14 @@ struct ContentView: View {
                 live.start(state: demo)
             }
         }
+        // Re-arms the daily notifications on every foregrounding (this also fires at launch): a
+        // manual session mutes the occurrences it covers and only leaves a limited horizon of dated
+        // ones behind, so the plain repeating triggers have to be put back once it has run out —
+        // including when the app was simply left in the background for days.
+        .onChange(of: scenePhase) { _, phase in
+            guard phase == .active else { return }
+            NotificationManager.shared.reschedule(for: schedule)
+        }
         .sheet(isPresented: $showSettings) {
             SettingsView(schedule: $schedule)
         }
@@ -182,6 +191,7 @@ struct ContentView: View {
         .sheet(item: $editingStart) { window in
             StartEditorView(schedule: schedule, state: window.state) { session in
                 SharedStore.setManualOverride(session)
+                NotificationManager.shared.reschedule(for: schedule, override: session)
                 live.refreshIfActive(state: schedule.effectiveState(at: Date(), override: session))
                 historyVersion += 1
             }
@@ -346,6 +356,8 @@ struct ContentView: View {
         }
         let session = ManualSession(isFasting: isFasting, start: now)
         SharedStore.setManualOverride(session)
+        // The scheduled notifications must not announce a fast that's already running.
+        NotificationManager.shared.reschedule(for: schedule, override: session)
         toggleTrigger.toggle()
         live.refreshIfActive(state: schedule.effectiveState(at: now, override: session))
     }

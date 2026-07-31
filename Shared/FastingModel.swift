@@ -104,8 +104,7 @@ extension FastingSchedule {
     /// schedule — a one-off override doesn't permanently shift future days.
     func effectiveState(at now: Date, override: ManualSession?, calendar: Calendar = .current) -> FastingState {
         if let override {
-            let targetMinutes = override.isFasting ? fastingMinutes : (24 * 60 - fastingMinutes)
-            let end = override.start.addingTimeInterval(Double(targetMinutes) * 60)
+            let end = override.end(for: self)
             if now < end {
                 let total = end.timeIntervalSince(override.start)
                 let p = total > 0 ? now.timeIntervalSince(override.start) / total : 0
@@ -123,6 +122,18 @@ extension FastingSchedule {
 struct ManualSession: Codable, Equatable {
     var isFasting: Bool
     var start: Date
+
+    /// When the session runs out and the recurring schedule takes over again.
+    func end(for schedule: FastingSchedule) -> Date {
+        let targetMinutes = isFasting ? schedule.fastingMinutes : (24 * 60 - schedule.fastingMinutes)
+        return start.addingTimeInterval(Double(targetMinutes) * 60)
+    }
+
+    /// Whether the session is still running at that moment — i.e. whether it, and not the schedule,
+    /// is what the app is showing. Used to mute the scheduled notifications it contradicts.
+    func covers(_ date: Date, schedule: FastingSchedule) -> Bool {
+        date >= start && date < end(for: schedule)
+    }
 }
 
 /// Common fasting protocols, expressed as the fasting-window duration in hours.
