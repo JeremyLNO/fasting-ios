@@ -43,12 +43,14 @@ enum L {
         // Phases
         "phase_fasting": [.en: "Fasting", .fr: "Jeûne en cours", .de: "Fasten läuft", .es: "Ayuno en curso"],
         "phase_eating":  [.en: "Eating window", .fr: "Fenêtre alimentaire", .de: "Essensfenster", .es: "Ventana de comida"],
+        "phase_ready":   [.en: "Ready to fast", .fr: "Prêt à jeûner", .de: "Bereit zu fasten", .es: "Listo para ayunar"],
 
         // Stats
         "stat_start":     [.en: "Start", .fr: "Début", .de: "Start", .es: "Inicio"],
         "stat_remaining": [.en: "Remaining", .fr: "Restant", .de: "Übrig", .es: "Restante"],
         "stat_next_fast": [.en: "Next fast", .fr: "Prochain jeûne", .de: "Nächstes Fasten", .es: "Próximo ayuno"],
         "stat_end":       [.en: "End", .fr: "Fin", .de: "Ende", .es: "Fin"],
+        "stat_late":      [.en: "Late by", .fr: "Retard", .de: "Verspätet", .es: "Retraso"],
 
         // Ring labels
         "ring_elapsed":   [.en: "elapsed", .fr: "écoulé", .de: "vergangen", .es: "transcurrido"],
@@ -86,8 +88,9 @@ enum L {
         // Manual start/interrupt (tap the ring)
         "tap_to_end":   [.en: "Tap the ring to end your fast now", .fr: "Touche l'anneau pour arrêter ton jeûne maintenant", .de: "Tippe auf den Ring, um dein Fasten jetzt zu beenden", .es: "Toca el anillo para terminar tu ayuno ahora"],
         "tap_to_start": [.en: "Tap the ring to start fasting now", .fr: "Touche l'anneau pour démarrer ton jeûne maintenant", .de: "Tippe auf den Ring, um jetzt mit dem Fasten zu beginnen", .es: "Toca el anillo para empezar a ayunar ahora"],
+        "tap_to_start_overdue": [.en: "Your fast hasn't started — tap the ring to start it", .fr: "Ton jeûne n'a pas démarré — touche l'anneau pour le lancer", .de: "Dein Fasten läuft nicht — tippe auf den Ring, um es zu starten", .es: "Tu ayuno no ha empezado — toca el anillo para iniciarlo"],
         "end_fast_confirm_title":  [.en: "End your fast now?", .fr: "Arrêter ton jeûne maintenant ?", .de: "Fasten jetzt beenden?", .es: "¿Terminar tu ayuno ahora?"],
-        "end_fast_confirm_body":   [.en: "Your eating window will start right now instead of following the schedule.", .fr: "Ta fenêtre alimentaire commencera maintenant, au lieu de suivre le planning.", .de: "Dein Essensfenster beginnt jetzt sofort, statt dem Zeitplan zu folgen.", .es: "Tu ventana de comida empezará ahora mismo, en lugar de seguir el horario."],
+        "end_fast_confirm_body":   [.en: "Your eating window starts now. The next fast won't start on its own — we'll remind you at your usual hour.", .fr: "Ta fenêtre alimentaire commence maintenant. Le prochain jeûne ne démarrera pas tout seul : on te le rappellera à ton heure habituelle.", .de: "Dein Essensfenster beginnt jetzt. Das nächste Fasten startet nicht von allein — wir erinnern dich zur gewohnten Zeit.", .es: "Tu ventana de comida empieza ahora. El próximo ayuno no empezará solo: te lo recordaremos a tu hora habitual."],
         "end_fast_confirm_action": [.en: "End fast now", .fr: "Arrêter le jeûne", .de: "Fasten beenden", .es: "Terminar ayuno"],
 
         // Settings
@@ -105,6 +108,12 @@ enum L {
         "notif_start_body":  [.en: "Your %@ fast begins now. You've got this!", .fr: "Ton jeûne de %@ commence maintenant. Courage !", .de: "Dein %@-Fasten beginnt jetzt. Du schaffst das!", .es: "Tu ayuno de %@ comienza ahora. ¡Tú puedes!"],
         "notif_end_title":   [.en: "Fast complete ✅", .fr: "Jeûne terminé ✅", .de: "Fasten abgeschlossen ✅", .es: "Ayuno completado ✅"],
         "notif_end_body":    [.en: "Well done! You can open your eating window.", .fr: "Bravo ! Tu peux ouvrir ta fenêtre alimentaire.", .de: "Gut gemacht! Du kannst dein Essensfenster öffnen.", .es: "¡Bien hecho! Puedes abrir tu ventana de comida."],
+
+        // Nudges after a fast was stopped early — the next one doesn't start on its own.
+        "notif_restart1_title": [.en: "Ready to fast? 🌙", .fr: "Prêt à jeûner ? 🌙", .de: "Bereit zu fasten? 🌙", .es: "¿Listo para ayunar? 🌙"],
+        "notif_restart1_body":  [.en: "It's your usual time. Open the app to start your fast.", .fr: "C'est ton heure habituelle. Ouvre l'app pour lancer ton jeûne.", .de: "Es ist deine übliche Zeit. Öffne die App, um dein Fasten zu starten.", .es: "Es tu hora habitual. Abre la app para iniciar tu ayuno."],
+        "notif_restart2_title": [.en: "Your fast hasn't started", .fr: "Ton jeûne n'a pas démarré", .de: "Dein Fasten hat nicht begonnen", .es: "Tu ayuno no ha empezado"],
+        "notif_restart2_body":  [.en: "Start it now and it will still finish at your usual hour.", .fr: "Lance-le maintenant, il se terminera quand même à ton heure habituelle.", .de: "Starte es jetzt, es endet trotzdem zur gewohnten Zeit.", .es: "Inícialo ahora y terminará igualmente a tu hora habitual."],
 
         // Live Activity
         "la_end":       [.en: "End", .fr: "Fin", .de: "Ende", .es: "Fin"],

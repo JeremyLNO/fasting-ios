@@ -95,15 +95,25 @@ enum HistoryStore {
     /// and aren't recorded yet. Never overwrites a day that already has a record — in particular,
     /// a real interruption logged by `logInterruption` always wins over this reconstruction.
     @discardableResult
-    static func syncIfNeeded(schedule: FastingSchedule, installDate: Date, now: Date = Date()) -> Bool {
+    static func syncIfNeeded(schedule: FastingSchedule, installDate: Date,
+                             override: ManualSession? = SharedStore.manualOverride(),
+                             now: Date = Date()) -> Bool {
+        // A fast stopped early skips the next scheduled window: it never ran, so reconstructing it
+        // as a success would hand the user a fast they didn't do.
+        let skipped = override?.skippedFastStart(for: schedule)
         var records = load()
         var changed = false
         for w in schedule.pastFastingWindows(before: now, limitDate: installDate) {
             let key = dayKey(w.start)
             if records[key] == nil {
-                // Fully elapsed scheduled window → the real duration is the target.
-                records[key] = FastRecord(targetMinutes: schedule.fastingMinutes, completed: true,
-                                          actualMinutes: schedule.fastingMinutes)
+                if let skipped, dayKey(skipped) == key {
+                    records[key] = FastRecord(targetMinutes: schedule.fastingMinutes, completed: false,
+                                              actualMinutes: 0)
+                } else {
+                    // Fully elapsed scheduled window → the real duration is the target.
+                    records[key] = FastRecord(targetMinutes: schedule.fastingMinutes, completed: true,
+                                              actualMinutes: schedule.fastingMinutes)
+                }
                 changed = true
             }
         }

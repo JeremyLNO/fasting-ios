@@ -257,7 +257,8 @@ struct ContentView: View {
             // it here was only costing room.
             VStack(spacing: 6) {
                 PhaseBadge(phase: s.phase)
-                Text((s.isFasting ? L.t("phase_fasting", lang) : L.t("phase_eating", lang)).uppercased())
+                Text((s.isRestartOverdue ? L.t("phase_ready", lang)
+                      : (s.isFasting ? L.t("phase_fasting", lang) : L.t("phase_eating", lang))).uppercased())
                     .font(.caption2.weight(.bold))
                     .tracking(1.4)
                     .foregroundStyle(Palette.sub)
@@ -310,7 +311,8 @@ struct ContentView: View {
                     .background(.white, in: Circle())
                 // Two lines allowed: the French/German labels are much longer than the English
                 // one and were being truncated mid-word inside the pill.
-                Text(s.isFasting ? L.t("tap_to_end", lang) : L.t("tap_to_start", lang))
+                Text(s.isRestartOverdue ? L.t("tap_to_start_overdue", lang)
+                     : (s.isFasting ? L.t("tap_to_end", lang) : L.t("tap_to_start", lang)))
                     .font(.system(.subheadline, design: .rounded).weight(.semibold))
                     .foregroundStyle(.white)
                     .lineLimit(2)
@@ -348,7 +350,10 @@ struct ContentView: View {
             HistoryStore.logInterruption(day: currentState.windowStart, targetMinutes: schedule.fastingMinutes,
                                          actualMinutes: Int(currentState.elapsed / 60))
         }
-        let session = ManualSession(isFasting: isFasting, start: now)
+        // Stopping a running fast suspends the schedule: the next fast waits for the user instead of
+        // starting by itself, and two notifications will ask for it.
+        let session = ManualSession(isFasting: isFasting, start: now,
+                                    awaitingRestart: currentState.isFasting && !isFasting)
         SharedStore.setManualOverride(session)
         // The scheduled notifications must not announce a fast that's already running.
         NotificationManager.shared.reschedule(for: schedule, override: session)
@@ -361,7 +366,11 @@ struct ContentView: View {
     /// Metabolic stage as a proper row: name on top, explanation below, tappable to open History
     /// (where the stages are laid out in full).
     private func stageCard(_ s: FastingState) -> some View {
-        let current = FastingStage.current(forHours: s.elapsedHours)
+        // The metabolic stages only mean something while fasting. Outside a fast the clock is
+        // pinned to zero, otherwise a long eating window — one now runs for a whole day when a fast
+        // was stopped early and not restarted — would claim the body is burning glycogen while the
+        // user is eating.
+        let current = FastingStage.current(forHours: s.isFasting ? s.elapsedHours : 0)
         let subtitle: String = {
             if s.isFasting, let next = FastingStage.next(forHours: s.elapsedHours) {
                 return "\(L.t("next_stage", lang)) \(next.name(lang)) \(L.t("word_in", lang)) \(formatHM((next.threshold - s.elapsedHours) * 3600))"
@@ -413,10 +422,13 @@ struct ContentView: View {
                          value: clockLabel(s.windowStart), showsEditAffordance: true)
             }
             .buttonStyle(.plain)
-            StatCard(icon: s.isFasting ? "hourglass" : "calendar",
-                     tint: Palette.accent(s.phase),
-                     label: s.isFasting ? L.t("stat_remaining", lang) : L.t("stat_next_fast", lang),
-                     value: formatHM(s.remaining))
+            // Past the hour the fast was due, a "next fast in 0h00" would read as if something were
+            // about to happen on its own. It isn't: say how late it is instead.
+            StatCard(icon: s.isRestartOverdue ? "exclamationmark.circle.fill" : (s.isFasting ? "hourglass" : "calendar"),
+                     tint: s.isRestartOverdue ? Palette.amber : Palette.accent(s.phase),
+                     label: s.isRestartOverdue ? L.t("stat_late", lang)
+                          : (s.isFasting ? L.t("stat_remaining", lang) : L.t("stat_next_fast", lang)),
+                     value: formatHM(s.isRestartOverdue ? s.overdueBy : s.remaining))
             StatCard(icon: "sunrise.fill", tint: Palette.peach, label: L.t("stat_end", lang),
                      value: clockLabel(s.windowEnd))
         }

@@ -20,9 +20,14 @@ final class NotificationManager {
     /// since the plain repeating triggers come back as soon as the session is over.
     private static let horizonDays = 14
 
+    /// How long after the scheduled hour the second "start it by hand" nudge fires.
+    private static let restartNudgeDelay: TimeInterval = 30 * 60
+
     private var horizonIdentifiers: [String] {
         (0..<Self.horizonDays).flatMap { ["fast.start.\($0)", "fast.end.\($0)"] }
     }
+
+    private let restartIdentifiers = ["fast.restart.0", "fast.restart.1"]
 
     func reschedule(for schedule: FastingSchedule,
                     override: ManualSession? = SharedStore.manualOverride(),
@@ -30,7 +35,7 @@ final class NotificationManager {
                     calendar: Calendar = .current) {
         let lang = AppLanguage.current
         center.removePendingNotificationRequests(
-            withIdentifiers: ["fast.start", "fast.end"] + horizonIdentifiers)
+            withIdentifiers: ["fast.start", "fast.end"] + horizonIdentifiers + restartIdentifiers)
 
         let startTitle = L.t("notif_start_title", lang)
         let startBody = String(format: L.t("notif_start_body", lang), schedule.fastingHoursText)
@@ -65,8 +70,22 @@ final class NotificationManager {
             guard !override.covers(date, schedule: schedule) else { muted += 1; continue }
             add(id: "fast.end.\(index)", at: date, title: endTitle, body: endBody, calendar: calendar)
         }
+        // A fast stopped early doesn't restart on its own, so the muted "your fast starts now" is
+        // replaced by two nudges asking the user to start it by hand: one at the hour it was due,
+        // one 30 minutes later.
+        var nudges = 0
+        if let due = override.skippedFastStart(for: schedule, calendar: calendar) {
+            for (index, date) in [due, due.addingTimeInterval(Self.restartNudgeDelay)].enumerated()
+            where date > now {
+                add(id: restartIdentifiers[index], at: date,
+                    title: L.t("notif_restart\(index + 1)_title", lang),
+                    body: L.t("notif_restart\(index + 1)_body", lang), calendar: calendar)
+                nudges += 1
+            }
+        }
+
         print("[Notifications] manual session running until \(override.end(for: schedule)): "
-              + "\(Self.horizonDays) days scheduled, \(muted) occurrence(s) muted")
+              + "\(Self.horizonDays) days scheduled, \(muted) occurrence(s) muted, \(nudges) restart nudge(s)")
     }
 
     /// The next `horizonDays` occurrences of a daily hour:minute, strictly after `now`.

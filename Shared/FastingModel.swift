@@ -38,11 +38,19 @@ struct FastingState {
     let windowStart: Date
     let windowEnd: Date
     let now: Date
+    /// A fast was stopped early, so the next one is *not* starting on its own: the app is waiting
+    /// for the user to say when they're ready. `windowEnd` is then the hour the fast was supposed
+    /// to start — the moment we nudge them — not a transition the app performs by itself.
+    var awaitingRestart: Bool = false
 
     var elapsed: TimeInterval { max(0, now.timeIntervalSince(windowStart)) }
     var remaining: TimeInterval { max(0, windowEnd.timeIntervalSince(now)) }
     var elapsedHours: Double { elapsed / 3600 }
     var isFasting: Bool { phase == .fasting }
+    /// Waiting on the user, past the hour the fast was due to start.
+    var isRestartOverdue: Bool { awaitingRestart && now >= windowEnd }
+    /// How long ago the fast was due — 0 unless overdue.
+    var overdueBy: TimeInterval { isRestartOverdue ? now.timeIntervalSince(windowEnd) : 0 }
 }
 
 extension FastingSchedule {
@@ -99,12 +107,48 @@ extension FastingSchedule {
         return results
     }
 
-    /// Like `state(at:)`, but a manual override (tap-to-start/interrupt) takes priority while its
-    /// own target duration hasn't elapsed yet. Once it has, this falls back to the normal recurring
-    /// schedule — a one-off override doesn't permanently shift future days.
+    /// The next scheduled start of a fast, strictly after `date`.
+    func nextFastStart(after date: Date, calendar: Calendar = .current) -> Date {
+        nextOccurrence(hour: startHour, minute: startMinute, after: date, calendar: calendar)
+    }
+
+    /// The next scheduled end of a fast, strictly after `date`.
+    func nextFastEnd(after date: Date, calendar: Calendar = .current) -> Date {
+        nextOccurrence(hour: endHour, minute: endMinute, after: date, calendar: calendar)
+    }
+
+    private func nextOccurrence(hour: Int, minute: Int, after date: Date, calendar: Calendar) -> Date {
+        let today = calendar.startOfDay(for: date)
+        for offset in 0...1 {
+            if let day = calendar.date(byAdding: .day, value: offset, to: today),
+               let occurrence = calendar.date(bySettingHour: hour, minute: minute, second: 0, of: day),
+               occurrence > date {
+                return occurrence
+            }
+        }
+        return date.addingTimeInterval(24 * 3600)
+    }
+
+    /// Like `state(at:)`, but a manual override (tap-to-start/interrupt) takes priority. Once it has
+    /// run its course, this falls back to the normal recurring schedule — a one-off override doesn't
+    /// permanently shift future days.
     func effectiveState(at now: Date, override: ManualSession?, calendar: Calendar = .current) -> FastingState {
-        if let override {
-            let end = override.end(for: self)
+        guard let override else { return state(at: now, calendar: calendar) }
+
+        if override.isAwaitingRestart {
+            // A fast stopped early: the next one must *not* start on its own. The "not fasting"
+            // state is held across the whole window that gets skipped, then the schedule takes over
+            // again — one fast is skipped, the app isn't suspended for good.
+            let skippedStart = nextFastStart(after: override.start, calendar: calendar)
+            if now < nextFastEnd(after: skippedStart, calendar: calendar) {
+                let total = skippedStart.timeIntervalSince(override.start)
+                let p = total > 0 ? now.timeIntervalSince(override.start) / total : 1
+                return FastingState(phase: .eating, progress: min(max(p, 0), 1),
+                                    windowStart: override.start, windowEnd: skippedStart, now: now,
+                                    awaitingRestart: true)
+            }
+        } else {
+            let end = override.end(for: self, calendar: calendar)
             if now < end {
                 let total = end.timeIntervalSince(override.start)
                 let p = total > 0 ? now.timeIntervalSince(override.start) / total : 0
@@ -122,17 +166,44 @@ extension FastingSchedule {
 struct ManualSession: Codable, Equatable {
     var isFasting: Bool
     var start: Date
+    /// Set when the session follows a fast stopped before its scheduled end: the schedule must not
+    /// start the next one on its own, the user says when they're ready. Optional so sessions stored
+    /// before this rule existed still decode (they predate it, so they mean "no").
+    var awaitingRestart: Bool? = nil
 
-    /// When the session runs out and the recurring schedule takes over again.
-    func end(for schedule: FastingSchedule) -> Date {
-        let targetMinutes = isFasting ? schedule.fastingMinutes : (24 * 60 - schedule.fastingMinutes)
-        return start.addingTimeInterval(Double(targetMinutes) * 60)
+    var isAwaitingRestart: Bool { awaitingRestart == true }
+
+    /// When the session stops driving the app and the recurring schedule takes over again.
+    func end(for schedule: FastingSchedule, calendar: Calendar = .current) -> Date {
+        if isAwaitingRestart {
+            // Holds until the end of the fasting window that gets skipped.
+            let skipped = schedule.nextFastStart(after: start, calendar: calendar)
+            return schedule.nextFastEnd(after: skipped, calendar: calendar)
+        }
+        if isFasting {
+            // A manual fast runs to the *scheduled* end of the fasting window, whatever that makes
+            // its length: starting two hours early buys a longer fast, it doesn't shift the finish
+            // line. (It used to end after the target duration, which pushed the end time later and
+            // made every early start ripple into the next day.)
+            return schedule.nextFastEnd(after: start, calendar: calendar)
+        }
+        return start.addingTimeInterval(Double(24 * 60 - schedule.fastingMinutes) * 60)
     }
 
     /// Whether the session is still running at that moment — i.e. whether it, and not the schedule,
     /// is what the app is showing. Used to mute the scheduled notifications it contradicts.
-    func covers(_ date: Date, schedule: FastingSchedule) -> Bool {
-        date >= start && date < end(for: schedule)
+    func covers(_ date: Date, schedule: FastingSchedule, calendar: Calendar = .current) -> Bool {
+        let end = end(for: schedule, calendar: calendar)
+        guard date >= start else { return false }
+        // The end boundary counts for a skipped fast: "fast complete, well done" at the hour it
+        // would have finished is exactly as wrong as "your fast starts now" at its beginning. For a
+        // real session the opposite holds — that notification lands right on time.
+        return isAwaitingRestart ? date <= end : date < end
+    }
+
+    /// The scheduled fast this session skips — i.e. the hour to nudge the user to start it by hand.
+    func skippedFastStart(for schedule: FastingSchedule, calendar: Calendar = .current) -> Date? {
+        isAwaitingRestart ? schedule.nextFastStart(after: start, calendar: calendar) : nil
     }
 }
 

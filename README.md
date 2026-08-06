@@ -205,13 +205,36 @@ Un **tap sur l'anneau** de l'écran principal bascule immédiatement l'état :
 - En jeûne → une **confirmation** (« End fast now ») puis bascule en fenêtre alimentaire à cet instant.
 - En repas → démarre un jeûne **immédiatement**, sans confirmation.
 
-Techniquement : `ManualSession` (`Shared/FastingModel.swift`) capture `{isFasting, start}` et prime
-sur le planning tant que sa **propre durée cible** (durée de jeûne ou de repas configurée) n'est pas
-écoulée — `FastingSchedule.effectiveState(at:override:)`. Stocké dans l'App Group
-(`SharedStore.manualOverride()`), donc **l'app, les widgets et la Dynamic Island** reflètent tous le
-même état réel. Une fois la session manuelle terminée, l'app revient automatiquement au planning
-normal (une interruption ponctuelle ne décale pas les jours suivants). La Live Activity déjà active
-est mise à jour en direct (`LiveActivityManager.refreshIfActive`).
+Techniquement : `ManualSession` (`Shared/FastingModel.swift`) capture `{isFasting, start,
+awaitingRestart}` et prime sur le planning — `FastingSchedule.effectiveState(at:override:)`. Stocké
+dans l'App Group (`SharedStore.manualOverride()`), donc **l'app, les widgets et la Dynamic Island**
+reflètent tous le même état réel. La Live Activity déjà active est mise à jour en direct
+(`LiveActivityManager.refreshIfActive`).
+
+Deux règles gouvernent la suite :
+
+**Un jeûne lancé à la main va jusqu'à l'heure de fin programmée**, quelle que soit sa durée. Démarré
+à 20:00 sur un planning 22:00 → 18:00, il fait 22 h et se termine quand même à 18:00 ; démarré à
+03:00, il en fait 15. L'heure d'arrivée ne bouge pas — auparavant la session durait sa durée cible,
+donc chaque départ anticipé décalait la fin (20:00 + 20 h = 16:00) et faisait déraper le lendemain.
+
+**Un jeûne arrêté prématurément ne redémarre pas tout seul.** L'arrêt pose une session
+`awaitingRestart` : le planning est suspendu pendant **toute la fenêtre de jeûne qui est sautée**
+(22:00 → 18:00), donc rien ne se relance à 22:00. À la place, deux notifications demandent de le
+relancer à la main : une à l'heure prévue, une 30 minutes plus tard
+(`NotificationManager`, ids `fast.restart.*`). Passé l'heure prévue, l'écran principal le dit —
+« Prêt à jeûner », carte **RETARD** ambre, et un CTA explicite. Une fois la fenêtre sautée écoulée,
+le planning reprend normalement : **un** jeûne est sauté, l'app n'est pas suspendue pour autant.
+
+Conséquences traitées avec ces règles :
+- `HistoryStore.syncIfNeeded` reconstruit l'historique depuis le planning ; il enregistre désormais
+  le jeûne sauté comme **0 h** au lieu d'une réussite (sinon l'app offrait un jeûne jamais fait).
+- Les notifications programmées qui tombent dans la session sont muettes, **bornes comprises** pour
+  un jeûne sauté : « jeûne terminé, bravo » à 18:00 serait aussi faux que « ton jeûne commence » à
+  22:00 (`ManualSession.covers(_:schedule:)`).
+- Les étapes métaboliques ne courent plus qu'en jeûne : une fenêtre alimentaire peut maintenant
+  durer une journée entière, et elle affirmait « le corps puise dans le glycogène » pendant qu'on
+  mange.
 
 ### Notifications et sessions manuelles
 Une session manuelle **coupe le son** des notifications qu'elle contredirait : si le jeûne a été

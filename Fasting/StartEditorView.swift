@@ -18,10 +18,13 @@ struct StartEditorView: View {
     /// A window can't start in the future — that would show a negative elapsed time.
     private var isValid: Bool { start <= Date() }
 
-    private var targetMinutes: Int {
-        state.isFasting ? schedule.fastingMinutes : (24 * 60 - schedule.fastingMinutes)
+    /// Same rule as the saved session: a fast ends at the scheduled hour, whatever its length.
+    private var projectedEnd: Date { session.end(for: schedule) }
+
+    private var session: ManualSession {
+        ManualSession(isFasting: state.isFasting, start: start,
+                      awaitingRestart: state.awaitingRestart)
     }
-    private var projectedEnd: Date { start.addingTimeInterval(Double(targetMinutes) * 60) }
 
     var body: some View {
         NavigationStack {
@@ -93,7 +96,7 @@ struct StartEditorView: View {
 
     private func save() {
         guard isValid else { return }
-        onSaved(ManualSession(isFasting: state.isFasting, start: start))
+        onSaved(session)
         dismiss()
     }
 }

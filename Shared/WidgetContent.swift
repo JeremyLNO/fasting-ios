@@ -18,6 +18,17 @@ struct FastingWidgetContent: View {
         }
     }
 
+    /// Metabolic stages only mean something while fasting — outside a fast the clock is pinned to
+    /// zero, so a long eating window can't claim the body is burning glycogen while the user eats.
+    private var stage: FastingStage { FastingStage.current(forHours: state.isFasting ? state.elapsedHours : 0) }
+
+    /// "Ready to fast" once the hour has passed and nothing restarted on its own — the widget would
+    /// otherwise just show an eating window with a timer counting past zero.
+    private var phaseTitle: String {
+        if state.isRestartOverdue { return L.t("phase_ready") }
+        return state.isFasting ? L.t("phase_fasting") : L.t("phase_eating")
+    }
+
     /// Live-updating elapsed (fasting) or countdown (eating), no timeline reloads needed.
     private var live: some View {
         Group {
@@ -34,12 +45,12 @@ struct FastingWidgetContent: View {
         ZStack {
             RingView(progress: state.progress, colors: Palette.ringColors(for: state.phase), lineWidth: 11)
             VStack(spacing: 2) {
-                Text(FastingStage.current(forHours: state.elapsedHours).emoji)
+                Text(stage.emoji)
                     .font(.title3)
                 live
                     .font(.system(.callout, design: .rounded).weight(.bold))
                     .foregroundStyle(Palette.ink)
-                Text(state.isFasting ? L.t("phase_fasting") : L.t("phase_eating"))
+                Text(phaseTitle)
                     .font(.caption2)
                     .foregroundStyle(Palette.subtle)
                     .lineLimit(1)
@@ -60,14 +71,14 @@ struct FastingWidgetContent: View {
             .frame(width: 92, height: 92)
 
             VStack(alignment: .leading, spacing: 6) {
-                Text(state.isFasting ? L.t("phase_fasting") : L.t("phase_eating"))
+                Text(phaseTitle)
                     .font(.headline)
                     .foregroundStyle(Palette.ink)
                 live
                     .font(.system(.title2, design: .rounded).weight(.bold))
                     .foregroundStyle(Palette.ink)
-                StageChip(emoji: FastingStage.current(forHours: state.elapsedHours).emoji,
-                          name: FastingStage.current(forHours: state.elapsedHours).name(), compact: true)
+                StageChip(emoji: stage.emoji,
+                          name: stage.name(), compact: true)
                 HStack(spacing: 4) {
                     Image(systemName: water >= waterGoal ? "checkmark.seal.fill" : "drop.fill")
                         .font(.caption2)
@@ -86,7 +97,7 @@ struct FastingWidgetContent: View {
                 Image(systemName: state.isFasting ? "moon.stars.fill" : "leaf.fill")
                     .font(.subheadline)
                     .foregroundStyle(Palette.accent(state.phase))
-                Text(state.isFasting ? L.t("phase_fasting") : L.t("phase_eating"))
+                Text(phaseTitle)
                     .font(.system(.subheadline, design: .rounded).weight(.semibold))
                     .foregroundStyle(Palette.ink)
                 Spacer()
@@ -98,7 +109,7 @@ struct FastingWidgetContent: View {
             ZStack {
                 RingView(progress: state.progress, colors: Palette.ringColors(for: state.phase), lineWidth: 14)
                 VStack(spacing: 1) {
-                    Text(FastingStage.current(forHours: state.elapsedHours).emoji)
+                    Text(stage.emoji)
                         .font(.title3)
                     live
                         .font(.system(size: 28, weight: .bold, design: .rounded))
@@ -107,8 +118,8 @@ struct FastingWidgetContent: View {
             }
             .frame(maxHeight: .infinity)
 
-            StageChip(emoji: FastingStage.current(forHours: state.elapsedHours).emoji,
-                      name: FastingStage.current(forHours: state.elapsedHours).name(),
+            StageChip(emoji: stage.emoji,
+                      name: stage.name(),
                       compact: true)
 
             HStack(spacing: 7) {

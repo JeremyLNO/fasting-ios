@@ -91,6 +91,14 @@ de référence aux sessions Claude Code : à lire avant toute modification.
   sont dessinées sur du sombre/noir et n'héritent pas du thème pastel de l'app. `Palette.ink` (bleu
   nuit) y est illisible : tout ce qui s'affiche là doit être en clair-sur-sombre. Aperçu réel via
   `-widgetGallery` (la carte « small » y est rendue sur `Palette.ink`).
+- ⚠️ **Deux règles de session manuelle**, à ne pas casser : un jeûne lancé à la main finit à
+  **l'heure programmée** (`ManualSession.end(for:)` → `schedule.nextFastEnd(after:)`), et un jeûne
+  **arrêté prématurément** (`awaitingRestart`) suspend le planning sur toute la fenêtre sautée, avec
+  2 notifications de relance. Tout ce qui reconstruit l'état depuis le planning doit en tenir
+  compte — `HistoryStore.syncIfNeeded` (jeûne sauté = 0 h, pas une réussite) et les étapes
+  métaboliques (à zéro hors jeûne, les fenêtres alimentaires durent parfois 24 h maintenant).
+  Banc d'essai rapide sans simulateur : compiler `Shared/FastingModel.swift` +
+  `Shared/Localization.swift` avec un `main.swift` d'assertions (`swiftc -o check …`).
 - ⚠️ **Notifications vs session manuelle** : un `UNCalendarNotificationTrigger(repeats: true)` ne
   sait pas sauter une occurrence. Tant qu'une session manuelle tourne, `NotificationManager` bascule
   donc sur des déclencheurs **datés** (horizon 14 jours) en filtrant `override.covers(date:)`, et
