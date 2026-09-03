@@ -54,7 +54,7 @@ struct SettingsView: View {
                         }
                         .padding(.top, 8)
 
-                        Link(destination: URL(string: "https://www.crazybeelabs.com/privacy-policy/")!) {
+                        Link(destination: URL(string: "https://www.crazybeelabs.com/legal/apps")!) {
                             HStack(spacing: 6) {
                                 Image(systemName: "hand.raised.fill")
                                 Text(L.t("privacy_policy", lang))
