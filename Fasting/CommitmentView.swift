@@ -13,6 +13,9 @@ struct CommitmentView: View {
     /// and the same destination for every entry point (first launch here, and the Settings row).
     static let commitmentURL = URL(string: "https://www.crazybeelabs.com/commitment")!
 
+    /// The studio's catalogue — the other free apps this one belongs to.
+    static let appsURL = URL(string: "https://www.crazybeelabs.com/apps")!
+
     var onContinue: () -> Void
 
     @AppStorage(AppLanguage.storageKey) private var languageRaw = "en"
@@ -60,9 +63,12 @@ struct CommitmentView: View {
                             .fixedSize(horizontal: false, vertical: true)
                     }
 
-                    commitmentFooter
-                        .frame(maxWidth: .infinity)
-                        .padding(.top, 4)
+                    VStack(spacing: 14) {
+                        commitmentFooter
+                        otherAppsLink
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 4)
                 }
                 .padding(24)
             }
@@ -116,5 +122,26 @@ struct CommitmentView: View {
         }
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(L.t("commit_link", lang)), Crazy Bee Labs")
+    }
+
+    /// Second destination, kept visually distinct from the commitment link above: the screen says
+    /// this app belongs to a family of free apps, so it should also show where to find them.
+    private var otherAppsLink: some View {
+        Link(destination: CommitmentView.appsURL) {
+            HStack(spacing: 6) {
+                Image(systemName: "square.grid.2x2.fill")
+                Text(L.t("commit_other_apps", lang))
+                Image(systemName: "arrow.up.right")
+                    .font(.caption2.weight(.bold))
+            }
+            .font(.footnote.weight(.semibold))
+            .foregroundStyle(Palette.fastAccent)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+            .background(.ultraThinMaterial, in: Capsule())
+            .overlay(Capsule().strokeBorder(Palette.fastAccent.opacity(0.35), lineWidth: 1))
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(L.t("commit_other_apps", lang)), Crazy Bee Labs")
     }
 }
