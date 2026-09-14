@@ -289,7 +289,9 @@ jour : l'app peut rester fermée un moment sans perdre ses notifications.
 
 The `OneSignal-XCFramework` Swift Package (pinned to **5.5.1**, only the
 `OneSignalFramework` product) is linked into the app target, the app declares
-`aps-environment`, and Push is enabled on the App ID `company.lno.fasting`.
+`aps-environment` (`production`, even in Debug — the real environment is picked by the
+provisioning profile, and `development` in a TestFlight build yields a token APNs rejects
+in silence), and Push is enabled on the App ID `company.lno.fasting`.
 
 Everything is gated on one constant — `OneSignalPush.appID` in
 `Fasting/OneSignalPush.swift`. While it is empty the SDK is never
