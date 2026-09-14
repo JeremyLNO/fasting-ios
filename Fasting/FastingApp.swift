@@ -37,6 +37,7 @@ struct FastingApp: App {
         if !CommandLine.arguments.contains("-skipNotifPrompt") {
             NotificationManager.shared.requestAuthorizationAndSchedule()
         }
+        OneSignalPush.start()
     }
 
     var body: some Scene {
